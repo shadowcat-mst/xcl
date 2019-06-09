@@ -11,7 +11,7 @@
 #}
 
 grammar XCL {
-  token TOP { <statement> }
+  token TOP { <statementlist> }
   token word { <[a..zA..Z]> <[a..zA..Z0..9_]>* }
   token symbol { <-[\s\w;,()\[\]{}]>+ }
   token list { '(' <.ws> <expr>* %% [ <.ws> ',' <.ws> ] ')' }
@@ -19,6 +19,7 @@ grammar XCL {
   token compound { <element>+ }
   rule expr { <compound> + }
   rule statement { <compound> + }
+  rule statementlist { <statement> + %% ';' }
 }
 
-say XCL.parse('foo bar($x , y )+z');
+say XCL.parse('foo bar($x , y, )+z; baz');
