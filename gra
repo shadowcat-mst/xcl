@@ -17,13 +17,23 @@ grammar XCL {
   token list { '(' <.ws> <expr>* %% [ <.ws> ',' <.ws> ] ')' }
   token block { '{' <.ws> <statementlist> <.ws> '}' }
   token command { '[' <.ws> <statement> <.ws> ']' }
-  token element { <word> | <symbol> | <list> | <block> | <command> }
+  token element {
+    <word> | <symbol>
+    | <list> | <block> | <command>
+    | <qstring>
+  }
   token compound { <element>+ }
   rule expr { <compound> + }
   rule statement { <compound> + }
   rule statementlist { <statement> + %% ';' }
+
+  token qstring { "'" [ <qescape> | <qstr> ]+ "'" }
+  token qescape { \\ . }
+  token qstr { <-[\\']>+ }
 }
 
 say XCL.parse('foo bar($x , y, )+z; baz');
 
 say XCL.parse('for x in [ lines_of stdin ] { foo; bar; baz }');
+
+say XCL.parse("'foo \\x \\ \\' bar'");
