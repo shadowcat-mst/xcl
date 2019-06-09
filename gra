@@ -1,0 +1,22 @@
+#grammar XCL {
+#  token TOP { <statement>+ }
+#  token word { <[a..zA..Z]> <[a..zA..Z0..9_]>* }
+#  token symbol { <-[\s\w]>+ }
+#  token block { '{' <statement>* % ';' '}' }
+#  token list { '(' <expr>* % ',' ')' }
+#  token command { '[' <statement> ']' }
+#  token element { <block> | <list> | <command> | <word> | <symbol> }
+#  token expr { <element>+ }
+#  token statement { <element>+ }
+#}
+
+grammar XCL {
+  token TOP { <statement> }
+  token word { <[a..zA..Z]> <[a..zA..Z0..9_]>* }
+  token symbol { <-[\s\w]>+ }
+  token element { <word> | <symbol> }
+  token compound { <element>+ }
+  rule statement { <compound> + }
+}
+
+say XCL.parse('foo x+y');
