@@ -13,14 +13,14 @@
 grammar XCL {
   token TOP { <statementlist> }
   token word { <[a..zA..Z]> <[a..zA..Z0..9_]>* }
-  token symbol { <-[\s\w;,()\[\]{}]>+ }
+  token symbol { <-[\s\w;,()\[\]{}'"]>+ }
   token list { '(' <.ws> <expr>* %% [ <.ws> ',' <.ws> ] ')' }
   token block { '{' <.ws> <statementlist> <.ws> '}' }
   token command { '[' <.ws> <statement> <.ws> ']' }
   token element {
     <word> | <symbol>
     | <list> | <block> | <command>
-    | <qstring>
+    | <qstring> | <qqstring>
   }
   token compound { <element>+ }
   rule expr { <compound> + }
@@ -30,6 +30,12 @@ grammar XCL {
   token qstring { "'" [ <qescape> | <qstr> ]+ "'" }
   token qescape { \\ . }
   token qstr { <-[\\']>+ }
+
+  token qqstring { '"' [ <qqescape> | <qqinterp> | <qqstr> ]+ '"' }
+  token qqstr { <-[\\"$]>+ }
+  token qqescape { \\ <qqescapechar> [ <list> | block ]? }
+  token qqescapechar { . }
+  token qqinterp { '$' [ <list> | <command> | <word> ] }
 }
 
 say XCL.parse('foo bar($x , y, )+z; baz');
@@ -37,3 +43,5 @@ say XCL.parse('foo bar($x , y, )+z; baz');
 say XCL.parse('for x in [ lines_of stdin ] { foo; bar; baz }');
 
 say XCL.parse("'foo \\x \\ \\' bar'");
+
+say XCL.parse('"foo \x \y\( \z(baz) bar $(a) $[b c] quux"');
