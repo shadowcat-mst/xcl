@@ -13,10 +13,12 @@
 grammar XCL {
   token TOP { <statement> }
   token word { <[a..zA..Z]> <[a..zA..Z0..9_]>* }
-  token symbol { <-[\s\w]>+ }
-  token element { <word> | <symbol> }
+  token symbol { <-[\s\w;,()\[\]{}]>+ }
+  token list { '(' <.ws> <expr>* %% [ <.ws> ',' <.ws> ] ')' }
+  token element { <word> | <list> | <symbol> }
   token compound { <element>+ }
+  rule expr { <compound> + }
   rule statement { <compound> + }
 }
 
-say XCL.parse('foo x+y');
+say XCL.parse('foo bar($x , y )+z');
