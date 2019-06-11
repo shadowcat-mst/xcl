@@ -1,0 +1,44 @@
+# let set f fexpr
+# lang.cond, lang.eval, lang.is_list, envrionment.clone
+# label, redo
+
+let ? let
+let $ [f x cond(
+  (lang.is_list(x), eval(x).0,
+  eval(x)
+)]
+let @ $
+
+  # from inside if:
+    # the latter would work better in a macro
+    # @(lang.cond rest.0 => (_ => rest.0()), _ => ()),
+
+let if [fexpr (cond, block, @rest) {
+  # @rest is assumed to be either (elseblock) or ()
+  let myenv [environment.clone env]
+  lang.cond(
+    (lang.eval myenv $cond, lang.eval myenv block),
+    (_, lang.cond((rest.0, lang.eval myenv rest.0)),
+  )
+}]
+
+let while [fexpr (cond, block) {
+  label WHILE {
+    let myenv [environment.clone env]
+    if (lang.eval myenv $cond) {
+      lang.eval myenv $block
+      redo WHILE
+    }
+  }
+}]
+
+let foreach [fexpr (name, args, block) {
+  let idx -1
+  let myenv [environment.clone env]
+  let myargs lang.eval myenv args
+  while (<= ++idx [list.last_index myargs]) {
+    let thisenv [ environment.clone myenv ]
+    set [ lang.eval thisenv x ] myargs(idx)
+    lang.eval thisenv block
+  }
+}]
