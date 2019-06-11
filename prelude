@@ -1,9 +1,10 @@
 # let set f fexpr _if
-# lang.is_list, envrionment.clone
+# lang.is_list, lang.is_valid_index, environment.clone
 # lang.tailcall, lang.expr, lang.exec
+# int.incr, 
 
 let ? let
-let $ [f (x) { let e eval(x); _if lang.is_list(x) x.0 x  }]
+let $ [f (x) { let e eval(x); _if lang.is_list(x) e.0 e }]
 let @ $
 
   # from inside if:
@@ -32,10 +33,11 @@ let while [fexpr (cond, block) {
 let foreach [fexpr (name, args, block) {
   let idx -1
   let myenv [environment.clone env]
-  let myargs lang.eval myenv args
-  while (<= ++idx [list.last_index myargs]) {
+  let myargs [lang.expr myenv args]
+  while (list.is_valid_index myargs [ int.incr idx ]) {
     let thisenv [ environment.clone myenv ]
-    set [ lang.eval thisenv x ] myargs(idx)
-    lang.eval thisenv block
+    let set_x ([ sym set ], [ sym x ], myargs(idx))
+    lang.exec thisenv @(set_x)
+    lang.exec thisenv block
   }
 }]
