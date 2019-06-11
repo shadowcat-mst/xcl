@@ -1,12 +1,9 @@
-# let set f fexpr
-# lang.cond, lang.eval, lang.is_list, envrionment.clone
-# label, redo
+# let set f fexpr _if
+# lang.is_list, envrionment.clone
+# lang.tailcall, lang.expr, lang.exec
 
 let ? let
-let $ [f x cond(
-  (lang.is_list(x), eval(x).0,
-  eval(x)
-)]
+let $ [f (x) { let e eval(x); _if lang.is_list(x) x.0 x  }]
 let @ $
 
   # from inside if:
@@ -16,19 +13,19 @@ let @ $
 let if [fexpr (cond, block, @rest) {
   # @rest is assumed to be either (elseblock) or ()
   let myenv [environment.clone env]
-  lang.cond(
-    (lang.eval myenv $cond, lang.eval myenv block),
-    (_, lang.cond((rest.0, lang.eval myenv rest.0)),
-  )
+  let call [ _if
+    [ lang.expr myenv cond ]
+    block
+    [ _if rest.0 rest.0 {} ]
+  ]
+  lang.exec myenv call
 }]
 
 let while [fexpr (cond, block) {
-  label WHILE {
-    let myenv [environment.clone env]
-    if (lang.eval myenv $cond) {
-      lang.eval myenv $block
-      redo WHILE
-    }
+  let myenv [environment.clone env]
+  if (lang.expr myenv cond) {
+    lang.exec myenv block
+    lang.tailcall cond block
   }
 }]
 
