@@ -11,14 +11,27 @@ let @ $
     # the latter would work better in a macro
     # @(lang.cond rest.0 => (_ => rest.0()), _ => ()),
 
+let ?: [fexpr (cond, @blocks) {
+  let choice [ lang.expr env cond ]
+  let has_then = [ list.is_valid_index blocks 1 ]
+  let call = [ _if
+    choice
+      [ _if has_then
+        blocks.0
+        $choice
+      [ _if has_then
+        blocks.1
+        blocks.0
+      ]
+    ]
+  ]
+  lang.exec env call
+}
+
 let if [fexpr (cond, block, @rest) {
   # @rest is assumed to be either (elseblock) or ()
   let myenv [environment.clone env]
-  let call [ _if
-    [ lang.expr myenv cond ]
-    block
-    [ _if rest.0 rest.0 {} ]
-  ]
+  let call [ ?: [ lang.expr myenv cond ] block [ ?: rest.0 {} ] ]
   lang.exec myenv call
 }]
 
