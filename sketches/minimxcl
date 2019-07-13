@@ -1,0 +1,217 @@
+$foo(1, 2, 3)
+
+is
+
+[ compound $ foo (1, 2, 3) ]
+
+[ apply [ apply $ foo ] (1, 2, 3) ]
+
+[ foreach w webservers [
+   progn
+    [ run apt-get update ]
+    [ run apt-get upgrade ]
+  ]
+]
+
+
+foreach w in webservers {
+  apt-get update;
+  apt-get upgrade;
+}
+
+?cooked = raw.map(cpu_intensive_thing);
+
+?cooked = raw.map(cpu_intensive_thing, :pool(5));
+
+compound = x$y(1,2,3)
+
+x($)(y)(1,2,3)
+
+foo bar baz quux;
+[ apply foo (bar, baz, quux) ]:
+[ = compound
+    [ apply
+      [ apply
+        [ apply
+          [ fetch
+            x
+          $ ]
+        ]
+        y
+      ]
+      (1, 2, 3)
+    ]
+]
+
+# THIS IDEA MUST BE REVISITED
+metaclass Result {
+  ro ok_type;
+  ro err_type;
+  ....
+}
+
+############ total sketch
+
+class Result (ok, err) {
+  one_of {
+    ro ok => (predicate => 'is_ok');
+    ro err => (predicate => 'is_err');
+  }
+  # method ok { Option(self.result.0 == 'ok' ? Just($ok) : Nothing) };
+
+  fmethod ? {
+    if (self.is_ok) {
+      return self.ok;
+    }
+    env.exec(return $self);
+  }
+}
+
+let res = {
+  x.foo(1, 2, 3)?;
+  x.bar(4)?;
+  x.baz('aaaaaa')?;
+};
+
+let baz (str) {
+  if (^str.length mod 2) {
+    return 'aaaaaaaa';
+  } else {
+    return 'bbbbbbbb';
+  }
+}
+
+if (res.err) { log warn res.err }
+
+
+
+
+
+?cnt = [ run
+   sh -qt -i /home/lacey/.ssh/remote_id_rsa remote.server 'netstat -tuln'
+     | grep 2222 >/dev/null 2>&1
+].out;
+
+let bound_to (port) { sh .... ... ... | grep $port | awk '{print $PID}' }
+
+foreach pid in bound_to(2222) { kill $pid }
+
+?cmd = \[
+  ssh -i /home/lacey/.ssh/sthelens_id_rsa
+    -N -R 2222:localhost:22
+    lacey@remote.server &
+];
+
+let sup = supervisor();
+
+sup.add('tunnel', cmd);
+
+sup.every('180', <ping>);
+
+sup.supervise;
+
+
+         if (blah) {
+           foo = $<<
+            '  ServerAliase buggrit
+             </VirtualHost>';
+
+
+let uptime_on (host) [
+  (on host uptime | awk '{print $3 " " $4 }').out.line
+];
+
+#  on host {
+#    ?hup = (uptime | awk '{print $3 " " $4 }').out.line;
+#    return hup
+#  }
+}
+
+forall s in servers :parallel(5) {
+  say "s: " + uptime_on(s);
+}
+
+let h = new_line_from_config_somehow();
+
+^forall.parallel(5);
+
+^on.sudo_pw(env('SUDO_PASSWORD')//ask('Sudo password:'));
+
+let f = '/etc/hosts';
+
+forall s in servers {
+  on s {
+    sudo {
+      ?l = fs.file(f).lines;
+      unless (l.grep(_ == h)) {
+        fs.file(f).append(h);
+      }
+    }
+  }
+}
+
+## load this interactively
+
+let server_list { fs.file('server.list').lines }
+
+let batch_size = 5;
+
+let sleep_time = 120;
+
+let slb cmd {
+  let servers = server_list();
+  while (^servers.count >= 0) {
+    let batch = ^servers.splice(0, batch_size);
+    forall :parallel(batch_size) s in batch {
+      on s run @cmd;
+    }
+    sleep sleep_time;
+  }
+}
+
+$ sleep_time = 10
+$ slb uptime
+...
+$ slb tail -10 /var/log/syslog
+
+
+# SERVERS=agaton:sherlock:...
+^on.default(servers:(split ':', env(SERVERS)));
+
+on * { ... }
+
+on @(*.grep r'^web') {
+
+let en_UKifier (str) {
+#  let re = s'^Hello (\S+)$'"Good afternoon, $1";
+#  return re.replace(str);
+  return s'^Hello (\S+)$'"Good afternoon, $1" str;
+}
+
+let en_UKifier = s'^Hello (\S+)$'"Good afternoon, $1";
+
+let fixed = en_UKifier str;
+
+let name = f (...args) {
+
+let name (...args) {
+
+
+flet cond (pairs) {
+  let idx 0;
+  while (> array.last_index(pairs) idx) {
+    let pair pairlist(idx);
+    if (env.expr(pair.0)) { return env.expr(pair.1) }
+    ++ idx
+  }
+  return null
+}
+
+cond(
+  (x == 1, [ say "X is 1" ]),
+  (x == 2, [ say "X is 2" ]),
+  (true, [ say "X is many!" ]),
+);
+
+
+

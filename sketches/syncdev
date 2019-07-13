@@ -1,0 +1,49 @@
+#!/usr/bin/env dx
+
+use dx 1.0
+use fs 1.0
+use string 1.0
+
+const repo_vhosts '/path/to/repo/vhosts/'
+
+const live_vhosts '/etc/apache2/sites-available/'
+
+const vhost_subs %(
+  :IP_ADDRESS '1.2.3.4,
+  :SERVER_ADMIN 'bob@example.com',
+)
+
+rule dev_vhosts_synced {} {
+  foreach vhost_file in fs.files_in(repo_vhosts) {
+    ?vhost_lines = string.lines_of [
+      fs.file_content_of "$(repo_vhosts)/$(vhost_file)"
+    ]
+    ?cooked_lines = string.lines_of [
+      fs.file_content_of "$(live_vhosts)/dev.$(vhost_file)";
+    ]
+    vhost_lines = live_lines but {
+      foreach line vhost_lines {
+        if (string.regexp_match line '^(\s+)ServerName') {
+          member_after line "$(1)ServerAlias dev.$(vhost)"
+        }
+      }
+    }
+  }
+}
+
+
+  foreach { ?VHostFile in {fs.files_in repo_vhosts} } {
+    ?VHostRaw = {fs.file_content_of {repo_vhosts + VHostFile}}
+    ?VHostCooked = {string.substitute vhost_subs VHostRaw}
+    ?CookedLines = {string.lines_of VHostCooked}
+    ?LiveLines = {
+      string.lines_of {fs.file_content_of {live_vhosts + 'dev.' + VHostFile}}
+    }
+    CookedLines = LiveLines but {
+      ?LineIndex ?Line in LiveLines
+      string.regexp_match 'ServerName (.*)' Line ?Host
+      ?AliasLine = {'    ServerAlias dev.' + Host}
+      member_after LiveLines LineIndex AliasLine
+    }
+  }
+}

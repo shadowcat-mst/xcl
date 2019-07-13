@@ -1,0 +1,24 @@
+?fixup_keys = f (livekeys, deadkeys) {
+  ?dir = [home_dir] / '.ssh';
+  ensure {
+    fs.directory dir
+    fs.mode dir '0700'
+  }
+  livelines = fs.lines_of livekeys
+  deadlines = fs.lines_of deadkeys
+  conflines = on conn { fs.line_of dir / '.authorized_keys' }
+  foreach l livelines {
+    ensure member_at conflines _ l
+  }
+  foreach d deadlines {
+    ensure not member_at conflines _ d
+  }
+};
+
+?put_all = f hosts {
+  foreach h hosts {
+    on h { fixup_keys livekeys deadkeys }
+  }
+}
+
+command put { put_all qw(agaton sherlock ...) }

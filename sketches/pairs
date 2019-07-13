@@ -1,0 +1,10 @@
+let yah = (
+  (master1, slave1),
+  (master2, slave2),
+)
+
+forall p yah {
+  let master p.0
+  let slave p.1
+  < ... >
+}

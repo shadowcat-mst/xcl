@@ -1,0 +1,30 @@
+use Future::Utils qw(fmap_scalar);
+
+my $input = \@some_target_list;
+
+my $f = fmap_scalar {
+  my ($x) = @_;
+  return <some future returning thing>;
+} foreach => $input, concurrent => 5;
+
+$loop->await($f);
+
+#################################
+
+?forall = f (\thing, list, block, :concurrent = 3) {
+  ?each = f (thing) block
+  ?f = fmap_scalar x {
+    fetch_some_stuff_based_on(x)
+  } :foreach(list) :concurrent(concurrent)
+  await f
+}
+
+###########
+
+forall :concurrent(10) x $(foo(...)) {
+  do_async_thing($x)
+}
+
+forall --concurrent=10 x $(foo(...)) {
+  do_async_thing($x)
+}

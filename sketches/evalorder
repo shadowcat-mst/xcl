@@ -1,0 +1,3 @@
+foreach line in (@(stdin)) {
+  echo $line;
+}

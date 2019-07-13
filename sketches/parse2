@@ -1,0 +1,106 @@
+Initial rule: block
+
+  x y z;
+  a b;
+  42
+
+lack of final thing makes that work.
+
+Also viable would be
+
+  x y z;
+  a b;
+  return 42:
+
+so e.g.
+
+let myfunc (x) {
+  let weird = if (x div 2) { x } else { log warn weird; 0 }
+  return weird*3;
+}
+
+Point though:
+
+  [0-9] -> int/float
+  [a-zA-Z_] -> plain
+  ' -> qstring
+  " -> qqstring
+  ( -> list
+  [ -> command
+  { -> block
+  [!#$%&*+-./:<=>@\^_`|~?] -> symbol
+
+arg -> int|float|plain|qstring|qqstring|list|command|block|member
+
+
+compound -> arg+
+
+expr -> arg # single arg, returned
+expr -> arg arg + # command call
+<expr><list> -> # command call
+command -> arg # single arg, called as a zero arity function
+command -> arg arg + # command call
+
+listbody = { <expr>+ % ',' }
+blockbody = { <command>; + <expr>? }
+cmdbody = { arg + }
+
+notable so that
+
+foo,begin; # calls [ foo('begin') ]
+foo.query(q, @args); # calls [ foo('query') q @args ]
+
+let want_ensure_user () {
+  f (UserUpdate user) {
+    if (?u = User.find(user.id)) { User.update(user) }
+    else { User.create(user) }
+  }
+}
+
+let want_revoke_user () {
+  f (UserIdent user) { User.delete(user.id) }
+}
+
+let UserUpdate = Dict(
+  id => ID,
+  name => Str,
+  optional(
+    password => Password,
+    password2 => Password,
+  );
+);
+
+
+let builder () {
+  let MyModule = <load thing>;
+  let MyOtherModule = <load thing>;
+  return MyModule.new(other: MyOtherModule.new);
+}
+
+
+
+
+
+######## I MAKE NO CLAIM AS TO WHETHER THIS IS A GOOD IDEA
+
+setup_db {
+  table 'tags' (
+    pk(id SERIAL),
+    uk(tag LineStr),
+    points_to URL
+  );
+);
+
+let new_tag (
+  LineStr tag,
+  URL points_to
+) {
+  db.run INSERT INTO tags (tag, points_to) VALUES ($tag, $points_to);
+}
+
+let Tags = collection 'tags';
+
+
+
+
+

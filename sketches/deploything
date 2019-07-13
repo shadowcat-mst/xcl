@@ -1,0 +1,107 @@
+let hosts = ('paxman', 'deaton', ...);
+
+let newconf = file.slurp 'vhost.conf';
+
+let on = ssh_transport();
+
+let targfile = '/etc/apache2/conf.d/thisvhost.conf'
+
+foreach host hosts {
+  on host {
+    let targfile = '/etc/apache2/conf.d/thisvhost.conf'
+    let oldconf = file.content targfile
+    file.content targfile = newconf
+    if (proc.run apache2ctl configtest) {
+      proc.run apache2ctl restart
+    } {
+      file.content targfile = oldconf
+    }
+  }
+}
+
+let tested = map (host) {
+  on host {
+    let oldconf = file.content targfile
+    file.content targfile = newconf
+    let res = proc.run apache2ctl configtest
+    file.content targfile = oldconf
+    res
+  }
+} hosts
+
+if (list.all(tested, true)) {
+  foreach host hosts {
+    on host {
+      file.content targfile = newconf
+      apache2ctl restart
+    }
+  }
+}
+
+#foreach host hosts {
+#  on host {
+#    let targfile = '/etc/apache2/conf.d/thisvhost.conf'
+#    let oldconf = file.content targfile
+#    file.content targfile = newconf
+#    if (proc.run apache2ctl configtest) {
+#      proc.run apache2ctl restart
+#    } {
+#      file.content targfile = oldconf
+#    }
+#  }
+#}
+
+################################
+
+let newconf = ...;
+
+let saveconf = f (host, conf) { file.content ('conf' / host) = conf }
+
+let saveall = f () {
+  hosts.each h { on h { saveconf h [ file.content targfile ] } }
+}
+
+let oneach = fexpr (name, stuff, block) {
+  foreach h [lang.expr env stuff] {
+    let henv = [environment.clone env]
+    set [lang.expr henv name] = h
+    lang.exec henv on h block
+  }
+}
+
+oneach w webservers { apache2ctl status }
+
+let default_parallel = $ENV.XCL_PARALLEL || 5
+
+let onall = fexpr (
+  name, [sym 'in'], stuff, block, :parallel = default_parallel
+) {
+  forall :parallel(parallel) h env.expr(stuff) {
+    let henv = env.clone
+    henv.expr(name) = h
+    # :(h) henv.exec(on, h, block)
+    h => henv.exec on h block
+  }
+}
+
+onall w in webservers { say "Status for $(w)"; apache2ctl status }
+
+?uptimes = onall s in servers { uptime }
+
+foreach u uptimes {
+  # say "Uptime from $(u.0): $(u.1)";
+  say "Uptime from $(u.key): $(u.value)";
+}
+
+# foreach (h, u) ^(% @uptimes).pairs() [
+foreach (h, u) uptimes [
+  say "Uptime from $h: $u";
+}
+
+foreach host hosts {
+  on host {
+    saveconf host [ file.content targfile ]
+    file.content targfile = newconf
+    apache2ctl restart
+  }
+}

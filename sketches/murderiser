@@ -1,0 +1,24 @@
+
+
+# There's weird shit here. Mostly qmail. Follow it.
+
+cron job was
+
+* <once an hour or so> * /the/script.pl
+
+let flag_file_dir = '.....';
+let murder_file = '....';
+;et hosts = qw(a b c d e f g h);
+
+let main () {
+  let iam = sh$ hostname;
+  # touch 'myhostname' means my turn
+  return unless path.exists(flag_file_dir.$iam)
+  $MAIL_SERVER stop;
+  rm_rf_all $MAIL_QUEUE $murder_file;
+  path.rm(flag_file_dir.$iam)
+  iam++;
+  path.touch(flag_file_dir.$iam)
+}
+
+

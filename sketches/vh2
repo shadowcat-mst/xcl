@@ -1,0 +1,115 @@
+#!/usr/bin/env dx
+
+use dx 1.0
+use fs 1.0
+use string 1.0
+
+const repo_vhosts '/path/to/repo/vhosts/'
+
+const live_vhosts '/etc/apache2/sites-available/'
+
+const vhost_subs %(
+  :IP_ADDRESS '1.2.3.4,
+  :SERVER_ADMIN 'bob@example.com',
+)
+
+# repo/vhosts/foo.conf ->
+#
+# <VirtualHost IP_ADDRESS>
+#   ServerAdmin SERVER_ADMIN
+#   ...
+# </VirtualHost>
+
+command vhosts_synced () {
+  let vhost_files = fs.files_in repo_vhosts
+  let live_vhosts = '/etc/apache2/sites-available/'
+  foreach f vhost_files {
+    ?vhost_basename = [ fs.basename f ]
+    ?vhost_host = [ regexp.subst '\.conf$' '' f ]
+    ?vhost_config = file.content f
+    unify {
+      fs.content f = [ string.subst vhost_subs vhost_config ]
+    }
+  }
+}
+
+command dev_vhosts_synced () {
+  let vhost_files = fs.file_names_in repo_vhosts
+  let live_vhosts = '/etc/apache2/sites-available/'
+  foreach vhfile in vhost_files {
+    ?vhlines = fs.lines_of(repo_vhosts / vhfile)
+    ?lines = fs.lines_of(live_vhosts / vhfile)
+    contact(line) = contact(vhline)
+  }
+
+rule dev_vhosts_synced {} {
+  foreach { ?VHostFile in {fs.files_in repo_vhosts} } {
+    ?VHostRaw = {fs.file_content_of {repo_vhosts + VHostFile}}
+    ?VHostCooked = {string.substitute vhost_subs VHostRaw}
+    ?CookedLines = {string.lines_of VHostCooked}
+    ?LiveLines = {
+      string.lines_of {fs.file_content_of {live_vhosts + 'dev.' + VHostFile}}
+    }
+    CookedLines = LiveLines but {
+      ?LineIndex ?Line in LiveLines
+      string.regexp_match 'ServerName (.*)' Line ?Host
+      ?AliasLine = {'    ServerAlias dev.' + Host}
+      member_after LiveLines LineIndex AliasLine
+    }
+  }
+}
+
+__END__
+
+rule vhosts_synced {} {
+  foreach { ?VHostFile in {fs.files_in repo_vhosts} } {
+    ?VHostRaw = {fs.file_content_of {repo_vhosts + VHostFile}}
+    ?VHostCooked = {string.substitute vhost_subs VHostRaw}
+    {fs.file_content_of {live_vhosts + VHostFile}} = VHostCooked
+  }
+}
+
+rule dev_vhosts_synced {} {
+  foreach { ?VHostFile in {fs.files_in repo_vhosts} } {
+    ?VHostRaw = {fs.file_content_of {repo_vhosts + VHostFile}}
+    ?VHostCooked = {string.substitute vhost_subs VHostRaw}
+    ?CookedLines = {string.lines_of VHostCooked}
+    ?LiveLines = {
+      string.lines_of {fs.file_content_of {live_vhosts + 'dev.' + VHostFile}}
+    }
+    CookedLines = LiveLines but {
+      ?LineIndex ?Line in LiveLines
+      string.regexp_match 'ServerName (.*)' Line ?Host
+      ?AliasLine = {'    ServerAlias dev.' + Host}
+      member_after LiveLines LineIndex AliasLine
+    }
+  }
+}
+
+rule check {
+  vhosts_synced
+}
+
+rule push {
+  fs.allow_write live_vhosts
+  vhosts_synced
+}
+
+rule pull {
+  fs.allow_write repo_vhosts
+  vhosts_synced
+}
+
+rule push_dev {
+  fs.allow_write live_vhosts
+  dev_vhosts_synced
+}
+
+rule check_dev {
+  dev_vhosts_synced
+}
+
+rule pull_dev {
+  fs.allow_write repo_vhosts
+  dev_vhosts_synced
+}

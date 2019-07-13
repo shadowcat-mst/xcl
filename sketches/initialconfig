@@ -1,0 +1,68 @@
+
+let CONFIG_VARS := ('foo', 'bar', 'baz');
+
+let opts = getopts(@{CONFIG_VARS), 'config');
+
+if (opts.config) {
+  opts = %(@{read_file opts.config}, @opts);
+}
+
+opts.foo //= ask('Value for foo option?');
+
+foreach var in CONFIG_VARS {
+  opts(var) //= ask("Value for $(var) option?");
+}
+
+write_file $('genconfig.' + sys.pid + '.conf') opts;
+
+#### alts
+
+fs.file('genconfig.' + sys.pid + '.conf').content = serialize(opts);
+
+########### Colonic immigration
+
+:foo # means LHS(foo) which is a partial pair - invoked returs Pair(self, rhs)
+:foo(3) # is Pair('foo', 3)
+
+#### by the magic of stupid shit like I did for ! in the other thing
+
+foo: 3, # is Pair('foo', 3)
+'foo' : 3, # is Pair('foo', 3)
+[ foo ]: 3, # is Pair(foo(), 3)
+$(foo): 3, # is Pair(foo, 3)
+
+#### => is actially really boring
+
+:foo => value # Pair('foo', value)
+'foo' => value # {Pair('foo', value)
+foo => value # Pair(foo, value)
+
+[ foo ] => 3, # is Pair(foo(), 3)
+$(foo) => 3, # is just foo => 3
+
+
+let thing = %(
+  foo: 3,
+  'bar': 4,
+  [ baz ]: 6,
+  $(quux): 14,
+);
+
+[
+  =
+    [ let thing ]
+    [ dict
+      [ pair 'foo' 3 ]
+      [ pair 'bar' 4 ]
+      [ pair [ baz ] 6 ]
+      [ pair quux 14 ]
+    ]
+]
+
+let [[thing [dict ['foo' 3] ['bar' 4] [baz() 6] [quux 14]]]]
+  [ <call something using thing> ];
+
+match msg (
+  ('echo', @rest) => self.say @rest,
+  ('die', ec, @) => self.exit ec,
+);

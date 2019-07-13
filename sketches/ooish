@@ -1,0 +1,184 @@
+?foo = object %(
+  :BUILD({ self.x += 1 }),
+  :bar({ self.x }),
+);
+
+foo/bar
+
+x.y
+
+?Album = f (artist, name, year) {
+  ?self = %(artist, name, year)
+  %(
+    :artist f () { self.artist },
+    :name f () { self.name },
+    :year f () { self.year },
+  )
+}
+
+?randalbum = Album('bob','rand',1998);
+
+randalbum.artist
+
+stdout.println "Argh"
+
+$xcl->{stdout}{println}("Argh");
+
+
+?Point = f (%(:x :y)) {
+  ?self = %(:x(x), :y(y))
+  self.area = f () {
+    self.x * self.y
+  }
+  $self
+}
+
+# ?pt = Point(x => x, y => y)
+?pt = Point(:x(x),:y(y))
+
+out pt.x;
+out pt.area;
+
+?pt2 = Point(%(pt))
+
+/* 
+
+  : # key constructor
+  :foo # key 'foo'
+  :foo 'bar'; # pair (foo: 'bar')
+  :foo('bar');
+  foo => bar;
+*/
+?' => ' = f (l, r) { :l(r) }
+/*
+  % # dict constructor
+  %(@pairs) # dict from pairs
+  (...) # list of exprs
+  f # function constructor
+  f (<args>) { <body> }
+*/  
+
+#?Point = %;
+#let Point.new (:x, :y) {
+#  ?self = %(:x(x), :y(y));
+#  self.area = f () {
+#    self.x * self.y
+#  }
+#  return self
+#
+
+?Point = %(
+  methods: (
+    area: f (self) { self.x * self.y }
+  )
+);
+
+class Point {
+
+  has rw Int x = 0;
+
+  has rw Int y = 0;
+
+  method area (self) { self.x * self.y }
+}
+
+class Point3D extends Point {
+
+  has rw Int z = 0;
+
+  method volume (self) { self.area() * self.z }
+}
+
+
+?Point.new = f new(:x, :y) {
+  ?new = %(x, y);
+  ?methods = Point.methods;
+  forall (name, meth) in methods {
+    new.[$name] = f args { meth new @args }
+  }
+  return new;
+);
+    
+let Point.new (:x, :y) {
+  ?self = %(:x(x), :y(y));
+  self.area = f () {
+    self.x * self.y
+  }
+  return self
+}
+
+?pt = Point.new(:x x,:y y)
+
+?pt = Point.new(%(x, y))
+
+
+
+############# blah blah blah blah
+
+class PackageInstall {
+
+  ro host;
+
+  ro package;
+
+  rwp last_version :optional;
+
+  lazy version (self) {
+    on host {
+     run dpkg -s $(self.package) | grep 'Version:' | awk '{print $2}'
+    }
+  }
+
+  method upgrade (self) {
+    self._set_last_version self.version;
+    on self.host { apt-get update; apt-get install $(self.package) }
+  }
+
+  method rollback (self) {
+    on self.host { apt-get install "$(self.package)=$(self.last_version)" }
+  }
+}
+
+#### scriptify
+
+let cmd = argv(0);
+
+foreach s in ('www1', 'www2', 'www3') {
+  let apache = PackageInstall.new(:host(s). :package('apache2'));
+  if (cmd == 'version') {
+    say apache.version;
+  } elsif (cmd == 'upgrade') {
+    apache.upgrade() || apache.rollback();
+  } elsif (cmd == 'rollback') {
+    apache.rollback();
+  }
+
+}
+
+foreach wset in list.groups_of( webservers. 5 _ }
+  forall :parallel w in wset {
+    upgrade
+  } on_error { rollback $_ for @webservers }
+}
+
+################################### la
+
+let servers = ('www01', 'www02', ...);
+
+let deployed_upto = 0;
+
+let canary (num, wait = 0) {
+  ?final = deployed_upto + num;
+  deploy_to(@servers(deployed_upto .. final);
+  deployed_upto = final;
+  if (wait) { sleep wait }
+  return num;
+} 
+
+
+canary(1, 60);
+canary(5, 180);
+canary(25, 360);
+canary(50, 1880);
+
+

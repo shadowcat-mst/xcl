@@ -1,0 +1,20 @@
+
+
+write_config() # required
+restore_config() # required
+check_config() # required
+reload_config() # required
+
+let ready_f = Future.needs_all_after_the_fact
+
+foreach host in hosts {
+  write_config
+  if (check_config) {
+    timeout in 30
+    ready_f.push(...)
+    reload_config
+  } else {
+    restore_config
+  }
+}
+

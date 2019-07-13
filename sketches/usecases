@@ -1,0 +1,261 @@
+# ssh keys
+# vhost
+# dependencies
+# files
+
+# Prereqs:
+# $REPO/apache2.conf/x.conf
+# $REPO/apache2.conf/y.conf
+# /etc/apache2/conf.d
+
+let REPO = path(env.home).child('wdir','webconf', 'apache2.conf')
+
+let LIVE = path('/etc/apache2/conf.d')
+
+Deploy:
+
+let sync_prod = f () {
+  foreach file in REPO.files('*.conf') {
+    LIVE.file(file).content = file.content # this is the one dx-ish op
+  }
+}
+
+let push_prod = f () {
+  allow_write LIVE
+  sync_prod
+}
+
+let pull_prod = f () {
+  allow_write REPO
+  sync_prod
+}
+
+let sync_dev = f () {
+  foreach file in REPO.files('*.conf') {
+    sync_dev_file(LIVE.file(file), file)
+  }
+}
+
+let sync_dev_file (left, right) {
+  left.lines = right.lines but (lines) {
+    foreach ?l in lines {
+      if (?(ws, host) = l.match r'(\s+)ServerName\s+(\S+)') {
+        line_after l "$(ws)ServerAlias dev.$(host)"
+      }
+    }
+  }
+}
+
+########### psuedo expansion
+#
+# push_dev ->
+# 
+#   # run the stuff
+#
+# pull_dev ->
+#
+#  foreach ?l in lines {
+#    if (?(ws, host) = ...) {
+#      not line_after l "..."
+#    }
+#  }
+
+
+
+
+
+############## webserver move
+
+let server_available = f (s) {
+  server_available_directly(s) ||
+    server_available_via(proxy, s)
+}
+
+foreach w in webservers {
+  ensure server_available w
+  make_available_via proxy w
+  adjust_dns_to proxy.host w.hosts
+  make_unavailable_directly w
+}
+
+
+
+############ user creation
+
+struct User {
+  name: Str
+  password: Password
+  ...
+}
+
+####
+  <form ...>
+    Name: <input ... />
+    Password: <input ... />
+####
+  $ spoon
+  Name: ....?
+
+########## user sync
+
+let ldap_sync = f (user) {
+  try {
+    ldap_add user
+  } catch {
+    ldap_update user
+  }
+}
+
+###############
+
+?host = $(new debian)
+connect root $host {
+  useradd -m matthewt
+  <add key>
+  <add sudoers entry>
+}
+rsync gravitas:~ oldhome
+
+###############
+
+keys end up fucking everywhere
+let us pretend for the moment they're only on servers and github
+
+let push () {
+  keysets = %(
+    @(hosts.map({
+      return ($_ => on $_ { path('.ssh/authorized_keys').lines })
+    })),
+    'github' => github(gh_user).keys
+  )
+}
+
+#################
+
+sub env :lvalue ($key) {
+  return get { $ENV{$key} }
+         set { $ENV{$key} = $_ }
+}
+
+###############
+
+let home = env.HOME
+
+env('PATH') = extra + ':' + env('PATH')
+
+env.PATH = "$(extra):$(env.PATH)";
+
+hash.x # is $hash{x}
+
+^hash.keys # is 'keys %$hash'
+
+# hash.__hidden_meta # but actually insvisible
+
+
+$(meta thing).key = value
+
+$(meta thing)('^') = # ^thing spec
+
+let ^ (val) {
+  $(meta val).'^'
+}
+
+let draft_only (str) { meta(str).draft = 1; str }
+
+##############################
+
+let variable_name = value;
+let function_name (arg1, arg2) { <body> };
+
+###### irc backup
+
+every 7 days (dir) {
+  foreach h in ircds {
+    dir.file(h) = on h { path('/......') }
+  }
+}
+
+################################
+
+forall :parallel(5) w in webservers {
+  on w {
+    apt-get update
+    apt-get upgrade
+    apt-get restart apache2
+  }
+}
+
+###############################
+
+let setup_user (
+  username: Str,
+  password: Password,
+  ssh_key: SSHKey,
+  group: Group,
+) {
+  ensure {
+    xmpp_account username password
+    redmine_account username password
+    ssh_key_registered username ssh_key
+    foreach ?key in ssh_keys_registered {
+      unless (key == ssh_key) {
+        not ssh_key_registered username key
+      }
+    }
+    ?repos = group.repositories
+    foreach ?repo in repos {
+      repo_user repo username ssh_key
+    }
+    foreach ?repo in REPOSITORIES.except(repos) {
+      not repo_user repo username
+    }
+  }
+}
+
+# actions:
+#
+# CreateXMPPAccount: username password
+# CreateRedmineAccount: usernmae password
+# RegisterSSHKey: username ssh_key
+#
+# repeated per repo:
+#
+#   CreateRepoUser: repo username ssh_key
+#
+
+###############################################
+
+table users {
+  id SERIAL
+  name TEXT
+}
+
+table user_live_keys {
+  pk(
+    user_id INT REFERENCES users(id)
+    key TEXT
+  )
+}
+
+table user_dead_keys {
+  pk(
+    user_id INT REFERENCES users(id)
+    key TEXT
+  )
+}
+
+?l = file.lines_of $authorized_keys_file
+?live = SELECT ( key ) FROM user_live_keys WHERE user_id = $user_id
+?dead = SELECT ( key ) FROM user_dead_keys WHERE user_id = $user_id
+
+foreach ?d in dead {
+  not key_installed d
+}
+foreach ?l in live {
+  key_installed l
+}
+
+###########################################
+
+let inc (Array ary) { ary.map(_ + 1) }
+let inc (!) { f (ary) { _ += 1 foreach ary } }

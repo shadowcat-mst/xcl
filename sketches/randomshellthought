@@ -1,0 +1,28 @@
+?rollback_info := json_file('rollback.info.json');
+
+let results = forall :parallel(5) u in upgrades {
+  rollback_info.[$u] = [
+    run dpkg -s $package | grep '^Version:' | awk '{print $2}'
+  ];
+  apt-get update;
+  apt-get upgrade $package;
+}
+
+if (grep .is_err. results) {
+  forall :parallel(5) u in upgrades {
+    apt-get install "$(package)-$(rollback_info.[$u])"
+  }
+}
+
+########### a diiferent random thought
+
+let hosts = ('foo', 'bar', 'baz');
+
+#let on($_, @rest) { run :on($_) run @rest }
+
+let on($_, @rest) { run ssh $_ @rest }
+
+let uptimes = hosts.map(on($_,'uptime'));
+
+
+

@@ -1,0 +1,46 @@
+#!/usr/bin/xclsh
+
+# original expect script:
+# 
+# for {set i 35} {$i < 36} {incr i 1} {
+#      spawn ssh lacey@ln${cluster}query${i}.moonshadowmobile.net
+#      expect "$ "
+#      send "sudo tar -czvf ln${cluster}query${i}_logs.tar.gz /home/cast/data-local/global_logs/queryserver/ln${cluster}query26/log/\r"
+#      expect ": "
+#      send "MyPassword\r"
+#      expect "$ "
+#      send "exit\r"
+#      expect "$ "
+#      spawn rsync lacey@ln${cluster}query${i}.moonshadowmobile.net:ln${cluster}query${i}_logs.tar.gz /home/lacey/log_downloads/
+#      expect "$ " 
+#      spawn ssh lacey@ln${cluster}query${i}.moonshadowmobile.net
+#      expect "$ "
+#      send "rm -vf ln${cluster}query${i}_logs.tar.gz\r"
+#      expect "$ "
+#      send "exit\r"
+#      expect "$ "
+
+let timeout = -1;
+let cluster = "prod";
+let pw = env.SUDO_PASSWORD // [ask "Sudo password:"];
+
+sudo.setpass(pw);
+
+forall :parallel(5) i in [1 .. 36] {
+  ?host = "ln$(cluster)query$(i)";
+  ?ssh_host = "lacey@$(host).moonshadowmobile.net";
+  ?tarball = "$(host)_logs.tar.gz";
+  ?logs = "/home/cast/data-local/global_logs/queryserver/$(host)/log/";
+  ?ready = "$(tarball).ready";
+  ?conn = connect ssh_host;
+  on conn {
+    unless (file.exists(ready)) {
+      sh# :onerror(rm -rf tarball) tar -czvf $tarball $logs;
+      file.touch(ready);
+    }
+  }
+  sh rsync "$(ssh_host):$(tarball)" '/home/lacey/log_downloads/';
+  on conn {
+    sh$ rm -vf $tarball $ready;
+  }
+}

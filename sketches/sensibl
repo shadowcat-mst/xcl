@@ -1,0 +1,5 @@
+?info = (host, port, user);
+?conn = DBI.new(host, port, user);
+foreach host (conn.dbh.do SELECT host FROM hosts) +
+  say "HOST: $(host)";
+}

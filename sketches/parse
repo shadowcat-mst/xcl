@@ -1,0 +1,41 @@
+We assume that an initial xcl parse starts as a Script.
+
+A Script is made up of Commands.
+
+A Command consists of a space-separated sequence of Elements.
+
+An Element may contain a single /[a-zA-Z]\w*/ which is a Word.
+
+An Element may contain a single /\W+/ which is a Symbol.
+
+An Element may be a List; (<Expression>, <Expression>, ...)
+
+A List is a comma separated list of Expressions
+
+An Element may be a command: [<Command>]
+
+An Element may be a block: { ... }
+
+An Element may be a command - each element being applied as a single argument
+  function to the next element:
+     $foo(1, 2, 3) -> [ [ $ foo ] [ list 1 2 3 ] ]
+
+Similarly, an Element may result in a command then an expr:
+  :(+ $foo 'id') 1. # foo_id => 1
+
+A single word as a command is an execution of the function of that name.
+
+A single word as an expression is the value of that variable.
+
+If a newline is encountered while parsing a block and the parser is at top
+level, the newline ends the command just like ';' would.
+
+?Glossary = %(
+  :Word /[a-z][A-Z]\w*/,
+  :Int /[+-]?[0-9]+/,
+  :Float /[+-]?[0-9]+\.[0-9]+/,
+  :Symbol /\W+/,
+  :ListStart '(',
+  :CommandStart '[',
+  :BlockStart '{',
+);
