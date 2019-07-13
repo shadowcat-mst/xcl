@@ -15,13 +15,19 @@ sub plus ($x, $y) {
 }
 
 sub eval_expr ($env, $expr) {
-  if ($expr->type eq 'Symbol') {
+  if ($expr->type eq 'Name') {
     if (my $val = $env->{$expr->data}) {
       return $val;
     }
     die "No such name in scope: ${\$expr->data}\n";
   }
   return $expr;
+}
+
+sub eval_command ($env, $cmd_proto, @args) {
+  my $cmd = eval_expr($env, $cmd_proto);
+  die "Not a valid command\n" unless $cmd->type eq 'Command';
+  $cmd->data->($env, @args);
 }
 
 sub wrap ($thing) {
@@ -32,7 +38,8 @@ sub wrap ($thing) {
 
 sub Int ($v) { XCL::Value->new(type => 'Int', data => $v) }
 sub String ($v) { XCL::Value->new(type => 'String', data => $v) }
-sub Symbol ($v) { XCL::Value->new(type => 'Symbol', data => $v) }
+sub Name ($v) { XCL::Value->new(type => 'Name', data => $v) }
+sub Command ($v) { XCL::Value->new(type => 'Command', data => $v) }
 
 my $plus = wrap \&plus;
 
@@ -44,4 +51,8 @@ try { $plus->({}, Int(1), String(3)) } catch { print $_ };
 
 my $env = { x => Int(3), y => Int(7), z => Int(10) };
 
-say +($plus->($env, Symbol('x'), Symbol('z'))->data);
+say +($plus->($env, Name('x'), Name('z'))->data);
+
+$env->{'+'} = Command($plus);
+
+say eval_command($env, Name('+'), Name('y'), Int(4))->data;
