@@ -32,7 +32,7 @@ use experimental 'signatures';
 
 sub evaluate ($env, $thing) {
   for ($thing) {
-    is_Name and return $env->data->{$_->data};
+    is_Name and return $env->data->{$_->data}//die "No such name ${\$_->data}\n";;
     is_Call and return $_->call($env);
     is_List and return List[ map evaluate($env, $_), @{$thing->data} ];
   }
@@ -45,6 +45,13 @@ sub XCL::Value::Call::call ($self, $env) {
 }
 
 sub XCL::Value::FExpr::call ($self, $env, @args) { $self->data->($env, @args) }
+
+sub XCL::Value::Dict::call ($self, $env, $keyv) {
+  is_String $keyv or die "Key type must be string, not ${\$keyv->type}\n";
+  my $key = $keyv->data;
+  die "No such key ${key}\n" unless my $value = $self->data->{$key};
+  return $value;
+}
 
 sub plus ($x, $y) {
   if ($x->type eq 'Int' and $y->type eq 'Int') {
@@ -77,10 +84,17 @@ sub xcl_say ($thing) {
 my $say = FExpr(wrap \&xcl_say);
 
 my $env = Dict {
-  '+' => $plus, say => $say, three => Int(3), bob => String("Bob")
+  '+' => $plus, say => $say, three => Int(3), bob => String("Bob"),
+  d => Dict {
+    x => Int(1),
+    y => Int(2),
+  },
 };
 
 evaluate($env, Call[ Name('say'), String('Hello world') ]);
 evaluate($env,
   Call[ Name('say'), Call[ Name('+'), String('Hello '), Name('bob') ] ]
+);
+evaluate($env,
+  Call [ Name('say'), Call[ Name('d'), String('x') ] ]
 );
