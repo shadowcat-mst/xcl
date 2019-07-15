@@ -13,7 +13,7 @@ BEGIN {
   use experimental 'signatures';
   $INC{'XCL/Value.pm'} = __FILE__;
   ro 'data';
-  sub type ($self) { (ref($self) =~ /([^:+])$/)[0] }
+  sub type ($self) { (ref($self) =~ /([^:]+)$/)[0] }
 }
 
 BEGIN {
@@ -48,10 +48,10 @@ sub XCL::Value::FExpr::call ($self, $env, @args) { $self->data->($env, @args) }
 
 sub plus ($x, $y) {
   if ($x->type eq 'Int' and $y->type eq 'Int') {
-    return $x->new_value($x->data + $y->data);
+    return Int($x->data + $y->data);
   }
   if ($x->type eq 'String' and $y->type eq 'String') {
-    return $x->new_value($x->data.$y->data);
+    return String($x->data.$y->data);
   }
   die "No handler for (${\join(',',map $_->type, @_)})\n";
 }
@@ -76,6 +76,11 @@ sub xcl_say ($thing) {
 
 my $say = FExpr(wrap \&xcl_say);
 
-my $env = Dict { '+' => $plus, say => $say, three => Int(3), bob => String("bob") };
+my $env = Dict {
+  '+' => $plus, say => $say, three => Int(3), bob => String("Bob")
+};
 
 evaluate($env, Call[ Name('say'), String('Hello world') ]);
+evaluate($env,
+  Call[ Name('say'), Call[ Name('+'), String('Hello '), Name('bob') ] ]
+);
