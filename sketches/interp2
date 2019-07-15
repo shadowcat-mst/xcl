@@ -83,12 +83,19 @@ sub xcl_say ($thing) {
 
 my $say = FExpr(wrap \&xcl_say);
 
+sub let ($env, $name, $vproto) {
+  die "First argument to let must be name\n" unless is_Name($name);
+  $env->data->{$name->data} = evaluate($env, $vproto);
+  return;
+}
+
 my $env = Dict {
   '+' => $plus, say => $say, three => Int(3), bob => String("Bob"),
-  d => Dict {
+  d => Dict({
     x => Int(1),
     y => Int(2),
-  },
+  }),
+  let => FExpr(\&let),
 };
 
 evaluate($env, Call[ Name('say'), String('Hello world') ]);
@@ -98,3 +105,8 @@ evaluate($env,
 evaluate($env,
   Call [ Name('say'), Call[ Name('d'), String('x') ] ]
 );
+evaluate($env,
+  Call [ Name('say'), Name('d') ]
+);
+evaluate($env, Call[ Name('let'), Name('foo'), String('FOO!') ]);
+evaluate($env, Call[ Name('say'), Name('foo') ]);
