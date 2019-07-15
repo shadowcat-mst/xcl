@@ -1,0 +1,81 @@
+# Interp 2: Hacktastic Boogaloo
+
+use strictures 2;
+use feature 'say';
+use experimental 'signatures';
+use Import::Into;
+use Scalar::Util qw(refaddr);
+
+BEGIN {
+  package XCL::Value;
+  use Mu;
+  use strictures 2;
+  use experimental 'signatures';
+  $INC{'XCL/Value.pm'} = __FILE__;
+  ro 'data';
+  sub type ($self) { (ref($self) =~ /([^:+])$/)[0] }
+}
+
+BEGIN {
+  foreach my $type (qw(Name String Int FExpr List Dict Block Call)) {
+    my $class = "XCL::Value::${type}";
+    Mu->import::into($class);
+    $class->can('extends')->('XCL::Value');
+    my $type_sub = sub { @_ ? $class->new(data => shift) : $class };
+    { no strict 'refs'; *$type = $type_sub }
+    my $is_type_sub = sub ($thing = $_) { $thing->isa($class) };
+    { no strict 'refs'; *{"is_${type}"} = $is_type_sub }
+  }
+}
+
+use experimental 'signatures';
+
+sub evaluate ($env, $thing) {
+  for ($thing) {
+    is_Name and return $env->data->{$_->data};
+    is_Call and return $_->call($env);
+    is_List and return List[ map evaluate($env, $_), @{$thing->data} ];
+  }
+  return $thing;
+}
+
+sub XCL::Value::Call::call ($self, $env) {
+  my ($command, @args) = @{$self->data};
+  evaluate($env, $command)->call($env, @args);
+}
+
+sub XCL::Value::FExpr::call ($self, $env, @args) { $self->data->($env, @args) }
+
+sub plus ($x, $y) {
+  if ($x->type eq 'Int' and $y->type eq 'Int') {
+    return $x->new_value($x->data + $y->data);
+  }
+  if ($x->type eq 'String' and $y->type eq 'String') {
+    return $x->new_value($x->data.$y->data);
+  }
+  die "No handler for (${\join(',',map $_->type, @_)})\n";
+}
+
+sub wrap ($thing) {
+  return sub ($env, @args) {
+    $thing->(map evaluate($env, $_), @args)
+  };
+}
+
+my $plus = FExpr(wrap \&plus);
+
+sub xcl_say ($thing) {
+  my $to_say = do {
+    local $_ = $thing;
+    if (is_String) { q{'}.($_->data =~ s/([\\'])/\\$1/gr).q{'} }
+    elsif (is_Int) { $_->data }
+    else { $_->type.'(0x'.sprintf("%x", refaddr($_->data)).')' }
+  };
+  say $to_say
+}
+
+my $say = FExpr(wrap \&xcl_say);
+
+my $env = Dict { '+' => $plus, say => $say, three => Int(3), bob => String("bob") };
+
+evaluate($env, Call[ Name('say'), String('Hello world') ]);
