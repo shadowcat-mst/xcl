@@ -94,7 +94,7 @@ my $say = FExpr(wrap \&xcl_say);
 sub let ($env, $name, $vproto) {
   die "First argument to let must be name\n" unless is_Name($name);
   $env->data->{$name->data} = evaluate($env, $vproto);
-  return;
+  return Int(1);
 }
 
 # for sharing with repl2
