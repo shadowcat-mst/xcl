@@ -1,0 +1,161 @@
+x 'y' z;
+
+Call(Name('x'), String('y'), Name('z'));
+
+or:
+
+eval($thing) ->
+  $thing->isa(Call) -> eval_command(@$thing)
+  $thing->isa(List) -> List(map eval($_), @$thing)
+  _ -> $thing;
+
+x = [foo bar]
+
+Call(Name('='), Name('x'), Call(Name('foo'), Name('bar'));
+
+x = y + z;
+
+Call(Name('='), Name('x'), Call(Name('+'), Name('y'), Name('z')));
+
+(foo bar, baz, quux + 3)
+
+(foo bar, baz, + quux 3)
+
+List(
+  Call(Name('foo'), Name('bar')),
+  Name('baz'),
+  Call(Name('+'), Name('quux'), Int(3))
+)
+
+?new = list.map(old, _ + 1);
+
+?new = list.map(old, x => x + 1);
+
+?new = list.rmap { _ * 1 } old;
+
+?new = list.rmap $(_ * 1) old;
+
+?new = list.rmap [ _ * 1 ] old;
+
+?new = list.rmap(x => { x * 1 }, old);
+
+[ @terms ]
+
+Call(@terms)
+
+log error "Error: ${
+  let debug_info [ expensive_stacktrace 10 ];
+  debug_info.map(_.format()).join("\n")
+}";
+
+syntax Block:
+  {
+    statement;+
+    expr?
+  }
+
+let x = if (foo) {
+  log debug "Foo: $(foo)";
+  1
+} else {
+  0
+}
+
+S = Statement, E = Expr, R = Raw
+
+R: x y z
+S: [ x y z ]
+E: [ x y z ]
+
+R: x
+S: [ x ]
+E: x
+
+let h = %(x => 1, :y(2));
+
+Things that all return 1:
+  h.x
+  h('x')
+  [ h 'x' ]
+
+Things that all return 2:
+  h.y
+  h('y')
+  [ h 'y' ]
+
+{ x y; z }
+
+Block(Call(Name('x'), Name('y')), Name('z'));
+
+{ x y; z; }
+
+Block(Call(Name('x'), Name('y')), Call(Name('z')));
+
+let munge (in) {
+  do_thing in;
+  do_other_thing in;
+  return in;
+}
+
+let munge (in) => { ... };
+
+also
+
+let munge (in) => [ inscope progn [ do_thing in ] [ do_other_thing in ] in ];
+
+Given lexical scoping with inheritance:
+
+Want to temporarily overload foo.bar ?
+
+  let foo = scope(:parent foo);
+  let foo.bar = baz;
+
+[ let x 1 ]
+[ let y 2 ]
+[ inscope progn [ let z 3 ] [ say x+z ] ]
+[ say x+y ]
+
+# 4\n3\n
+
+Script:
+
+  let x 1;
+  let y 2;
+  { let z 3; say x+z }
+  say x+y;
+
+flet eval (env, e) {
+  return cond(
+    is_Call(e) => env.apply(e),
+    is_List(e) => e.map(eval env _),
+    _ => e
+  );
+}
+
+flet eval (env, e) [
+  cond [
+    [ => [ is_Call e ] [ env_apply env e ] ]
+    [ => [ is_List e ] [ [ list 'map' ] e [ eval env _ ] ] ]
+    [ => _ e ]
+  ]
+]
+
+let apply (env, e) {
+  (?command_name, ?@args) = e;
+  env.get(command_name).call(@args);
+}
+
+# [ list 'map'] is list.map
+# not using 'list' as a constructor because much less needed with our ()
+# plus honestly it makes no sense to need it since:
+
+  let push (l, e) {
+    l = (@l, e)
+  }
+
+flet inscope (env, @cmd) {
+  let myenv = scope(:parent env);
+  return eval(myenv, Call.new(cmd));
+}
+
+flet inscope (env, @cmd) [ eval scope(:parent env) [ @cmd ] ];
