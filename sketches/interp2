@@ -85,7 +85,8 @@ sub xcl_say ($thing) {
     elsif (is_Int) { $_->data }
     else { $_->type.'(0x'.sprintf("%x", refaddr($_->data)).')' }
   };
-  say $to_say
+  say $to_say;
+  return Int(1);
 }
 
 my $say = FExpr(wrap \&xcl_say);
@@ -96,7 +97,9 @@ sub let ($env, $name, $vproto) {
   return;
 }
 
-my $env = Dict {
+# for sharing with repl2
+
+our $env = Dict {
   '+' => $plus, say => $say, three => Int(3), bob => String("Bob"),
   d => Dict({
     x => Int(1),
@@ -122,3 +125,5 @@ evaluate($env,
     Call[ List([ map Int($_), 3, 5, 7 ]), Int(1) ]
   ]
 );
+
+1;

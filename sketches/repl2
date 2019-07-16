@@ -1,0 +1,18 @@
+use strictures 2;
+use Caroline;
+use XCL::Parser;
+use Devel::DDCWarn;
+
+require './sketches/interp2';
+
+my $p = XCL::Parser->new;
+
+my $l = Caroline->new;
+
+while (my $line = $l->readline('> ')) {
+  if (my $res = eval { $p->parse_statement($line) }) {
+    xcl_say(evaluate(our $env, $res));
+  } else {
+    warn "Error parsing ${line}: $@\n";
+  }
+}
