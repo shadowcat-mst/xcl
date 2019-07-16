@@ -97,6 +97,16 @@ sub let ($env, $name, $vproto) {
   return Int(1);
 }
 
+sub _if ($env, $cond, $then, $else = undef) {
+  my $res = evaluate($env, $cond);
+  if (is_Int($res)) {
+    if ($res->data) {
+      return evaluate($env, $then);
+    }
+    return $else ? evaluate($env, $else) : Int(0);
+  }
+}
+
 # for sharing with repl2
 
 our $env = Dict {
@@ -106,6 +116,7 @@ our $env = Dict {
     y => Int(2),
   }),
   let => FExpr(\&let),
+  _if => FExpr(\&_if),
 };
 
 evaluate($env, Call[ Name('say'), String('Hello world') ]);
