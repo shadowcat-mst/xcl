@@ -11,7 +11,9 @@ my $l = Caroline->new;
 
 while (my $line = $l->readline('> ')) {
   if (my $res = eval { $p->parse_statement($line) }) {
-    xcl_say(evaluate(our $env, $res));
+    unless (eval { xcl_say(evaluate(our $env, $res)); 1 }) {
+      warn "Error executing ${line}: $@\n";
+    }
   } else {
     warn "Error parsing ${line}: $@\n";
   }
