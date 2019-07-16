@@ -53,6 +53,13 @@ sub XCL::Value::Dict::call ($self, $env, $keyv) {
   return $value;
 }
 
+sub XCL::Value::List::call ($self, $env, $idxv) {
+  is_Int $idxv or die "Key type must be int, not ${\$idxv->type}\n";
+  my $idx = $idxv->data;
+  die "No such iindex ${idx}\n" unless my $value = $self->data->[$idx];
+  return $value;
+}
+
 sub plus ($x, $y) {
   if ($x->type eq 'Int' and $y->type eq 'Int') {
     return Int($x->data + $y->data);
@@ -110,3 +117,8 @@ evaluate($env,
 );
 evaluate($env, Call[ Name('let'), Name('foo'), String('FOO!') ]);
 evaluate($env, Call[ Name('say'), Name('foo') ]);
+evaluate($env,
+  Call[ Name('say'),
+    Call[ List([ map Int($_), 3, 5, 7 ]), Int(1) ]
+  ]
+);
