@@ -6,49 +6,41 @@ use experimental qw(signatures);
 
 our $SYMBOL_CHARS = q{!#$%&*+-./:<=>@\^_`|~};
 
+our %START_CHARACTER_MAP = (
+  word => 'a-zA-Z',
+  symbol => $SYMBOL_CHARS,
+  number => '0-9',
+  statement => '[',
+);
+
 sub parse_statement ($self, $) {
   my @stmt;
   for ($_[1]) {
     while (!/\G\Z/gc) {
       /\G\s+/gc;
-      push @stmt, do {
-        if (/\G(?=[a-zA-Z_])/gc)            { $self->parse_word($_[1]) }
-        elsif (/\G(?=[${SYMBOL_CHARS}])/gc) { $self->parse_symbol($_[1]) }
-        elsif (/\G(?=[0-9])/gc)             { $self->parse_number($_[1]) }
-        elsif (/\G\[/gc)                    { $self->parse_statement($_[1]) }
-        elsif (/\G\]/gc) { return ::Call(\@stmt) } ## HACK
-        else { die "Failed to parse: $_[1]\n" }
-      };
+      if (/\G\]/gc) { return ::Call(\@stmt) } ## HACK
+      foreach my $poss (sort keys %START_CHARACTER_MAP) {
+        if (/\G[${\quotemeta $START_CHARACTER_MAP{$poss}}]/gc) {
+          return $self->${\"parse_${poss}"}($_[1]);
+        }
+      }
+      die "Eh?\n";
     }
   }
   return ::Call(\@stmt);
 }
 
-sub parse_word ($self, $str) {
-  for ($_[1]) {
-    if (my ($word) = /\G(\w+)/gc) {
-      return ::Name($word);
-    }
+sub _expect ($self, $match, $name, $call, $str) {
+  if (my ($m) = $_[4] =~ /\G(${match})/gc) {
+    return $call->($m);
   }
-  die "Can't parse word from ${str}\n";
+  die "Can't parse ${name} from ${str}";
 }
-
-sub parse_symbol ($self, $str) {
-  for ($_[1]) {
-    if (my ($symbol) = /\G([${SYMBOL_CHARS}]+)/gc) {
-      return ::Name($symbol);
-    }
-  }
-  die "Can't parse symbol from ${str}\n";
+  
+sub parse_word { $_[0]->_expect('\w+', 'word', \&::Name, $_[1]) }
+sub parse_symbol {
+   $_[0]->_expect("[${SYMBOL_CHARS}]", 'symbol', \&::Name, $_[1])
 }
-
-sub parse_number ($self, $str) {
-  for ($_[1]) {
-    if (my ($int) = /\G([0-9]+)/gc) {
-      return ::Int($int);
-    }
-  }
-  die "Can't parse number from ${str}\n";
-}
+sub parse_number { $_[0]->_expect('[0-9]+', 'number', \&::Int, $_[1]) }
 
 1;
