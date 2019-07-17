@@ -159,3 +159,72 @@ flet inscope (env, @cmd) {
 }
 
 flet inscope (env, @cmd) [ eval scope(:parent env) [ @cmd ] ];
+
+##########################
+
+let x [ _if 1 5 3 ]; # 5
+letf if (env, cond, then, else = {}) {
+  let res [ evaluate env cond ];
+  let block [ _if res then else ];
+  return evaluate env [ block ]
+}
+
+# let x = { ... };
+# let y = { ... };
+#
+# let z = if [thing] x y;
+#
+# if [thing] { say "hi" }
+
+letf if (env, cond, then, else = Nothing) {
+  let raw [ _if [ evaluate env cond ] then else ];
+  return [
+    _if [ is_Block raw ]
+      [ evaluate env [ raw ] ]
+      [ evaluate env raw ]
+  ];
+}
+
+let unless (cond, block) { if [ ! cond ] [ block ] }
+
+letf while (env, cond, block) {
+  unless (evaluate env cond) {
+    return;
+  }
+  evaluate env [ block ];
+  lang.tailself env cond block;
+}
+
+##################### ES6
+
+let thing = {
+  foo: 'bar',
+  [ baz ]: 3,
+  'quux': 7,
+};
+
+##################### XCL
+
+let thing = %(
+  foo : 'bar',
+  [ baz ] : 3,
+  'quux' : 7,
+);
+
+let thing = %(
+  :foo 'bar',
+  :[ baz ] 3,
+  :'quux' 7,
+);
+
+let thing = %(
+  :foo('bar'),
+  :[baz](3),
+  :'quux'(7),
+);
+
+## SANELEEEEEEEEEEEEEEEY
+
+let thing = %(:foo('bar'), :[baz](3), :quux(7));
+
+#########
