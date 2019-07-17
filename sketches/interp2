@@ -101,9 +101,9 @@ sub _if ($env, $cond, $then, $else = undef) {
   my $res = evaluate($env, $cond);
   if (is_Int($res)) {
     if ($res->data) {
-      return evaluate($env, $then);
+      return $then;
     }
-    return $else ? evaluate($env, $else) : Int(0);
+    return $else ? $else : Int(0);
   }
 }
 
