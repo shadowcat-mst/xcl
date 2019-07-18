@@ -1,0 +1,12 @@
+use xcl alpha;
+use perl 0;
+
+let ua = perl('Mojo::UserAgent').new;
+
+let urls = sys.argv;
+
+foreach url in urls :parallel(5) {
+  let res = await ua.get_p(url);
+  let title = res.dom.at('title').text;
+  say "$(url): $(title)";
+}
