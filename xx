@@ -51,7 +51,13 @@ sub parse_script ($self, $src) {
       die "Two ws tokens in a row indicates a tokenizer bug"
         if defined $meta{ws_before};
       if (@atoms) {
-        push @parse, @atoms == 1 ? $atoms[0] : [ compound => [ @atoms ] ];
+        if (@atoms == 1) {
+          push @parse, @atoms;
+        } else {
+          my $cmeta = $atoms[0][1];
+          $atoms[0][1] = {};
+          push @parse, [ compound => $cmeta => [ @atoms ] ];
+        }
         @atoms = ();
       }
       $meta{ws_before} = $tok;
