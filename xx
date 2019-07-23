@@ -84,18 +84,20 @@ sub parse ($self, $src, $mode = 'script') {
     } elsif ($type eq 'symbol') {
       _add($targ, [ $type, $tok ], \%meta);
     } elsif ($type eq 'enter') {
-      die "Not yet, sorry" unless $tok eq "[";
-      push @mode, 'call';
-      push @targstack, _add_meta([ call => ($targ = []) ], \%meta);
-    } elsif ($type eq 'leave') {
-      die "Not yet, sorry" unless $tok eq "]";
-      pop @mode;
-      if ($meta{ws_before}) {
-        $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
+      if ($tok eq '[') {
+        push @mode, 'call';
+        push @targstack, _add_meta([ call => ($targ = []) ], \%meta);
       }
-      my $top = pop @targstack;
-      push @{$targstack[-1][2]}, $top;
-      $targ = $targstack[-1];
+    } elsif ($type eq 'leave') {
+      if ($tok eq ']') {
+        pop @mode;
+        if ($meta{ws_before}) {
+          $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
+        }
+        my $top = pop @targstack;
+        push @{$targstack[-1][2]}, $top;
+        $targ = $targstack[-1];
+      }
     }
   }
   return \@parse;
