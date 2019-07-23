@@ -15,12 +15,12 @@ sub extract_next ($self, $src) {
       [ symbol => "[${SYMBOL_CHARS}]", "[${SYMBOL_CHARS}]+" ],
       [ comma => ',' ],
       [ semicolon => ';' ],
-      [ startcall => "\\[" ],
-      [ endcall => "\\]" ],
-      [ startlist => "\\(" ],
-      [ endlist => "\\)" ],
-      [ startblock => "\\{" ],
-      [ endblock => "\\}" ],
+      [ enter => "\\[" ],
+      [ leave => "\\]" ],
+      [ enter => "\\(" ],
+      [ leave => "\\)" ],
+      [ enter => "\\{" ],
+      [ value => "\\}" ],
     );
     map { @$_ == 3 ? $_ : [ @{$_}[0,1], "(?:${$_}[1]+)" ] } @s;
   });
@@ -43,6 +43,8 @@ sub _add_meta ($thing, $meta) {
 
 sub parse_script ($self, $src) {
   my @parse;
+  my @targstack = \@parse;
+  my $targ = $targstack[-1];
   my %meta;
   my @atoms;
   TOK: while ($src !~ /^\Z/) {
@@ -52,11 +54,11 @@ sub parse_script ($self, $src) {
         if defined $meta{ws_before};
       if (@atoms) {
         if (@atoms == 1) {
-          push @parse, @atoms;
+          push @$targ, @atoms;
         } else {
           my $cmeta = $atoms[0][1];
           $atoms[0][1] = {};
-          push @parse, [ compound => $cmeta => [ @atoms ] ];
+          push @$targ, [ compound => $cmeta => [ @atoms ] ];
         }
         @atoms = ();
       }
@@ -70,6 +72,14 @@ sub parse_script ($self, $src) {
       );
     } elsif ($type eq 'symbol') {
       push @atoms, _add_meta([ $type, $tok ], \%meta);
+    } elsif ($type eq 'enter') {
+      die "Not yet, sorry" unless $type eq "\\[";
+      push @targstack, $targ = [];
+    } elsif ($type eq 'leave') {
+      die "Not yet, sorry" unless $type eq "\\]";
+      push @parse, $targ;
+      pop @targstack;
+      $targ = $targstack[-1];
     }
   }
   return \@parse;
@@ -93,7 +103,7 @@ use Devel::DDCWarn;
 
 my $p = XCL::Parser->new;
 
-::Dwarn $p->parse_script(qq{+ 3.0 foo4x! ]});
+::Dwarn $p->parse_script(qq{+ 3.0 foo4x! });
 
 #::Dwarn $p->parse_script(qq{
 #  foo \$bar [ baz ];
