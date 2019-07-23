@@ -6,6 +6,8 @@ use XCL::Class;
 
 our $SYMBOL_CHARS = '!$%&*+-./:<=>@\^_|~';
 
+our $IS_ATOM = qr{^(?:word|symbol|number|int|float|compound|list|call|block)$};
+
 sub extract_next ($self, $src) {
   state @types = (do {
     my @s = (
@@ -35,48 +37,59 @@ sub extract_next ($self, $src) {
   die "ALSO WHAT";
 }
 
+sub _add ($ar, $thing, $meta) {
+  if ($ar->[-1]
+    and $ar->[-1][0] =~ $IS_ATOM
+    and $thing->[0] =~ $IS_ATOM
+    and not $meta->{ws_before}
+  ) {
+    $ar->[-1] = [
+      compound => { %{$ar->[-1][1]} }, [
+        [ $ar->[-1][0], {}, $ar->[-1][2] ],
+        [ $thing->[0], {}, $thing->[1] ],
+      ]
+    ];
+  } else {
+    push @$ar, _add_meta($thing, $meta);
+  }
+  %$meta = ();
+  return;
+}
+
 sub _add_meta ($thing, $meta) {
   my $r = [ $thing->[0], { %$meta }, $thing->[1] ];
   %$meta = ();
   return $r;
 }
 
-sub parse_script ($self, $src) {
+sub parse ($self, $src, $mode = 'script') {
   my @parse;
   my @targstack = \@parse;
   my $targ = $targstack[-1];
   my %meta;
-  my @atoms;
+  my @mode = $mode;
   TOK: while ($src !~ /^\Z/) {
     (my ($type, $tok), $src) = $self->extract_next($src);
     if ($type eq 'ws') {
       die "Two ws tokens in a row indicates a tokenizer bug"
         if defined $meta{ws_before};
-      if (@atoms) {
-        if (@atoms == 1) {
-          push @$targ, @atoms;
-        } else {
-          my $cmeta = $atoms[0][1];
-          $atoms[0][1] = {};
-          push @$targ, [ compound => $cmeta => [ @atoms ] ];
-        }
-        @atoms = ();
-      }
       $meta{ws_before} = $tok;
     } elsif ($type eq 'word') {
-      push @atoms, _add_meta([ $type, $tok ], \%meta);
+      _add($targ, [ $type, $tok ], \%meta);
     } elsif ($type eq 'number') {
-      push @atoms, _add_meta(
+      _add($targ,
         ($tok =~ /\./ ? [ float => $tok ] : [ int => $tok ]),
         \%meta
       );
     } elsif ($type eq 'symbol') {
-      push @atoms, _add_meta([ $type, $tok ], \%meta);
+      _add($targ, [ $type, $tok ], \%meta);
     } elsif ($type eq 'enter') {
       die "Not yet, sorry" unless $tok eq "[";
+      push @mode, 'call';
       push @targstack, _add_meta([ call => ($targ = []) ], \%meta);
     } elsif ($type eq 'leave') {
       die "Not yet, sorry" unless $tok eq "]";
+      pop @mode;
       if ($meta{ws_before}) {
         $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
       }
@@ -106,7 +119,7 @@ use Devel::DDCWarn;
 
 my $p = XCL::Parser->new;
 
-::Dwarn $p->parse_script(qq{+ 3.0 [ bar foo4x!] });
+::Dwarn $p->parse(qq{+ 3.0 [ bar foo4x!] });
 
 #::Dwarn $p->parse_script(qq{
 #  foo \$bar [ baz ];
