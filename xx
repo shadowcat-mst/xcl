@@ -4,7 +4,7 @@ package XCL::Parser;
 
 use XCL::Class;
 
-our $SYMBOL_CHARS = '!$%&*+-./:<=>@\^_|~';
+our $SYMBOL_CHARS = '!$%&*+-/:<=>@\^_|~';
 
 our $IS_ATOM = qr{^(?:word|symbol|number|int|float|compound|list|call|block)$};
 
@@ -14,7 +14,7 @@ sub extract_next ($self, $src) {
       [ ws => '\s' => '\s+' ],
       [ word => '[a-zA-Z]' => '\w+' ],
       [ number => '[0-9]', "[0-9]+(?:\\.[0-9]+)?" ],
-      [ symbol => "[${SYMBOL_CHARS}]", "[${SYMBOL_CHARS}]+" ],
+      [ symbol => "[\Q${SYMBOL_CHARS}\E]", "[\Q${SYMBOL_CHARS}\E]+" ],
       [ comma => ',' ],
       [ semicolon => ';' ],
       [ enter => "\\[" ],
@@ -24,7 +24,11 @@ sub extract_next ($self, $src) {
       [ enter => "\\{" ],
       [ value => "\\}" ],
     );
-    map { @$_ == 3 ? $_ : [ @{$_}[0,1], "(?:${$_}[1]+)" ] } @s;
+    map {
+      @$_ == 3
+        ? $_
+        : [ $_->[0], $_->[1], "(?:".$_->[1]."+)" ]
+    } @s;
   });
 
   foreach my $type (@types) {
@@ -84,12 +88,11 @@ sub parse ($self, $src, $mode = 'script') {
     } elsif ($type eq 'symbol') {
       _add($targ, [ $type, $tok ], \%meta);
     } elsif ($type eq 'enter') {
-      if ($tok eq '[') {
-        push @mode, 'call';
-        push @targstack, _add_meta([ call => ($targ = []) ], \%meta);
-      }
+      our %types = ('[' => 'call', '(' => 'list', '{' => 'block');
+      push @mode, my $mode = $types{$tok};
+      push @targstack, _add_meta([ $mode => ($targ = []) ], \%meta);
     } elsif ($type eq 'leave') {
-      if ($tok eq ']') {
+      if ($tok eq ']' or $tok eq ')') {
         pop @mode;
         if ($meta{ws_before}) {
           $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
@@ -98,6 +101,10 @@ sub parse ($self, $src, $mode = 'script') {
         push @{$targstack[-1][2]}, $top;
         $targ = $targstack[-1];
       }
+    } elsif ($type eq 'comma') {
+      die "NOOOOO" unless $mode[-1] eq 'list';
+      my $expr = $targ;
+      push @{$targstack[-1][2]}, $targ = [];
     }
   }
   return \@parse;
@@ -121,7 +128,7 @@ use Devel::DDCWarn;
 
 my $p = XCL::Parser->new;
 
-::Dwarn $p->parse(qq{+ 3.0 [ bar foo4x!] });
+::Dwarn $p->parse(::Dwarn qq{+ 3.0 [ bar foo4x!] quux(1, 3) });
 
 #::Dwarn $p->parse_script(qq{
 #  foo \$bar [ baz ];
