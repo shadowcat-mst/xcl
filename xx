@@ -92,15 +92,16 @@ sub parse ($self, $src, $mode = 'script') {
       push @mode, my $mode = $types{$tok};
       push @targstack, _add_meta([ $mode => ($targ = []) ], \%meta);
     } elsif ($type eq 'leave') {
-      if ($tok eq ']' or $tok eq ')') {
-        pop @mode;
-        if ($meta{ws_before}) {
-          $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
-        }
-        my $top = pop @targstack;
-        push @{$targstack[-1][2]}, $top;
-        $targ = $targstack[-1];
+      our %types = (']' => 'call', ')' => 'list', '}' => 'block');
+      my $mode = pop @mode;
+      die "Can't close ${tok} - currently in the middle of a ${mode}"
+        unless $types{$tok} eq $mode;
+      if ($meta{ws_before}) {
+        $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
       }
+      my $top = pop @targstack;
+      push @{$targstack[-1][2]}, $top;
+      $targ = $targstack[-1];
     } elsif ($type eq 'comma') {
       die "NOOOOO" unless $mode[-1] eq 'list';
       my $expr = $targ;
