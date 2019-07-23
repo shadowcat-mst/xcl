@@ -1,0 +1,59 @@
+BEGIN {
+
+package XCL::Parser;
+
+use XCL::Class;
+
+our $SYMBOL_CHARS = '!$%&*+-./:<=>@\^_|~';
+
+sub extract_next ($self, $src) {
+  state @types = (do {
+    my @s = (
+      [ ws => '\s' => '\s+' ],
+      [ word => '[a-zA-Z]' => '\w+' ],
+      [ number => '[0-9]', '[0-9]+(?:\.[0-9]+)' ],
+      [ symbol => "[${SYMBOL_CHARS}]", "[${SYMBOL_CHARS}]+" ],
+      [ comma => ',' ],
+      [ semicolon => ';' ],
+      [ startcall => "\\[" ],
+      [ endcall => "\\]" ],
+      [ startlist => "\\(" ],
+      [ endlist => "\\)" ],
+      [ startblock => "\\{" ],
+      [ endblock => "\\}" ],
+    );
+    map { $_ == 3 ? $_ : [ @{$_}[0,1], "(?:${$_}[1]+)" ] } @s;
+  });
+
+  foreach my $type (@types) {
+    my ($name, $identify, $slurp) = @$type;
+    if ($src =~ /^${identify}/) {
+      $src =~ s/^(${slurp})// or die "WHAT";
+      return ([ $name => $1 ], $src);
+    }
+  }
+  die "ALSO WHAT";
+}
+
+sub all_tokens ($self, $src) {
+  my @tok;
+  while ($src !~ /^\Z/) {
+    (my $tok, $src) = $self->extract_next($src);
+    push @tok, $tok;
+  }
+  return \@tok;
+}
+
+1;
+
+}
+
+use strictures 2;
+use Devel::DDCWarn;
+
+my $p = XCL::Parser->new;
+
+::Dwarn $p->all_tokens(q{
+  foo $bar [ baz ];
+  if (thing) { do_stuff() }
+});
