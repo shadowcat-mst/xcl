@@ -13,10 +13,10 @@ our $IS_ATOM = qr{^(?:word|symbol|number|int|float|compound|list|call|block)$};
 sub extract_next ($self, $src) {
   state @types = (do {
     my @s = (
-      [ ws => '\s' => '\s+' ],
-      [ word => '[a-zA-Z]' => '\w+' ],
-      [ number => '[0-9]', "[0-9]+(?:\\.[0-9]+)?" ],
-      [ symbol => "[\Q${SYMBOL_CHARS}\E]", "[\Q${SYMBOL_CHARS}\E]+" ],
+      [ ws => '\s' => '(\s+)' ],
+      [ word => '[a-zA-Z]' => '(\w+)' ],
+      [ number => '[0-9]', "([0-9]+(?:\\.[0-9]+)?)" ],
+      [ symbol => "[\Q${SYMBOL_CHARS}\E]", "([\Q${SYMBOL_CHARS}\E]+)" ],
       [ comma => ',' ],
       [ semicolon => ';' ],
       [ enter => "\\[" ],
@@ -29,14 +29,14 @@ sub extract_next ($self, $src) {
     map {
       @$_ == 3
         ? $_
-        : [ @{$_}[0, 1, 1] ],
+        : [ @$_, '('.$_->[1].')' ],
     } @s;
   });
 
   foreach my $type (@types) {
     my ($name, $identify, $slurp) = @$type;
     if ($src =~ /\A${identify}/sm) {
-      $src =~ s/\A(${slurp})//sm or die "WHAT";
+      $src =~ s/\A${slurp}//sm or die "WHAT";
 #warn "[$name]: ($1) ...$src...";
       return ($name => $1, $src);
     }
@@ -114,7 +114,6 @@ sub parse ($self, $src, $mode = 'script') {
       %meta = ();
     } elsif ($type eq 'semicolon') {
       die "CANCER" unless $mode[-1] eq 'block';
-#::Dwarn \@targstack;
       push @{$targstack[-1][2]}, $targ = [];
       %meta = ();
     } else {
