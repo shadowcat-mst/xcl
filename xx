@@ -25,6 +25,7 @@ sub extract_next ($self, $src) {
       [ leave => "\\)" ],
       [ enter => "\\{" ],
       [ leave => "\\}" ],
+      [ string => "'", q{'((?:[^'\\\\]+|\\\\.)*)'} ],
     );
     map {
       @$_ == 3
@@ -116,6 +117,9 @@ sub parse ($self, $src, $mode = 'script') {
       die "CANCER" unless $mode[-1] eq 'block';
       push @{$targstack[-1][2]}, $targ = [];
       %meta = ();
+    } elsif ($type eq 'string') {
+      $tok =~ s/\\(['\\])/$1/g;
+      _add($targ, [ $type, $tok ], \%meta);
     } else {
       die "EH? ${type} ${tok}";
     }
@@ -142,9 +146,11 @@ my $p = XCL::Parser->new;
 
 #::Dwarn $p->parse(::Dwarn qq{+ 3.0 [ bar foo4x!] quux(1, 3) });
 
-::Dwarn $p->parse(::Dwarn qq'
-  foreach w (grep .is_webserver servers) {
-    ping w;
-    say w;
-  }
-');
+#::Dwarn $p->parse(::Dwarn qq'
+#  foreach w (grep .is_webserver servers) {
+#    ping w;
+#    say w;
+#  }
+#');
+
+::Dwarn $p->parse(q{foo (1, 2) 'baz'});
