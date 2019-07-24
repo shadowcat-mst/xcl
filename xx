@@ -1,3 +1,5 @@
+use Devel::Dwarn;
+
 BEGIN {
 
 package XCL::Parser;
@@ -91,7 +93,8 @@ sub parse ($self, $src, $mode = 'script') {
     } elsif ($type eq 'enter') {
       our %types = ('[' => 'call', '(' => 'list', '{' => 'block');
       push @mode, my $mode = $types{$tok};
-      push @targstack, _add_meta([ $mode => ($targ = []) ], \%meta);
+      my $inner = ($mode eq 'call' ? ($targ = []) : [ $targ = [] ]);
+      push @targstack, _add_meta([ $mode => $inner ], \%meta);
     } elsif ($type eq 'leave') {
       our %types = (']' => 'call', ')' => 'list', '}' => 'block');
       my $mode = pop @mode;
@@ -111,13 +114,8 @@ sub parse ($self, $src, $mode = 'script') {
       %meta = ();
     } elsif ($type eq 'semicolon') {
       die "CANCER" unless $mode[-1] eq 'block';
-      my $top = $targstack[-1];
-      unless ($top->[0] eq 'statement') {
-        $top = $targstack[-1] = [
-          statement => { %{$top->[1]} },
-          [ [ $top->[0], {}, $top->[2] ], [ $type, {}, $tok ] ]
-        ];
-      }
+#::Dwarn \@targstack;
+      push @{$targstack[-1][2]}, $targ = [];
       %meta = ();
     } else {
       die "EH? ${type} ${tok}";
@@ -140,7 +138,6 @@ sub all_tokens ($self, $src) {
 }
 
 use strictures 2;
-use Devel::DDCWarn;
 
 my $p = XCL::Parser->new;
 
