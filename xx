@@ -71,9 +71,7 @@ sub _add_meta ($thing, $meta) {
 }
 
 sub parse ($self, $src, $mode = 'script') {
-  my @parse;
-  my @targstack = \@parse;
-  my $targ = $targstack[-1];
+  my @targstack = my $parse = [ block => {} => [ my $targ = [] ] ];
   my %meta;
   my @mode = $mode;
   TOK: while ($src) {
@@ -107,7 +105,7 @@ sub parse ($self, $src, $mode = 'script') {
       %meta = ();
       my $top = pop @targstack;
       push @{$targstack[-1][2]}, $top;
-      $targ = $targstack[-1];
+      $targ = $targstack[-1][2];
     } elsif ($type eq 'comma') {
       die "NOOOOO" unless $mode[-1] eq 'list';
       my $expr = $targ;
@@ -124,7 +122,7 @@ sub parse ($self, $src, $mode = 'script') {
       die "EH? ${type} ${tok}";
     }
   }
-  return \@parse;
+  return $parse;
 }
 
 sub all_tokens ($self, $src) {
