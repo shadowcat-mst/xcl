@@ -1,0 +1,36 @@
+let commands = %;
+
+letf command (env, name, @rest) {
+  _eval env \let name @rest;
+  commands(name) = 1;
+}
+
+command help () {
+  stdout.say $<<'
+    Usage:
+
+      # Config commands
+    ...
+  ';
+}
+
+command status () {
+  let res = foreach account config.accounts {
+    let keys = on account.remote {
+      file('.ssh/authorized_keys).lines();
+    }
+    ("Account: $(account.remote)\n", @keys);
+  }
+  foreach r in res {
+    stdout.print @r;
+  }
+}
+
+let main (sub, @args) {
+  # would process options here but didn't write any yet
+  if (_exists commands(sub)) {
+    $sub @args;
+  } else {
+    exit 255 "Unknown command $(sub)";
+  }
+}
