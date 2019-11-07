@@ -1,6 +1,7 @@
 package XCL::Values;
 
 use strictures 2;
+use curry;
 use experimental 'signatures';
 
 # string, bytes
@@ -11,7 +12,9 @@ use experimental 'signatures';
 
 package XCL::V {
   sub eval ($self, $env) { XCL::Values::Result({ val => $self }) }
-  sub XVL::V::invoke ($self, @) { die "Not invokable: $self" }
+  sub data ($self) { $self->{data} }
+  sub metadata ($self) { $self->{metadata} }
+  sub invoke ($self, @) { die "Not invokable: $self" }
 }
 
 BEGIN {
@@ -39,35 +42,78 @@ BEGIN {
 
 }
 
-sub XCL::V::Escape::eval ($self, $env) { Result($self->{data}) }
+sub XCL::V::Escape::eval ($self, $env) { Result($self->data) }
 
 sub XCL::V::Call::eval ($self, $env) {
-  my ($command, @args) = @{$self->{data}};
-  $command->eval($env)->invoke($env, @args);
+  my ($command, @args) = @{$self->data};
+  if ((my $res = $command->eval($env))->is_ok) {
+    return $res->val->invoke($env, @args);
+  } else {
+    return $res;
+  }
 }
 
-sub XCL::V::Name::eval ($self, $env) { $env->get($self->{data}) }
+sub XCL::V::Name::eval ($self, $env) { $env->get($self->data) }
 
 sub XCL::V::Fexpr::invoke ($self, @args) {
-  my ($argspec, $env, $body) = @{$self->{data}}{qw(argspec env body)};
+  my ($argspec, $env, $body) = @{$self->data}{qw(argspec env body)};
   my %merge; @merge{@$argspec} = @args;
   $body->eval($env->derive(\%merge));
 }
 
-my sub Result (@args) { XCL::Values::Result(@args) };
-
 package XCL::V::Dict {
+  BEGIN { *Result = *XCL::Values::Result }
   sub get ($self, $key) {
-    my $dict = $self->{data};
+    my $dict = $self->data;
     Result({
      ($dict->{$key}
        ? (val => $dict->{$key})
        : (err => 'NO_SUCH_VALUE')
       ),
-      set => sub ($value) { Result({ val => $dict->{$key} = $value }) },
+      set => $self->curry::weak::set($key);
     });
   }
+  sub set ($self, $key, $value) {
+    $self->data->{$key} = $value;
+    Result({ val => $value });
+  }
   sub invoke ($self, $string) {
-    $self->get($self, $string->{data});
+    $self->get($self, $string->data);
   }
 }
+
+package XVL::V::List {
+  BEGIN { *Result = *XCL::Values::Result }
+  sub get ($self, $idx) {
+    die "NOT YET" if $idx < 0;
+    my $ary = $self->data;
+    Result({
+     ($#$ary <= $idx
+       ? (val => $ary->[$idx])
+       : (err => 'NO_SUCH_VALUE')),
+     (set => $self->curry::weak::set($idx)),
+    });
+  }
+  sub set ($self, $idx, $value) {
+    die "NOT YET" if $idx < 0;
+    my $ary = $self->data;
+    return Result({ err => 'NO_SUCH_INDEX' }) if $idx > @$ary;
+    $ary->[$idx] = $value;
+    Result({ val => $value });
+  }
+  sub invoke ($self, $int) {
+    $self->get($self, $int->data);
+  }
+}
+
+package XCL::V::Result {
+  sub is_ok ($self) { exists $self->data->{val} }
+  sub val ($self) { $self->data->{val} }
+  sub err ($self) { $self->data->{err} }
+  sub can_set ($self) { exists $self->data->{set} }
+  sub set ($self, $value) {
+    $self->data->{$set}->($value);
+  }
+}
+
+1;
