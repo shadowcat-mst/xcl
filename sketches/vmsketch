@@ -1,0 +1,73 @@
+package XCL::Values;
+
+use strictures 2;
+use experimental 'signatures';
+
+# string, bytes
+# float, int
+# name, bool
+# list, dict
+# call, block
+
+package XCL::V {
+  sub eval ($self, $env) { XCL::Values::Result({ val => $self }) }
+  sub XVL::V::invoke ($self, @) { die "Not invokable: $self" }
+}
+
+BEGIN {
+
+  our @Types = qw(
+    String Bytes
+    Float Int
+    Bool
+    Fexpr Dict List
+    Name
+    Call
+    Result
+  );
+
+  foreach my $type (@Types) {
+    my $class = "XCL::V::${type}";
+    {
+      no 'strict';
+      @{"${class}::ISA"} = qw(XCL::V);
+      *{$type} = sub ($data, $metadata = {}) {
+        bless({ data => $data, metadata => $metadata }, $class);
+      }
+    }
+  }
+
+}
+
+sub XCL::V::Escape::eval ($self, $env) { Result($self->{data}) }
+
+sub XCL::V::Call::eval ($self, $env) {
+  my ($command, @args) = @{$self->{data}};
+  $command->eval($env)->invoke($env, @args);
+}
+
+sub XCL::V::Name::eval ($self, $env) { $env->get($self->{data}) }
+
+sub XCL::V::Fexpr::invoke ($self, @args) {
+  my ($argspec, $env, $body) = @{$self->{data}}{qw(argspec env body)};
+  my %merge; @merge{@$argspec} = @args;
+  $body->eval($env->derive(\%merge));
+}
+
+my sub Result (@args) { XCL::Values::Result(@args) };
+
+package XCL::V::Dict {
+  sub get ($self, $key) {
+    my $dict = $self->{data};
+    Result({
+     ($dict->{$key}
+       ? (val => $dict->{$key})
+       : (err => 'NO_SUCH_VALUE')
+      ),
+      set => sub ($value) { Result({ val => $dict->{$key} = $value }) },
+    });
+  }
+  sub invoke ($self, $string) {
+    $self->get($self, $string->{data});
+  }
+}
