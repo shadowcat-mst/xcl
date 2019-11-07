@@ -2,6 +2,7 @@ package XCL::Values;
 
 use strictures 2;
 use curry;
+use Exporter 'import';
 use experimental 'signatures';
 
 # string, bytes
@@ -27,7 +28,10 @@ BEGIN {
     Name
     Call
     Result
+    Bultin
   );
+
+  our @EXPORT = @Types;
 
   foreach my $type (@Types) {
     my $class = "XCL::V::${type}";
@@ -39,7 +43,6 @@ BEGIN {
       }
     }
   }
-
 }
 
 sub XCL::V::Escape::eval ($self, $env) { Result($self->data) }
@@ -78,11 +81,13 @@ package XCL::V::Dict {
     Result({ val => $value });
   }
   sub invoke ($self, $string) {
+    return Result(err => 'NOT_A_STRING')
+      unless $string->isa('DX::Value::String');
     $self->get($self, $string->data);
   }
 }
 
-package XVL::V::List {
+package XCL::V::List {
   BEGIN { *Result = *XCL::Values::Result }
   sub get ($self, $idx) {
     die "NOT YET" if $idx < 0;
@@ -102,6 +107,7 @@ package XVL::V::List {
     Result({ val => $value });
   }
   sub invoke ($self, $int) {
+    return Result(err => 'NOT_AN_INT') unless $int->isa('DX::Value::Int');
     $self->get($self, $int->data);
   }
 }
@@ -113,6 +119,47 @@ package XCL::V::Result {
   sub can_set ($self) { exists $self->data->{set} }
   sub set ($self, $value) {
     $self->data->{$set}->($value);
+  }
+}
+
+sub XCL::V::Builtin::invoke ($self, @args) { $self->data->(@args) }
+
+package XCL::Builtins {
+  BEGIN { *Result = *XCL::Values::Result }
+  BEGIN { *List = *XCL::Values::List }
+  sub _eval ($env, @args) {
+    my @ret;
+    foreach my $arg (@args) {
+      my $r = $env->eval($arg);
+      return $r unless $r->is_ok;
+      push @rest, $r->val;
+    }
+    return Result({ val => List(\@ret)( });
+  }
+  my $MAX_SAFE_INT = 2**53;
+  sub plus {
+    my $res = _eval(@_);
+    return $res->err unless $res->is_ok;
+    my ($first, @rest) = @{$res->val->data};
+    my $type = ref($first);
+    die "Incorrect types" if grep ref($_) ne $type, @rest;
+    my $acc = $first->data;
+    foreach my $val (map $_->data, @rest) {
+      if ($type =~ /Int$/ and $MAX_SAFE_INT - $acc > $val) {
+        die "Possible integer overflow";
+      }
+      $acc += $val;
+    }
+    bless({ data => $acc }, $type);
+  }
+  sub progn {
+    my ($env, @args) = @_;
+    my $r;
+    foreach my $arg (@args) {
+      $r = $arg->eval($env);
+      return $r unless $r->is_ok;
+    }
+    return $r;
   }
 }
 
