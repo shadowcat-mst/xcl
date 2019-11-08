@@ -118,7 +118,8 @@ package XCL::V::Result {
   sub err ($self) { $self->data->{err} }
   sub can_set ($self) { exists $self->data->{set} }
   sub set ($self, $value) {
-    $self->data->{$set}->($value);
+    $self->data->{$set} = $value;
+    Result({ val => $value });
   }
 }
 
@@ -152,14 +153,27 @@ package XCL::Builtins {
     }
     bless({ data => $acc }, $type);
   }
-  sub progn {
-    my ($env, @args) = @_;
-    my $r;
+  sub progn ($env, @args) {
+    my $res;
     foreach my $arg (@args) {
-      $r = $arg->eval($env);
-      return $r unless $r->is_ok;
+      $res = $arg->eval($env);
+      return $res unless $res->is_ok;
     }
-    return $r;
+    return $res;
+  }
+  sub _if ($env, $cond, $true, $false) {
+    my $res = $cond->eval($env);
+    return $res unless $res->is_ok;
+    return Result({ err => 'NOT_A_BOOLEAN' })
+      unless $res->val->isa('XCL::V::Bool');
+    return Result({ val => $res->val->data ? $true : $false });
+  }
+  sub set ($env, $set, $valproto) {
+    my $place = $env->eval($set);
+    return Result({ err => 'NOT_SETTABLE' }) unless $place->can_set;
+    my $valres = $env->eval($valproto);
+    return $valres unless $valres->is_ok;
+    return $place->set($valres);
   }
 }
 
