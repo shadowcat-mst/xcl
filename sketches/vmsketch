@@ -31,12 +31,12 @@ BEGIN {
     Bultin
   );
 
-  our @EXPORT = @Types;
+  our @EXPORT = (@Types, qw(Val Err));
 
   foreach my $type (@Types) {
     my $class = "XCL::V::${type}";
     {
-      no 'strict';
+      no strict 'refs';
       @{"${class}::ISA"} = qw(XCL::V);
       *{$type} = sub ($data, $metadata = {}) {
         bless({ data => $data, metadata => $metadata }, $class);
@@ -45,7 +45,10 @@ BEGIN {
   }
 }
 
-sub XCL::V::Escape::eval ($self, $env) { Result($self->data) }
+sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
+sub Err ($err, $metadata = {}) { Result({ err => $err }, $metadata) }
+
+sub XCL::V::Escape::eval ($self, $env) { Val($self->data) }
 
 sub XCL::V::Call::eval ($self, $env) {
   my ($command, @args) = @{$self->data};
@@ -65,30 +68,29 @@ sub XCL::V::Fexpr::invoke ($self, @args) {
 }
 
 package XCL::V::Dict {
-  BEGIN { *Result = *XCL::Values::Result }
+  XCL::Values->import(qw(Result Val Err));
   sub get ($self, $key) {
     my $dict = $self->data;
     Result({
-     ($dict->{$key}
-       ? (val => $dict->{$key})
-       : (err => 'NO_SUCH_VALUE')
+      ($dict->{$key}
+        ? (val => $dict->{$key})
+        : (err => 'NO_SUCH_VALUE')
       ),
-      set => $self->curry::weak::set($key);
+      set => $self->curry::weak::set($key),
     });
   }
   sub set ($self, $key, $value) {
-    $self->data->{$key} = $value;
-    Result({ val => $value });
+    return Val($self->data->{$key} = $value);
   }
   sub invoke ($self, $string) {
-    return Result(err => 'NOT_A_STRING')
+    return Err('NOT_A_STRING')
       unless $string->isa('DX::Value::String');
     $self->get($self, $string->data);
   }
 }
 
 package XCL::V::List {
-  BEGIN { *Result = *XCL::Values::Result }
+  XCL::Values->import(qw(Result Val Err));
   sub get ($self, $idx) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
@@ -102,12 +104,11 @@ package XCL::V::List {
   sub set ($self, $idx, $value) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
-    return Result({ err => 'NO_SUCH_INDEX' }) if $idx > @$ary;
-    $ary->[$idx] = $value;
-    Result({ val => $value });
+    return Err('NO_SUCH_INDEX') if $idx > @$ary;
+    return Val($ary->[$idx] = $value);
   }
   sub invoke ($self, $int) {
-    return Result(err => 'NOT_AN_INT') unless $int->isa('DX::Value::Int');
+    return Err('NOT_AN_INT') unless $int->isa('DX::Value::Int');
     $self->get($self, $int->data);
   }
 }
@@ -118,40 +119,38 @@ package XCL::V::Result {
   sub err ($self) { $self->data->{err} }
   sub can_set ($self) { exists $self->data->{set} }
   sub set ($self, $value) {
-    $self->data->{$set} = $value;
-    Result({ val => $value });
+    $self->data->{set}->($value);
   }
 }
 
 sub XCL::V::Builtin::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  BEGIN { *Result = *XCL::Values::Result }
-  BEGIN { *List = *XCL::Values::List }
+  XCL::Values->import(qw(Val Err Result List));
   sub _eval ($env, @args) {
     my @ret;
     foreach my $arg (@args) {
       my $r = $env->eval($arg);
       return $r unless $r->is_ok;
-      push @rest, $r->val;
+      push @ret, $r->val;
     }
-    return Result({ val => List(\@ret)( });
+    return Val(List(\@ret));
   }
   my $MAX_SAFE_INT = 2**53;
   sub plus {
     my $res = _eval(@_);
-    return $res->err unless $res->is_ok;
+    return $res unless $res->is_ok;
     my ($first, @rest) = @{$res->val->data};
     my $type = ref($first);
     die "Incorrect types" if grep ref($_) ne $type, @rest;
     my $acc = $first->data;
     foreach my $val (map $_->data, @rest) {
       if ($type =~ /Int$/ and $MAX_SAFE_INT - $acc > $val) {
-        die "Possible integer overflow";
+        return Err('INT_OVERFLOW');
       }
       $acc += $val;
     }
-    bless({ data => $acc }, $type);
+    Val(bless({ data => $acc }, $type));
   }
   sub progn ($env, @args) {
     my $res;
@@ -164,16 +163,15 @@ package XCL::Builtins {
   sub _if ($env, $cond, $true, $false) {
     my $res = $cond->eval($env);
     return $res unless $res->is_ok;
-    return Result({ err => 'NOT_A_BOOLEAN' })
-      unless $res->val->isa('XCL::V::Bool');
-    return Result({ val => $res->val->data ? $true : $false });
+    return Err('NOT_A_BOOLEAN') unless $res->val->isa('XCL::V::Bool');
+    return Val($res->val->data ? $true : $false);
   }
   sub set ($env, $set, $valproto) {
     my $place = $env->eval($set);
-    return Result({ err => 'NOT_SETTABLE' }) unless $place->can_set;
+    return Err('NOT_SETTABLE') unless $place->can_set;
     my $valres = $env->eval($valproto);
     return $valres unless $valres->is_ok;
-    return $place->set($valres);
+    return $place->set($valres->val);
   }
 }
 
