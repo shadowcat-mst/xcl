@@ -12,13 +12,16 @@ use experimental 'signatures';
 # call, block
 
 package XCL::V {
-  sub eval ($self, $env) { XCL::Values::Result({ val => $self }) }
+  XCL::Values->import(qw(Val Err));
+  sub eval ($self, $env) { Val($self) }
   sub data ($self) { $self->{data} }
   sub metadata ($self) { $self->{metadata} }
   sub invoke ($self, @) { die "Not invokable: $self" }
   sub is ($self, $type) {
     $self->isa("XCL::V::${type}");
   }
+  sub bool ($self) { Err('CANT_BOOLEAN') }
+  sub string ($self) { Err('CANT_STRINGIFY') }
 }
 
 sub list ($env, @args) {
@@ -153,6 +156,24 @@ sub XCL::V::Builtin::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
   XCL::Values->import(qw(Val Err Result List list));
+  sub progn ($env, @args) {
+    my $res;
+    foreach my $arg (@args) {
+      $res = $arg->eval($env);
+      return $res unless $res->is_ok;
+    }
+    return $res;
+  }
+  sub set ($env, $set, $valproto) {
+    my $place = $env->eval($set);
+    return Err('NOT_SETTABLE') unless $place->can_set;
+    my $valres = $env->eval($valproto);
+    return $valres unless $valres->is_ok;
+    return $place->set($valres->val);
+  }
+}
+
+package XCL::Builtins {
   my $MAX_SAFE_INT = 2**53;
   sub add {
     my $res = list(@_);
@@ -212,26 +233,94 @@ package XCL::Builtins {
     return err('BAD_TYPE') unless $v->is('Int') or $v->is('Float');
     return Val(Float($v->data));
   }
-  sub progn ($env, @args) {
-    my $res;
-    foreach my $arg (@args) {
-      $res = $arg->eval($env);
-      return $res unless $res->is_ok;
-    }
-    return $res;
+}
+
+sub XCL::V::Bool::bool ($self) { Val($self) }
+
+sub XCL::V::List::bool ($self) { Val(Bool(@{$self->data} ? 1 : 0)) }
+
+sub XCL::V::Dict::bool ($self) { Val(Bool(keys %{$self->data} ? 1 : 0)) }
+
+sub XCL::V::String::bool ($self) { Val(Bool(length($self->data) ? 1 : 0)) }
+
+sub XCL::V::Int::bool ($self) { Val(Bool($self->data == 0 ? 0 : 1)) }
+sub XCL::V::Float::bool ($self) { Val(Bool($self->data == 0 ? 0 : 1)) }
+
+sub XCL::Builtins::if ($env, $cond, $true, $false = undef) {
+  my $denv = $env->derive;
+  my $res = $cond->eval($denv);
+  return $res unless $res->is_ok;
+  my $bool = $res->val->bool;
+  return $bool unless $bool->is_ok;
+  if ($bool->val->data) {
+    my $ret = $true->eval($denv);
+    return defined($false) ? $ret : Val($ret);
   }
-  sub _if ($env, $cond, $true, $false) {
-    my $res = $cond->eval($env);
+  return $false->eval($denv) if defined($false);
+  return Val(Err('NO_SUCH_VALUE'));
+}
+
+sub XCL::Builtins::while ($env, $cond, $body) {
+  my $denv = $env->derive;
+  my $did;
+  WHILE: while (1) {
+    my $res = $cond->eval($denv);
     return $res unless $res->is_ok;
-    return Err('NOT_A_BOOLEAN') unless $res->val->isa('XCL::V::Bool');
-    return Val($res->val->data ? $true : $false);
+    my $bool = $res->val->bool;
+    return $bool unless $bool->is_ok;
+    if ($bool->val->data) {
+      $did ||= 1;
+      my $benv = $denv->derive;
+      my $res = $body->eval($benv);
+      return $res unless $res->is_ok;
+    } else {
+      last WHILE;
+    }
   }
-  sub set ($env, $set, $valproto) {
-    my $place = $env->eval($set);
-    return Err('NOT_SETTABLE') unless $place->can_set;
-    my $valres = $env->eval($valproto);
-    return $valres unless $valres->is_ok;
-    return $place->set($valres->val);
+  return Val(Bool($did));
+}
+
+sub XCL::V::String::string ($self) { Val($self) }
+
+sub XCL::V::Int::string ($self) { Val(String(''.$self->data)) }
+sub XCL::V::Float::string ($self) { Val(String(''.$self->data)) }
+
+sub XCL::V::Bool::string ($self) {
+  Val(String($self->data ? 'true' : 'false'))
+}
+
+sub XCL::Builtins::string ($env, @args) {
+  my $res = list(@_);
+  return $res unless $res->is_ok;
+  my $str = '';
+  foreach my $el ($res->val->values) {
+    my $res = $el->string;
+    return $res unless $res->is_ok;
+    $str .= $res->val->data;
+  }
+  return Val(String($str));
+}
+
+package XCL::Builtins {
+  BEGIN {
+    my %ops = (
+      gt => '>', ge => '>=', lt => '<', le => '<=',
+      eq => '==', ne => '!=',
+    );
+    foreach my $key (sort keys %ops) {
+      my $numop = $ops{$key};
+      eval 'sub '.$key.' {
+        my $res = list(@_);
+        return $res unless $res->is_ok;
+        my ($l, $r) = $res->val->values;
+        if ($l->is("Int") or $l->is("Float")) {
+          return Err("VALUE_TYPE") unless $r->is("Int") or $r->is("Float");
+          return Val(Bool(($l->data '.$numop.' $r->data) ? 1 : 0));
+        }
+        return Err("VALUE_TYPE") unless $l->is("String") and $r->is("String");
+        return Val(Bool(($l->data '.$key.' $r->data)));
+      } 1' or die "Compilation failed for ${key}: $@";
+    }
   }
 }
 
