@@ -16,6 +16,19 @@ package XCL::V {
   sub data ($self) { $self->{data} }
   sub metadata ($self) { $self->{metadata} }
   sub invoke ($self, @) { die "Not invokable: $self" }
+  sub is ($self, $type) {
+    $self->isa("XCL::V::${type}");
+  }
+}
+
+sub list ($env, @args) {
+  my @ret;
+  foreach my $arg (@args) {
+    my $r = $env->eval($arg);
+    return $r unless $r->is_ok;
+    push @ret, $r->val;
+  }
+  return Val(List(\@ret));
 }
 
 BEGIN {
@@ -31,7 +44,7 @@ BEGIN {
     Bultin
   );
 
-  our @EXPORT = (@Types, qw(Val Err));
+  our @EXPORT = (@Types, qw(Val Err list));
 
   foreach my $type (@Types) {
     my $class = "XCL::V::${type}";
@@ -68,7 +81,7 @@ sub XCL::V::Fexpr::invoke ($self, @args) {
 }
 
 package XCL::V::Dict {
-  XCL::Values->import(qw(Result Val Err));
+  XCL::Values->import(qw(Result Val Err List));
   sub get ($self, $key) {
     my $dict = $self->data;
     Result({
@@ -84,13 +97,19 @@ package XCL::V::Dict {
   }
   sub invoke ($self, $string) {
     return Err('NOT_A_STRING')
-      unless $string->isa('DX::Value::String');
+      unless $string->is('String');
     $self->get($self, $string->data);
+  }
+  sub keys ($self) {
+    List([ map String($_), sort keys %{$self->data} ]);
+  }
+  sub values ($self) {
+    List([ @{$self->data}{sort CORE::keys %{$self->data}} ]);
   }
 }
 
 package XCL::V::List {
-  XCL::Values->import(qw(Result Val Err));
+  XCL::Values->import(qw(Result Val Err List));
   sub get ($self, $idx) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
@@ -108,8 +127,15 @@ package XCL::V::List {
     return Val($ary->[$idx] = $value);
   }
   sub invoke ($self, $int) {
-    return Err('NOT_AN_INT') unless $int->isa('DX::Value::Int');
+    return Err('NOT_AN_INT') unless $int->is('Int');
     $self->get($self, $int->data);
+  }
+  sub keys ($self) {
+    my $ary = $self->data;
+    return List([ map Int($_), 0 .. $ary ]);
+  }
+  sub values ($self) {
+    return List($self->data);
   }
 }
 
@@ -126,21 +152,12 @@ package XCL::V::Result {
 sub XCL::V::Builtin::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  XCL::Values->import(qw(Val Err Result List));
-  sub _eval ($env, @args) {
-    my @ret;
-    foreach my $arg (@args) {
-      my $r = $env->eval($arg);
-      return $r unless $r->is_ok;
-      push @ret, $r->val;
-    }
-    return Val(List(\@ret));
-  }
+  XCL::Values->import(qw(Val Err Result List list));
   my $MAX_SAFE_INT = 2**53;
-  sub plus {
-    my $res = _eval(@_);
+  sub add {
+    my $res = list(@_);
     return $res unless $res->is_ok;
-    my ($first, @rest) = @{$res->val->data};
+    my ($first, @rest) = $res->val->values;
     my $type = ref($first);
     die "Incorrect types" if grep ref($_) ne $type, @rest;
     my $acc = $first->data;
@@ -151,6 +168,49 @@ package XCL::Builtins {
       $acc += $val;
     }
     Val(bless({ data => $acc }, $type));
+  }
+  sub multiply {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($first, @rest) = $res->val->values;
+    my $type = ref($first);
+    die "Incorrect types" if grep ref($_) ne $type, @rest;
+    my $acc = $first->data;
+    foreach my $val (map $_->data, @rest) {
+      if ($type =~ /Int$/ and $MAX_SAFE_INT / $acc > $val) {
+        return Err('INT_OVERFLOW');
+      }
+      $acc *= $val;
+    }
+    Val(bless({ data => $acc }, $type));
+  }
+  sub subtract {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($l, $r) = $res->val->values;
+    # type check here
+    Val(bless({ data => $l->data - $r->data }, ref($l)));
+  }
+  sub divide {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($l, $r) = $res->val->values;
+    # type check here (numeric is enough)
+    Val(Float($l->data / $r->data));
+  }
+  sub int {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($v) = $res->val->values;
+    return err('BAD_TYPE') unless $v->is('Int') or $v->is('Float');
+    return Val(Int(int($v->data)));
+  }
+  sub float {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($v) = $res->val->values;
+    return err('BAD_TYPE') unless $v->is('Int') or $v->is('Float');
+    return Val(Float($v->data));
   }
   sub progn ($env, @args) {
     my $res;
