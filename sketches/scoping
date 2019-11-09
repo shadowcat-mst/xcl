@@ -1,0 +1,20 @@
+let env = %(
+  x: 3,
+  y: 4,
+);
+
+^env.eval [ x + y ]; # 7
+
+let _derived = %;
+
+let derived = f (name) {
+  if (^env.has(name)) {
+    return env(name);
+  }
+  return _derived(name);
+}
+
+^derived.eval {
+  let z = 6;
+  return x + z;
+} # 9

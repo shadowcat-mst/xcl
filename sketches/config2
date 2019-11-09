@@ -1,0 +1,13 @@
+let env = %(
+  @directives,
+  @basic_logic
+);
+
+#######################
+
+listen.host = 'localhost';
+listen.port = env.MY_DAEMON_PORT // 8080;
+
+if (let port = env.MY_DAEMON_PORT) {
+  listen.port = port;
+}

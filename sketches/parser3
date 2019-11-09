@@ -1,0 +1,167 @@
+use Devel::Dwarn;
+
+BEGIN {
+
+package XCL::Parser;
+
+use XCL::Class;
+
+our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\^_|~';
+
+our $IS_ATOM = qr{^(?:word|symbol|number|int|float|compound|list|call|block)$};
+
+sub extract_next ($self, $src) {
+  state @types = (do {
+    my @s = (
+      [ ws => '\s' => '(\s+)' ],
+      [ word => '[a-zA-Z]' => '(\w+)' ],
+      [ number => '[0-9]', "([0-9]+(?:\\.[0-9]+)?)" ],
+      [ symbol => "[\Q${SYMBOL_CHARS}\E]", "([\Q${SYMBOL_CHARS}\E]+)" ],
+      [ comma => ',' ],
+      [ semicolon => ';' ],
+      [ enter => "\\[" ],
+      [ leave => "\\]" ],
+      [ enter => "\\(" ],
+      [ leave => "\\)" ],
+      [ enter => "\\{" ],
+      [ leave => "\\}" ],
+      [ string => "'", q{'((?:[^'\\\\]+|\\\\.)*)'} ],
+    );
+    map {
+      @$_ == 3
+        ? $_
+        : [ @$_, '('.$_->[1].')' ],
+    } @s;
+  });
+
+  foreach my $type (@types) {
+    my ($name, $identify, $slurp) = @$type;
+    if ($src =~ /\A${identify}/sm) {
+      $src =~ s/\A${slurp}//sm or die "WHAT";
+#warn "[$name]: ($1) ...$src...";
+      return ($name => $1, $src);
+    }
+  }
+  die "ALSO WHAT:  $src";
+}
+
+sub _add ($ar, $thing, $meta) {
+  if ($ar->[-1]
+    and $ar->[-1][0] =~ $IS_ATOM
+    and $thing->[0] =~ $IS_ATOM
+    and not $meta->{ws_before}
+  ) {
+    $ar->[-1] = [
+      compound => { %{$ar->[-1][1]} }, [
+        [ $ar->[-1][0], {}, $ar->[-1][2] ],
+        [ $thing->[0], {}, $thing->[1] ],
+      ]
+    ];
+  } else {
+    push @$ar, _add_meta($thing, $meta);
+  }
+  %$meta = ();
+  return;
+}
+
+sub _add_meta ($thing, $meta) {
+  my $r = [ $thing->[0], { %$meta }, $thing->[1] ];
+  %$meta = ();
+  return $r;
+}
+
+sub parse ($self, $src, $mode = 'script') {
+  my @targstack = my $parse = [ block => {} => [ my $targ = [] ] ];
+  my %meta;
+  my @mode = $mode;
+  TOK: while ($src) {
+    (my ($type, $tok), $src) = $self->extract_next($src);
+    if ($type eq 'ws') {
+      die "Two ws tokens in a row indicates a tokenizer bug: ".$src." (old: $meta{ws_before}) (extra: $tok)"
+        if defined $meta{ws_before};
+      $meta{ws_before} = $tok;
+    } elsif ($type eq 'word') {
+      _add($targ, [ $type, $tok ], \%meta);
+    } elsif ($type eq 'number') {
+      _add($targ,
+        ($tok =~ /\./ ? [ float => $tok ] : [ int => $tok ]),
+        \%meta
+      );
+    } elsif ($type eq 'symbol') {
+      _add($targ, [ $type, $tok ], \%meta);
+    } elsif ($type eq 'enter') {
+      our %types = ('[' => 'call', '(' => 'list', '{' => 'block');
+      push @mode, my $mode = $types{$tok};
+      my $inner = ($mode eq 'call' ? ($targ = []) : [ $targ = [] ]);
+      push @targstack, _add_meta([ $mode => $inner ], \%meta);
+    } elsif ($type eq 'leave') {
+      our %types = (']' => 'call', ')' => 'list', '}' => 'block');
+      my $mode = pop @mode;
+      die "Can't close ${tok} - currently in the middle of a ${mode}"
+        unless $types{$tok} eq $mode;
+      if ($meta{ws_before}) {
+        $targstack[-1][1]->{ws_after} = delete $meta{ws_before};
+      }
+      %meta = ();
+      my $top = pop @targstack;
+      push @{$targstack[-1][2]}, $top;
+      $targ = $targstack[-1][2];
+      if ($mode eq 'block' and $src =~ /\A\n/) {
+        push @{$targstack[-1][2]}, $targ = [];
+        %meta = ();
+      }
+    } elsif ($type eq 'comma') {
+      die "NOOOOO" unless $mode[-1] eq 'list';
+      my $expr = $targ;
+      push @{$targstack[-1][2]}, $targ = [];
+      %meta = ();
+    } elsif ($type eq 'semicolon') {
+      die "CANCER" unless $mode[-1] eq 'block';
+      push @{$targstack[-1][2]}, $targ = [];
+      %meta = ();
+    } elsif ($type eq 'string') {
+      $tok =~ s/\\(['\\])/$1/g;
+      _add($targ, [ $type, $tok ], \%meta);
+    } else {
+      die "EH? ${type} ${tok}";
+    }
+  }
+  return $parse;
+}
+
+sub all_tokens ($self, $src) {
+  my @tok;
+  while ($src !~ /^\Z/) {
+    (my $tok, $src) = $self->extract_next($src);
+    push @tok, $tok;
+  }
+  return \@tok;
+}
+
+1;
+
+}
+
+use strictures 2;
+
+my $p = XCL::Parser->new;
+
+#::Dwarn $p->parse(::Dwarn qq{+ 3.0 [ bar foo4x!] quux(1, 3) });
+
+0 and ::Dwarn $p->parse(::Dwarn qq'
+  foreach w (grep .is_webserver servers) {
+    ping w;
+    say w;
+  }
+');
+
+##::Dwarn $p->parse(q{foo (1, 2) 'baz'});
+
+::Dwarn $p->parse(q{
+  if x {
+    thing;
+  } else {
+    other_thing
+  }
+  say 'wooo'
+});

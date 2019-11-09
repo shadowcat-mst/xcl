@@ -1,0 +1,37 @@
+# Needs: ? _eval _if _copy_env
+
+letf set (env, place, value) {
+  [ ? [ _eval env place ] ] 'set' [ _eval env value ]
+}
+
+letf if (env, cond, block) {
+  set ifenv [ _copy_env env ];
+  set exec [ _if [ _eval ifenv cond ] [ block ] nothing ];
+  _eval ifenv exec;
+}
+
+let _while (wenv, cond, block) {
+  set val [ _eval wenv cond ];
+  set tail [ _tailcallable ];
+  if [ _eval wenv cond ]
+    [ _progn
+      [ _eval wenv [ _call block ] ]
+      [ tail wenv cond block ]
+    ];
+}
+
+letf while (env, cond, block) {
+  set wenv [ _copy_env env ];
+  _while wenv cond block;
+}
+
+letf foreach (env, iteratee, over, block) {
+  set x 0;
+  set collection [ _eval env over ];
+  while (x < length_of collection) {
+    set thisenv = _copy_env env;
+    _eval thisenv [ _call \set iteratee collection(x) ];
+    _eval thisenv [ _call block ];
+    ++x;
+  }
+}

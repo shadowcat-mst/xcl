@@ -1,0 +1,100 @@
+
+
+let settle (:loadavg :timeout) {
+  let start = time();
+  let u = () => [ sh `'`{uptime | perl -pe 's/.*ge: //; s/,.*//'} ];
+  while (time() - start <= timeout) {
+    return if u() < loadavg;
+  }
+}
+
+let derive(scope) {
+  let d = %;
+  d.$x := scope.$x for ^scope.keys;
+  d
+}
+
+let proto (main, fallback) {
+  return key => {
+    return m! if [ let m = main(key)? ].ok();
+    return f if fallback(key)?.ok(?f);
+    m!
+  }
+}
+
+let view (of, @visible) {
+  let allow = %(^visible.map _ : true);
+  return key => { return Nothing unless allow.$key; return of(key) }
+}
+
+let library = %(:a 1, :b 2, :c 3, :d 4, :e 5);
+
+let base = %(:x 1, :y 2);
+
+say base.x; # 1
+say library.a; # 1
+say base.a; # exception
+
+# let x = 1;
+# let y = 2;
+
+# {
+#    let z = 3;
+#
+
+let locals = proto %(:z 3) base;
+
+# {
+#    use library a d e;
+#    let z = 3;
+#
+
+let import = view(library, 'a', 'd', 'e');
+
+let locals = proto %(:z 3) [ proto import base ];
+
+locals.k = 27; # will add to the %(:z 3) hash inside the proto call
+
+locals.x = 42;
+
+say base.x; # 42 now
+
+
+############################################################
+
+use xclsh 0.20190806;
+
+## implementation of xclsh
+
+let make_shell_function (name) {
+  return Nothing unless let w = which(name);
+  return (@args) => [ run w @args ];
+}
+
+let main (key) {
+  return m! if [ let m = main(key)? ].ok();
+  return f if make_shell_function(key)?.ok(?f);
+  m!
+}
+
+############################################################
+
+## stream connections
+
+  foo() | bar()
+
+->
+
+  foo()?.send_stdout_to(bar()?)
+
+fletop | (env, l, r) {
+  env.eval([ [ l ? ] 'send_stdout_to' [ r ? ] ]);
+}
+
+fletop | (env, l, r) {
+  env.eval l? 'send_stdout_to' r?;
+}
+
+fletop | (env, l, r) {
+  env.eval l?.send_stdout_to r?;
+}

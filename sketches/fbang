@@ -1,0 +1,43 @@
+# use of env and scoping is inaccurate, ignoring that for now
+
+letf do_exec (env, @args) {
+  if (args.length == 1) {
+    let (arg) = args;
+    if (is_Pair arg) {
+      return f (name, @inner) { do_exec name arg @inner }
+    } else {
+      return get {
+        results_of arg
+      } invoke (@inner) {
+        results_of arg @inner
+      }
+    }
+  }
+  results_of @args;
+}
+
+let ! = do_exec;
+
+!(:format csv) foo # runs 'results_of foo :format(csv)'
+!foo # hits the else branch get, so runs 'results_of foo'
+!foo WHERE p.x = $x; # hits the else branch invoke: 'results_of foo WHERE ...'
+! foo WHERE ...; # invokes the same via the final clause
+
+!(:format csv) foo WHERE p.x = $x; # 'results_of foo :format(csv) WHERE ...'
+
+# silly example but shows how the ! is working:
+
+let rec = !(-r);
+
+rec rm -f $destroy_this_path; # results_of rm -r -f $destroy_this_path
+
+################
+
+let format (env, type) {
+  ! = do_exec :format(type);
+}
+
+...
+
+> format csv
+> !SELECT .... # now !(format :csv) SELECT ....

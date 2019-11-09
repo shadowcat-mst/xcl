@@ -1,0 +1,29 @@
+let inherit (thing, parent) {
+  return f (key) {
+    if (^thing.has(key)) {
+      return thing(key);
+    }
+    return parent(key);
+  }
+}
+
+let foo_func ...
+let bar_func ...
+
+let env = inherit(
+  %(foo: foo_func, bar: bar_func),
+  f (key) { f (@args) { system key @args } }
+);
+
+env.eval(scripty_text);
+
+### dismantle
+
+let inherit = f (thing, parent) {
+  return f (key) {
+    if [ [ [ ^ thing ] 'has' ] key ] {
+      return [ thing key ];
+    }
+    return [ parent key ];
+  }
+}

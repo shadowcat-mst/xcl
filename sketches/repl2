@@ -1,12 +1,10 @@
 use strictures 2;
 use Caroline;
-use XCL::Parser;
 use Devel::DDCWarn;
 use experimental 'signatures';
 
 require './sketches/interp2';
-
-my $p = XCL::Parser->new;
+require './sketches/parser3';
 
 my $l = Caroline->new;
 

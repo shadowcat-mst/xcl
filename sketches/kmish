@@ -15,15 +15,13 @@ command help () {
 }
 
 command status () {
-  let res = foreach account config.accounts {
+  let fetch_keys = \[ foreach :parallel(5) account config.accounts {
     let keys = on account.remote {
-      file('.ssh/authorized_keys).lines();
+      file('.ssh/authorized_keys').lines();
     }
     ("Account: $(account.remote)\n", @keys);
-  }
-  foreach r in res {
-    stdout.print @r;
-  }
+  } ];
+  fetch_keys | stdout;
 }
 
 let main (sub, @args) {

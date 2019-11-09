@@ -1,0 +1,25 @@
+
+define script => [ join => ';' => \@statements ];
+
+define list_of [ ... ];
+
+define atom => [
+  word | symbol | number | compound | list | call | block
+];
+
+define statement => [ list_of => atom ];
+
+define Word '[A-Za-z+_]' '^[A-Za-z_]\w*';
+
+define Symbol "[$(SYMBOL_CHARS)]";
+
+define Number '[0-9]' {
+  '[0-9]+.[0-9]+'
+  sub ($v) { Float($v) },
+  '[0-9]+'
+  sub ($v) { Int($v) },
+}
+
+define Call '[' [
+  '[' [ list_of atom ] ']'
+

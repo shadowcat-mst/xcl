@@ -1,0 +1,28 @@
+
+
+let x = \[ say 'Argh!' ];
+
+x();
+
+#############
+
+dbash> SELECT * FROM foo;
+[[table here]]
+dbash> let active = \WHERE active = 1;
+dbash> SELECT * FROM foo ${active};
+
+################
+
+Basics of variables and shit:
+
+dbash> SELECT * FROM foo;
+x, 1
+y, 2
+dbash> let q = \[SELECT * FROM foo];
+dbash> SELECT * FROM $q WHERE name = 'x';
+x, 1
+dbash> let qn = \[SELECT * FROM foo WHERE name = _0];
+dbash> SELECT * FROM qn('x');
+x, 1
+
+dbash>

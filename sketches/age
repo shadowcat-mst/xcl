@@ -1,0 +1,71 @@
+
+
+use xcl 0;
+
+use fs 1;
+
+use age 1 +fs;
+
+let files = fs.dir('/where/the/logs/live').files;
+
+# foreach file in files {
+#   if (file.older_than 7 days ago) {
+#     file.rm();
+#   }
+# }
+
+foreach file in [ files.where _.older_than 7 days ago ] {
+  file.rm();
+}
+
+files.where(.older_than 7 days ago).each(.rm);
+
+files.where .older_than 7 days ago | .rm;
+
+fs.dir('/where/the/logs/live').files
+  | where .older_than 7 days ago
+  | .rm;
+
+
+fs.file('/etc/webhosts').lines
+  | each :parallel(3) {
+      on _ stop apache2;
+      sleep 15; # should check ps but lazy
+      on _ fs.in('/app/path').run git pull;
+      on _ start apache2;
+      sleep 5;
+    }
+#  | each { verify_up _ };
+#   | each {
+#     let r = verify_up _;
+#     if (am_interactive) { return }
+#     if (let err = r.error) {
+#       abort err;
+#     }
+   | ${
+      if (am_interactive) {
+        let checked = false;
+        return f (h) {
+          let r = verify_up(h)?;
+          log debug "Host check: $(h) $(r)";
+          if (r.err and !checked) {
+            let choice = ask 'Override? (yes/no/all)' r'[yna]';
+            match choice (
+              'y' => {},
+              'n' => { abort r.err },
+              'a' => { checked = true },
+            );;
+          }
+        }
+      }
+      return f (h) { return verify_up h }
+    };
+
+
+...
+    some_operation(...)?.match(
+      :val => { do_thing_with val },
+      :err => { log fatal err; abort err; },
+    );
+
+

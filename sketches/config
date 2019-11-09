@@ -1,0 +1,32 @@
+
+
+vhost {
+  host 'www.trout.me.uk';
+  port 80;
+  directory '/var/www/www.trout.me.uk';
+}
+
+letf vhost (env, block) {
+  let bc = %; # block config is a hash
+  let allowed = %(:host Str, :port Int, :directory Str);
+  foreach ?line in block.statements {
+    let (name, value) = line.args;
+    barf "No such directive $(name)" unless allowed.$name;
+    barf "Invalid $(allowed.$name) for $(name)"
+      unless allowed.$name.check(value);
+    bc.$name = args;
+  }
+  return bc
+}
+
+letf vhost (env, block) {
+  let allowed = %(:host Str, :port Int, :directory Str);
+  %( block.statements.map (n, v) {
+    barf "No such directive $(n)" unless allowed.$n;
+    barf "Invalid $(allowed.$n) for $(n)"
+      unless allowed.$n.check(v);
+    :$n($v)
+  } )
+}
+
+  map { barf ...; [ $_->[0] => $_->[1] ] } $block->statements->each;
