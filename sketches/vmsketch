@@ -44,7 +44,7 @@ BEGIN {
     Name
     Call
     Result
-    Bultin
+    Native
   );
 
   our @EXPORT = (@Types, qw(Val Err list));
@@ -59,6 +59,8 @@ BEGIN {
       }
     }
   }
+
+  $INC{"XCL/Values.pm"} = __FILE__;
 }
 
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
@@ -84,7 +86,7 @@ sub XCL::V::Fexpr::invoke ($self, @args) {
 }
 
 package XCL::V::Dict {
-  XCL::Values->import(qw(Result Val Err List));
+  use XCL::Values qw(Result Val Err List Dict);
   sub get ($self, $key) {
     my $dict = $self->data;
     Result({
@@ -113,16 +115,16 @@ package XCL::V::Dict {
     $self->data->{$key} ? 1 : 0;
   }
   sub keys ($self) {
-    List([ map String($_), sort keys %{$self->data} ]);
+    map String($_), sort keys %{$self->data};
   }
   sub values ($self) {
-    List([ @{$self->data}{sort CORE::keys %{$self->data}} ]);
+    @{$self->data}{sort CORE::keys %{$self->data}};
   }
 }
 
 package XCL::V::Dict::Layered {
+  use XCL::Values qw(Result Val Err List);
   our @ISA = qw(XCL::V);
-  XCL::Values->import(qw(Result Val Err List));
   sub is ($self, $thing) { return $thing eq 'Dict' }
   sub get ($self, $key) {
     foreach my $layer (@{$self->data}) {
@@ -159,15 +161,15 @@ package XCL::V::Dict::Layered {
     sort do { my %s; grep !$s{$_}++, @k };
   }
   sub keys ($self) {
-    List([ map String($_), @{$self->_keys} ]);
+    map String($_), @{$self->_keys};
   }
   sub values ($self) {
-    List([ map $self->get($_), @{$self->_keys} ]);
+    map $self->get($_), @{$self->_keys};
   }
 }
 
 package XCL::V::List {
-  XCL::Values->import(qw(Result Val Err List));
+  use XCL::Values qw(Result Val Err List);
   sub get ($self, $idx) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
@@ -190,10 +192,10 @@ package XCL::V::List {
   }
   sub keys ($self) {
     my $ary = $self->data;
-    return List([ map Int($_), 0 .. $ary ]);
+    return map Int($_), 0 .. $ary;
   }
   sub values ($self) {
-    return List($self->data);
+    return @{$self->data};
   }
 }
 
@@ -207,10 +209,10 @@ package XCL::V::Result {
   }
 }
 
-sub XCL::V::Builtin::invoke ($self, @args) { $self->data->(@args) }
+sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  XCL::Values->import(qw(Val Err Result List list));
+  use XCL::Values qw(Result Val Err List list);
   sub progn ($env, @args) {
     my $res;
     foreach my $arg (@args) {
@@ -245,7 +247,7 @@ package XCL::Builtins {
     die "Incorrect types" if grep ref($_) ne $type, @rest;
     my $acc = $first->data;
     foreach my $val (map $_->data, @rest) {
-      if ($type =~ /Int$/ and $MAX_SAFE_INT - $acc > $val) {
+      if ($type =~ /Int$/ and $MAX_SAFE_INT - $acc < $val) {
         return Err('INT_OVERFLOW');
       }
       $acc += $val;
