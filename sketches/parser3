@@ -1,10 +1,11 @@
 use Devel::Dwarn;
+use experimental qw(signatures state say);
 
 BEGIN {
 
 package XCL::Parser;
 
-use XCL::Class;
+sub new { bless({}, $_[0]) }
 
 our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\^_|~';
 
