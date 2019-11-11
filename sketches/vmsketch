@@ -27,7 +27,7 @@ package XCL::V {
 sub list ($env, @args) {
   my @ret;
   foreach my $arg (@args) {
-    my $r = $env->eval($arg);
+    my $r = $arg->eval($env);
     return $r unless $r->is_ok;
     push @ret, $r->val;
   }
