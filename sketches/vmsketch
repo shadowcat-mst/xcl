@@ -103,11 +103,66 @@ package XCL::V::Dict {
       unless $string->is('String');
     $self->get($self, $string->data);
   }
+  sub derive ($self, $merge = {}) {
+    bless(
+      { data => [ Dict($merge), $self ], metadata => {} },
+      'XCL::V::Dict::Layered'
+    );
+  }
+  sub has_key ($self, $key) {
+    $self->data->{$key} ? 1 : 0;
+  }
   sub keys ($self) {
     List([ map String($_), sort keys %{$self->data} ]);
   }
   sub values ($self) {
     List([ @{$self->data}{sort CORE::keys %{$self->data}} ]);
+  }
+}
+
+package XCL::V::Dict::Layered {
+  our @ISA = qw(XCL::V);
+  XCL::Values->import(qw(Result Val Err List));
+  sub is ($self, $thing) { return $thing eq 'Dict' }
+  sub get ($self, $key) {
+    foreach my $layer (@{$self->data}) {
+      next unless $layer->has_key($key);
+      return $layer->get($key);
+    }
+    Result({
+      err => 'NO_SUCH_VALUE',
+      set => $self->curry::weak::set($key),
+    });
+  }
+  sub set ($self, $key, $value) {
+    $self->data->[0]->set($key, $value);
+  }
+  sub invoke ($self, $string) {
+    return Err('NOT_A_STRING')
+      unless $string->is('String');
+    $self->get($self, $string->data);
+  }
+  sub derive ($self, $merge = {}) {
+    bless(
+      { data => [ Dict($merge), @{$self->data} ], metadata => {} },
+      'XCL::V::Dict::Layered'
+    );
+  }
+  sub has_key ($self, $key) {
+    foreach my $layer (@{$self->data}) {
+      return 1 if $layer->has_key($key);
+    }
+    return 0;
+  }
+  sub _keys ($self) {
+    my @k = map $_->keys, @{$self->data};
+    sort do { my %s; grep !$s{$_}++, @k };
+  }
+  sub keys ($self) {
+    List([ map String($_), @{$self->_keys} ]);
+  }
+  sub values ($self) {
+    List([ map $self->get($_), @{$self->_keys} ]);
   }
 }
 
@@ -170,6 +225,13 @@ package XCL::Builtins {
     my $valres = $env->eval($valproto);
     return $valres unless $valres->is_ok;
     return $place->set($valres->val);
+  }
+  sub let ($env, $name) {
+    return Err('NOT_A_NAME') unless $name->is('Name');
+    return Result({
+      err => 'LET_REQUIRES_SET',
+      set => $env->curry::weak::set($name->data),
+    });
   }
 }
 
