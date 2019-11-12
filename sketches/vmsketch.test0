@@ -1,10 +1,11 @@
-use Devel::DDCWarn;
+#use Devel::DDCWarn;
+use Devel::Dwarn;
 
 BEGIN { require './sketches/vmsketch' }
 
-use XCL::Values qw(Dict Call Int Native Bool);
+use XCL::Values qw(Dict Call Int Native Bool Name Environment);
 
-my $env = Dict({});
+my $env = Environment([ Dict {} ]);
 
 my $call = Call([ Native(\&XCL::Builtins::add), Int(3), Int(5) ]);
 
@@ -16,4 +17,17 @@ warn $call->eval($env)->val->string->val->data;
 
 $call = Call([ Native(\&XCL::Builtins::if), Bool(0), Int(7), Int(3) ]);
 
+warn $call->eval($env)->val->string->val->data;
+
+$call = Call([
+  Native(\&XCL::Builtins::progn),
+  Call([
+    Native(\&XCL::Builtins::set),
+    Call([ Native(\&XCL::Builtins::intro), Name('x') ]),
+    Int(4)
+  ]),
+  Call([ Native(\&XCL::Builtins::add), Int(13), Name('x') ]),
+]);
+
+#warn $call->eval($env)->err; # val->string->val->data;
 warn $call->eval($env)->val->string->val->data;

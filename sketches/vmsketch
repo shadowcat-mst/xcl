@@ -37,14 +37,11 @@ sub list ($env, @args) {
 BEGIN {
 
   our @Types = qw(
-    String Bytes
-    Float Int
-    Bool
-    Fexpr Dict List
-    Name
-    Call
+    String Bytes Float Int
+    Bool Fexpr Dict List Name Call
     Result
     Native
+    Environment
   );
 
   our @EXPORT = (@Types, qw(Val Err list));
@@ -105,12 +102,6 @@ package XCL::V::Dict {
       unless $string->is('String');
     $self->get($self, $string->data);
   }
-  sub derive ($self, $merge = {}) {
-    bless(
-      { data => [ Dict($merge), $self ], metadata => {} },
-      'XCL::V::Dict::Layered'
-    );
-  }
   sub has_key ($self, $key) {
     $self->data->{$key} ? 1 : 0;
   }
@@ -122,10 +113,8 @@ package XCL::V::Dict {
   }
 }
 
-package XCL::V::Dict::Layered {
-  use XCL::Values qw(Result Val Err List);
-  our @ISA = qw(XCL::V);
-  sub is ($self, $thing) { return $thing eq 'Dict' }
+package XCL::V::Environment {
+  use XCL::Values qw(Result Val Err List Dict);
   sub get ($self, $key) {
     foreach my $layer (@{$self->data}) {
       next unless $layer->has_key($key);
@@ -133,7 +122,6 @@ package XCL::V::Dict::Layered {
     }
     Result({
       err => 'NO_SUCH_VALUE',
-      set => $self->curry::weak::set($key),
     });
   }
   sub set ($self, $key, $value) {
@@ -147,7 +135,7 @@ package XCL::V::Dict::Layered {
   sub derive ($self, $merge = {}) {
     bless(
       { data => [ Dict($merge), @{$self->data} ], metadata => {} },
-      'XCL::V::Dict::Layered'
+      ref($self),
     );
   }
   sub has_key ($self, $key) {
@@ -222,16 +210,16 @@ package XCL::Builtins {
     return $res;
   }
   sub set ($env, $set, $valproto) {
-    my $place = $env->eval($set);
+    my $place = $set->eval($env);
     return Err('NOT_SETTABLE') unless $place->can_set;
-    my $valres = $env->eval($valproto);
+    my $valres = $valproto->eval($env);
     return $valres unless $valres->is_ok;
     return $place->set($valres->val);
   }
-  sub let ($env, $name) {
+  sub intro ($env, $name) {
     return Err('NOT_A_NAME') unless $name->is('Name');
     return Result({
-      err => 'LET_REQUIRES_SET',
+      err => 'INTRO_REQUIRES_SET',
       set => $env->curry::weak::set($name->data),
     });
   }
