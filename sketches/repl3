@@ -8,10 +8,22 @@ my $p = XCL::Parser->new;
 
 my $env = Environment([ Dict({ '+' => Native(\&XCL::Builtins::add) }) ]);
 
-my (undef, $ret) = $p->parse_statement(' + 2 3');
+my (undef, $ret) = $p->parse_statement(' + [ + 7 2 ] 3');
 
 use Devel::DDCWarn;
 
 ::Dwarn($ret);
 
-::Dwarn $ret->eval($env);
+::Dwarn my $r = $ret->eval($env);
+
+if (my $v = $r->val) {
+  warn $v->string->val->data;
+}
+
+(undef, $ret) = $p->parse_statement('(1, + 2 3, 4)');
+
+::Dwarn($ret);
+
+(undef, $ret) = $p->parse_statement('foreach x list { spoon x; frob; }');
+
+::Dwarn($ret);
