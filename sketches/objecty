@@ -1,0 +1,38 @@
+
+letf ^ (env, value) {
+  let hat = metadata(value)('^');
+  return f (name) {
+    f (@args) { hat(name)(value, @args) }
+  }
+}
+
+let mkobj (thing, code) {
+  f (name, @args) {
+    let c = ?: is_Function(name) name code(name);
+    c(thing, @args)
+  }
+}
+
+let . (name) {
+  let n = symbol2string name;
+  f (thing, @args) { thing(n)(@args) }
+}
+
+let hash = mkobj(...);
+
+say hash.get('foo');
+
+let x = hash(\[ f (h) { say h } ]);
+
+obj.[$ foo]
+
+foo.bar(1, 2, 3)
+   .baz("blah");
+
+obj(func) -> func(obj.data)
+
+let admins = grep .where(:admin true), users;
+
+let admins = users.where(:admin true);
+
+
