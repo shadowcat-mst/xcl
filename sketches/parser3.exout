@@ -1,0 +1,71 @@
+'+ 3.0 [ bar foo4x!] quux(1, 3) '
+[
+  'block', {}, [
+    [ [ 'symbol', {}, '+' ], [ 'float', { ws_before => ' ' }, '3.0' ] ], [
+      'call', { ws_before => ' ' }, [
+        [ 'word', { ws_before => ' ' }, 'bar' ], [
+          'compound', { ws_before => ' ' },
+          [ [ 'word', {}, 'foo4x' ], [ 'symbol', {}, '!' ] ],
+        ],
+      ],
+    ],
+    [ 'word', { ws_before => ' ' }, 'quux' ], [
+      'list', {},
+      [ [ [ 'int', {}, 1 ] ], [ [ 'int', { ws_before => ' ' }, 3 ] ] ],
+    ],
+  ],
+]
+"\n  foreach w (grep .is_webserver servers) {\n    ping w;\n    say w;\n  }\n"
+[
+  'block', {}, [
+    [
+      [ 'word', { ws_before => "\n  " }, 'foreach' ],
+      [ 'word', { ws_before => ' ' }, 'w' ],
+    ], [
+      'list', { ws_before => ' ' }, [ [
+          [ 'word', {}, 'grep' ], [
+            'compound', { ws_before => ' ' },
+            [ [ 'symbol', {}, '.' ], [ 'word', {}, 'is_webserver' ] ],
+          ],
+          [ 'word', { ws_before => ' ' }, 'servers' ],
+      ] ],
+    ], [
+      'block', { ws_after => "\n  ", ws_before => ' ' }, [
+        [
+          [ 'word', { ws_before => "\n    " }, 'ping' ],
+          [ 'word', { ws_before => ' ' }, 'w' ],
+        ], [
+          [ 'word', { ws_before => "\n    " }, 'say' ],
+          [ 'word', { ws_before => ' ' }, 'w' ],
+        ], [],
+      ],
+    ], [],
+  ],
+]
+[
+  'block', {}, [
+    [ [ 'word', {}, 'foo' ] ], [
+      'list', { ws_before => ' ' },
+      [ [ [ 'int', {}, 1 ] ], [ [ 'int', { ws_before => ' ' }, 2 ] ] ],
+    ],
+    [ 'string', { ws_before => ' ' }, 'baz' ],
+  ],
+]
+[
+  'block', {}, [
+    [
+      [ 'word', { ws_before => "\n  " }, 'if' ],
+      [ 'word', { ws_before => ' ' }, 'x' ],
+    ], [
+      'block', { ws_after => "\n  ", ws_before => ' ' },
+      [ [ [ 'word', { ws_before => "\n    " }, 'thing' ] ], [] ],
+    ],
+    [ 'word', { ws_before => ' ' }, 'else' ], [
+      'block', { ws_after => "\n  ", ws_before => ' ' },
+      [ [ [ 'word', { ws_before => "\n    " }, 'other_thing' ] ] ],
+    ], [
+      [ 'word', { ws_before => "\n  " }, 'say' ],
+      [ 'string', { ws_before => ' ' }, 'wooo' ],
+    ],
+  ],
+]
