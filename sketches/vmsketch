@@ -355,7 +355,7 @@ sub XCL::Builtins::string ($env, @args) {
 
 package XCL::Builtins {
   BEGIN {
-    my %ops = (
+    our %ops = (
       gt => '>', ge => '>=', lt => '<', le => '<=',
       eq => '==', ne => '!=',
     );
@@ -374,6 +374,23 @@ package XCL::Builtins {
       } 1' or die "Compilation failed for ${key}: $@";
     }
   }
+}
+
+our $Builtins = Dict({
+  map +($_ => Native(XCL::Builtins->can($_))),
+    grep /^[a-z]/,
+    grep XCL::Builtins->can($_),
+    keys %XCL::Builtins::
+});
+
+{
+  my $builtins = $Builtins->data;
+  my %ops = (
+    %XCL::Builtins::ops,
+    add => '+', multiply => '*', subtract => '-', divide => '/'
+  );
+  $builtins->{$ops{$_}} = $builtins->{$_}
+    for keys %ops;
 }
 
 1;
