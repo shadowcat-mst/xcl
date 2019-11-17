@@ -1,0 +1,135 @@
+package XCL::Parser;
+
+use strictures 2;
+use experimental qw(signatures state say);
+
+BEGIN { require './sketches/vmsketch' }
+
+use XCL::Values qw(Name String Int Float Call);
+
+our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\^_|~';
+
+our $IS_ATOM = qr{^(?:word|symbol|number|int|float|compound|list|call|block)$};
+
+our @TOKEN_TYPES = (do {
+  my @s = (
+    [ ws => '\s' => '(\s+)' ],
+    [ word => '[a-zA-Z]' => '(\w+)' ],
+    [ number => '[0-9]', "([0-9]+(?:\\.[0-9]+)?)" ],
+    [ symbol => "[\Q${SYMBOL_CHARS}\E]", "([\Q${SYMBOL_CHARS}\E]+)" ],
+    [ string => "'", q{'((?:[^'\\\\]+|\\\\.)*)'} ],
+    [ comma => ',' ],
+    [ semicolon => ';' ],
+    [ call => "\\[" ],
+    [ leave_call => "\\]" ],
+    [ list => "\\(" ],
+    [ leave_list => "\\)" ],
+    [ block => "\\{" ],
+    [ leave_block => "\\}" ],
+  );
+  $s[$_][2] ||= '('.$s[$_][1].')' for 0..$#s;
+  @s;
+});
+
+sub new { bless({}, ref($_[0])||$_[0]) }
+
+sub extract_next ($self, $src) {
+  foreach my $type (@TOKEN_TYPES) {
+    my ($name, $identify, $slurp) = @$type;
+    if ($src =~ /\A${identify}/sm) {
+      $src =~ s/\A${slurp}//sm or die "WHAT";
+      return ($name => $1, $src);
+    }
+  }
+  die "no idea wtf happened here, blame mst";
+}
+
+sub parse_statement_list ($self, $src, $end = undef) {
+  my @list;
+  my @stmt;
+  while ($src) {
+    (my ($type, $tok), $src) = $self->extract_next($src);
+    if ($type eq 'semicolon') {
+      push @list, Call([ @stmt ]);
+      @stmt = ();
+    } elsif ($end and $type eq $end) {
+      last;
+    } else {
+      push @stmt, $self->${\"_inflate_${type}"}($tok, $src);
+    }
+  }
+  push @list, Call([ @stmt ]) if @stmt;
+  return ($src, \@list);
+}
+
+sub parse_expr_list ($self, $src) {
+  my @list;
+  my @expr;
+  while ($src) {
+    (my ($type, $tok), $src) = $self->extract_next($src);
+    if ($type eq 'comma') {
+      push @list, @expr == 1 ? $expr[0] : Call([ @expr ]);
+      @expr = ();
+    } elsif ($type eq 'leave_list') {
+      last;
+    } else {
+      push @expr, $self->${\"_inflate_${type}"}($tok, $src);
+    }
+  }
+  if (@expr) {
+    push @list, @expr == 1 ? $expr[0] : Call([ @expr ]);
+  }
+  return ($src, \@list);
+}
+
+sub parse_statement ($self, $src, $end = undef) {
+  my @stmt;
+  while ($src) {
+    (my ($type, $tok), $src) = $self->extract_next($src);
+    if ($end and $type eq $end) {
+      last;
+    } else {
+      push @stmt, $self->${\"_inflate_${type}"}($tok, $src);
+    }
+  }
+  return ($src, Call([ @stmt ]));
+}
+
+sub _inflate_ws { () }
+sub _inflate_word { Name($_[1]) }
+sub _inflate_symbol { Name($_[1]) }
+sub _inflate_number ($, $v, $) { $v =~ /\./ ? Float($v) : Int($v) }
+sub _inflate_string { String($_[1]) }
+sub _inflate_comma { die "Comma only valid within ()" }
+sub _inflate_semicolon { die "Semicolon only valid within {}" }
+
+sub _inflate_list ($self, $, $src) {
+  ($_[2], my $ret) = $self->parse_expr_list($src);
+  return Call([ Name('list'), @$ret ]);
+}
+
+sub _inflate_call ($self, $, $src) {
+  ($_[2], my $ret) = $self->parse_statement($src, 'leave_call');
+  return $ret;
+}
+
+sub _inflate_block ($self, $, $src) {
+  ($_[2], my $ret) = $self->parse_statement_list($src, 'leave_block');
+  return Call([ Name('block'), @$ret ]);
+}
+
+package main;
+
+use Devel::DDCWarn;
+
+my $p = XCL::Parser->new;
+
+foreach my $str (
+  '+ 3 4',
+  'foo (1, 2)',
+  'bar {
+    fleem 73
+   }'
+) {
+  ::Dwarn($p->parse_statement_list(::Dwarn $str));
+}
