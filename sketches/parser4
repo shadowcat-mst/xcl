@@ -118,6 +118,10 @@ sub _inflate_block ($self, $, $src) {
   return Call([ Name('block'), @$ret ]);
 }
 
+1;
+
+__END__
+
 package main;
 
 use Devel::DDCWarn;

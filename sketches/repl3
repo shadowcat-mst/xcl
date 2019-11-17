@@ -1,0 +1,17 @@
+use strictures 2;
+BEGIN {
+  require './sketches/vmsketch';
+  require './sketches/parser4';
+}
+use XCL::Values qw(Native Environment Dict);
+my $p = XCL::Parser->new;
+
+my $env = Environment([ Dict({ '+' => Native(\&XCL::Builtins::add) }) ]);
+
+my (undef, $ret) = $p->parse_statement(' + 2 3');
+
+use Devel::DDCWarn;
+
+::Dwarn($ret);
+
+::Dwarn $ret->eval($env);
