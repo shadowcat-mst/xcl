@@ -115,7 +115,7 @@ sub _inflate_call ($self, $, $src) {
 
 sub _inflate_block ($self, $, $src) {
   ($_[2], my $ret) = $self->parse_statement_list($src, 'leave_block');
-  return Call([ Name('block'), @$ret ]);
+  return Call([ Name('progn'), @$ret ]);
 }
 
 1;

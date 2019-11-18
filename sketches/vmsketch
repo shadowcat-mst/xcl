@@ -223,6 +223,9 @@ package XCL::Builtins {
       set => $env->curry::weak::set($name->data),
     });
   }
+  sub id ($env, $thing) {
+    $thing->eval($env);
+  }
 }
 
 package XCL::Builtins {
@@ -387,7 +390,8 @@ our $Builtins = Dict({
   my $builtins = $Builtins->data;
   my %ops = (
     %XCL::Builtins::ops,
-    add => '+', multiply => '*', subtract => '-', divide => '/'
+    add => '+', multiply => '*', subtract => '-', divide => '/',
+    id => '$',
   );
   $builtins->{$ops{$_}} = $builtins->{$_}
     for keys %ops;
