@@ -162,7 +162,7 @@ package XCL::V::List {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
     Result({
-     ($#$ary <= $idx
+     ($idx <= $#$ary
        ? (val => $ary->[$idx])
        : (err => 'NO_SUCH_VALUE')),
      (set => $self->curry::weak::set($idx)),
