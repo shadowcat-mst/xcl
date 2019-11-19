@@ -212,6 +212,12 @@ package XCL::Builtins {
     }
     return $res;
   }
+  sub evaluate {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($thisenv, $thing) = @{$res->val->data};
+    $thing->eval($thisenv);
+  }
   sub set ($env, $set, $valproto) {
     my $place = $set->eval($env);
     return Err([ NOT_SETTABLE => 'FIXME' ]) unless $place->can_set;
@@ -228,6 +234,15 @@ package XCL::Builtins {
   }
   sub id ($env, $thing) {
     $thing->eval($env);
+  }
+  sub fexpr ($venv, $argspec, $block) {
+    my (undef, @argspec) = @{$argspec->data};
+    my @argnames = map $_->data, @argspec;
+    Val(Native(sub ($env, @args) {
+      my %merge; @merge{@argnames} = ($env, @args);
+      my $this_env = $venv->derive(\%merge);
+      $block->eval($this_env);
+    }));
   }
 }
 
