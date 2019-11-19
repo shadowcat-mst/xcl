@@ -47,7 +47,7 @@ sub extract_next ($self, $src) {
 sub parse_statement_list ($self, $src, $end = undef) {
   my @list;
   my @stmt;
-  while ($src) {
+  while (length $src) {
     (my ($type, $tok), $src) = $self->extract_next($src);
     if ($type eq 'semicolon') {
       push @list, Call([ @stmt ]);
@@ -65,7 +65,7 @@ sub parse_statement_list ($self, $src, $end = undef) {
 sub parse_expr_list ($self, $src) {
   my @list;
   my @expr;
-  while ($src) {
+  while (length $src) {
     (my ($type, $tok), $src) = $self->extract_next($src);
     if ($type eq 'comma') {
       push @list, @expr == 1 ? $expr[0] : Call([ @expr ]);
@@ -84,7 +84,7 @@ sub parse_expr_list ($self, $src) {
 
 sub parse_statement ($self, $src, $end = undef) {
   my @stmt;
-  while ($src) {
+  while (length $src) {
     (my ($type, $tok), $src) = $self->extract_next($src);
     if ($end and $type eq $end) {
       last;
