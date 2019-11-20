@@ -71,7 +71,7 @@ sub XCL::V::Escape::eval ($self, $env) { Val($self->data) }
 sub XCL::V::Call::eval ($self, $env) {
   my ($command, @args) = @{$self->data};
   if ((my $res = $command->eval($env))->is_ok) {
-    return $res->val->invoke($env, @args);
+    return $res->val->invoke($env->snapshot, @args);
   } else {
     return $res;
   }
@@ -140,6 +140,10 @@ package XCL::V::Environment {
       { data => [ Dict($merge), @{$self->data} ], metadata => {} },
       ref($self),
     );
+  }
+  sub snapshot ($self) {
+    my @data = map Dict({ %$_ }), map $_->data, @{$self->data};
+    bless({ data => \@data }, ref($self);
   }
   sub has_key ($self, $key) {
     foreach my $layer (@{$self->data}) {
