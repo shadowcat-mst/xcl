@@ -80,8 +80,8 @@ sub XCL::V::Call::eval ($self, $env) {
 sub XCL::V::Name::eval ($self, $env) { $env->get($self->data) }
 
 sub XCL::V::Fexpr::invoke ($self, @args) {
-  my ($argspec, $env, $body) = @{$self->data}{qw(argspec env body)};
-  my %merge; @merge{@$argspec} = @args;
+  my ($argnames, $env, $body) = @{$self->data}{qw(argnames env body)};
+  my %merge; @merge{@$argnames} = @args;
   $body->eval($env->derive(\%merge));
 }
 
@@ -203,7 +203,7 @@ package XCL::V::Result {
 sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  use XCL::Values qw(Result Val Err List Int Float Native list);
+  use XCL::Values qw(Result Val Err List Int Float Native Fexpr list);
   sub progn ($env, @args) {
     my $res;
     foreach my $arg (@args) {
@@ -235,14 +235,10 @@ package XCL::Builtins {
   sub id ($env, $thing) {
     $thing->eval($env);
   }
-  sub fexpr ($venv, $argspec, $block) {
+  sub fexpr ($env, $argspec, $block) {
     my (undef, @argspec) = @{$argspec->data};
     my @argnames = map $_->data, @argspec;
-    Val(Native(sub ($env, @args) {
-      my %merge; @merge{@argnames} = ($env, @args);
-      my $this_env = $venv->derive(\%merge);
-      $block->eval($this_env);
-    }));
+    Val(Fexpr({ argnames => \@argnames, env => $env, body => $block }));
   }
 }
 
