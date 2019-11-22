@@ -9,13 +9,13 @@ use XCL::Values qw(Native Environment Dict);
 
 my $p = XCL::Parser->new;
 
-my $env = Environment([ Dict({}), $XCL::Values::Builtins ]);
+my $env = $XCL::Values::Builtins->snapshot;
 
 my $l = Caroline->new;
 
 while (my $line = $l->readline('> ')) {
   if (my $res = eval { $p->parse_statement($line) }) {
-    unless (eval { ::Dwarn($res->eval($env)) }) {
+    unless (eval { ::Dwarn($res->eval($env)); 1 }) {
       warn "Error executing ${line}: $@\n";
     }
   } else {

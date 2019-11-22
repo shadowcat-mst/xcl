@@ -42,7 +42,7 @@ BEGIN {
   our @Types = qw(
     String Bytes Float Int
     Bool Fexpr Dict List Name Call
-    Result
+    Result Var
     Native
     Environment
   );
@@ -71,7 +71,7 @@ sub XCL::V::Escape::eval ($self, $env) { Val($self->data) }
 sub XCL::V::Call::eval ($self, $env) {
   my ($command, @args) = @{$self->data};
   if ((my $res = $command->eval($env))->is_ok) {
-    return $res->val->invoke($env->snapshot, @args);
+    return $res->val->invoke($env, @args);
   } else {
     return $res;
   }
@@ -81,7 +81,7 @@ sub XCL::V::Name::eval ($self, $env) { $env->get($self->data) }
 
 sub XCL::V::Fexpr::invoke ($self, @args) {
   my ($argnames, $env, $body) = @{$self->data}{qw(argnames env body)};
-  my %merge; @merge{@$argnames} = @args;
+  my %merge; @merge{@$argnames} = map Val($_), @args;
   $body->eval($env->derive(\%merge));
 }
 
@@ -116,50 +116,40 @@ package XCL::V::Dict {
   }
 }
 
+sub XCL::V::Var::set_data ($self, $val) {
+  $self->{data} = $val;
+}
+
+sub XCL::V::Var::invoke ($self, $env = undef) {
+  my $set_data = $self->curry::weak::set_data;
+  Result({
+    val => $self->data,
+    set => $set_data,
+  });
+}
+
 package XCL::V::Environment {
-  use XCL::Values qw(Result Val Err List Dict);
+  use XCL::Values qw(Result Val Err List Dict Var Environment);
   sub get ($self, $key) {
-    foreach my $layer (@{$self->data}) {
-      next unless $layer->has_key($key);
-      return $layer->get($key);
-    }
-    Result({
-      err => [ NO_SUCH_VALUE => $key ],
-    });
+    my $res = $self->data->get($key);
+    return Err($res->err) unless $res->is_ok;
+    my $val = $res->val;
+    return $val if $val->is('Result');
+    return $val->invoke;
   }
   sub set ($self, $key, $value) {
-    $self->data->[0]->set($key, $value);
+    $self->data->data->{$key} = $value;
   }
-  sub invoke ($self, $, $string, @) {
+  sub invoke ($self, $env, $string, @) {
     return Err([ NOT_A_STRING => $string->type ])
       unless $string->is('String');
-    $self->get($self, $string->data);
+    return $self->get($string->data);
   }
-  sub derive ($self, $merge = {}) {
-    bless(
-      { data => [ Dict($merge), @{$self->data} ], metadata => {} },
-      ref($self),
-    );
+  sub derive ($self, $merge) {
+    Environment(Dict({ %{$self->data->data}, %$merge }));
   }
   sub snapshot ($self) {
-    my @data = map Dict({ %$_ }), map $_->data, @{$self->data};
-    bless({ data => \@data }, ref($self);
-  }
-  sub has_key ($self, $key) {
-    foreach my $layer (@{$self->data}) {
-      return 1 if $layer->has_key($key);
-    }
-    return 0;
-  }
-  sub _keys ($self) {
-    my @k = map $_->keys, @{$self->data};
-    sort do { my %s; grep !$s{$_}++, @k };
-  }
-  sub keys ($self) {
-    map String($_), @{$self->_keys};
-  }
-  sub values ($self) {
-    map $self->get($_), @{$self->_keys};
+    Environment(Dict({ %{$self->data->data} }));
   }
 }
 
@@ -207,7 +197,7 @@ package XCL::V::Result {
 sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  use XCL::Values qw(Result Val Err List Int Float Native Fexpr list);
+  use XCL::Values qw(Result Val Var Err List Int Float Native Fexpr list);
   sub progn ($env, @args) {
     my $res;
     foreach my $arg (@args) {
@@ -229,11 +219,12 @@ package XCL::Builtins {
     return $valres unless $valres->is_ok;
     return $place->set($valres->val);
   }
-  sub intro ($env, $name) {
+  sub var ($env, $name) {
     return Err([ NOT_A_NAME => $name->type ]) unless $name->is('Name');
+    my $_set = $env->curry::weak::set($name->data);
     return Result({
       err => [ INTRO_REQUIRES_SET => $name->data ],
-      set => $env->curry::weak::set($name->data),
+      set => sub { $_set->(Var($_[0])) },
     });
   }
   sub id ($env, $thing) {
@@ -242,7 +233,14 @@ package XCL::Builtins {
   sub fexpr ($env, $argspec, $block) {
     my (undef, @argspec) = @{$argspec->data};
     my @argnames = map $_->data, @argspec;
-    Val(Fexpr({ argnames => \@argnames, env => $env, body => $block }));
+    Val(Fexpr({
+      argnames => \@argnames,
+      env => $env->snapshot,
+      body => $block
+    }));
+  }
+  sub current_env ($env) {
+    Val($env);
   }
 }
 
@@ -315,7 +313,9 @@ sub XCL::V::Bool::bool ($self) { Val($self) }
 
 sub XCL::V::List::bool ($self) { Val(Bool(@{$self->data} ? 1 : 0)) }
 
-sub XCL::V::Dict::bool ($self) { Val(Bool(keys %{$self->data} ? 1 : 0)) }
+sub XCL::V::Dict::bool ($self) {
+  Val(Bool(CORE::keys(%{$self->data}) ? 1 : 0))
+}
 
 sub XCL::V::String::bool ($self) { Val(Bool(length($self->data) ? 1 : 0)) }
 
@@ -402,22 +402,22 @@ package XCL::Builtins {
   }
 }
 
-our $Builtins = Dict({
-  map +($_ => Native(XCL::Builtins->can($_))),
+our $Builtins = Environment(Dict {
+  map +($_ => Var(Native(XCL::Builtins->can($_)))),
     grep /^[a-z]/,
     grep XCL::Builtins->can($_),
-    keys %XCL::Builtins::
+    CORE::keys %XCL::Builtins::
 });
 
 {
-  my $builtins = $Builtins->data;
+  my $builtins = $Builtins->data->data;
   my %ops = (
     %XCL::Builtins::ops,
     add => '+', multiply => '*', subtract => '-', divide => '/',
     id => '$',
   );
   $builtins->{$ops{$_}} = $builtins->{$_}
-    for keys %ops;
+    for CORE::keys %ops;
 }
 
 1;
