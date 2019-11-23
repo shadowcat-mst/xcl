@@ -5,7 +5,7 @@ use experimental 'signatures';
 
 BEGIN { require './sketches/vmsketch' }
 
-use XCL::Values qw(Name String Int Float Call);
+use XCL::Values qw(Name String Int Float Call List);
 
 our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\^_|~';
 
@@ -50,7 +50,7 @@ sub parse_statement_list ($self, $src, $end = undef) {
   while (length $src) {
     (my ($type, $tok), $src) = $self->extract_next($src);
     if ($type eq 'semicolon') {
-      push @list, Call([ @stmt ]);
+      push @list, Call(List([ @stmt ]));
       @stmt = ();
     } elsif ($end and $type eq $end) {
       last;
@@ -58,7 +58,7 @@ sub parse_statement_list ($self, $src, $end = undef) {
       push @stmt, $self->${\"_inflate_${type}"}($tok, $src);
     }
   }
-  push @list, Call([ @stmt ]) if @stmt;
+  push @list, Call(List([ @stmt ])) if @stmt;
   return ($src, \@list);
 }
 
@@ -68,7 +68,7 @@ sub parse_expr_list ($self, $src) {
   while (length $src) {
     (my ($type, $tok), $src) = $self->extract_next($src);
     if ($type eq 'comma') {
-      push @list, @expr == 1 ? $expr[0] : Call([ @expr ]);
+      push @list, @expr == 1 ? $expr[0] : Call(List([ @expr ]));
       @expr = ();
     } elsif ($type eq 'leave_list') {
       last;
@@ -77,7 +77,7 @@ sub parse_expr_list ($self, $src) {
     }
   }
   if (@expr) {
-    push @list, @expr == 1 ? $expr[0] : Call([ @expr ]);
+    push @list, @expr == 1 ? $expr[0] : Call(List([ @expr ]));
   }
   return ($src, \@list);
 }
@@ -92,7 +92,7 @@ sub parse_statement ($self, $src, $end = undef) {
       push @stmt, $self->${\"_inflate_${type}"}($tok, $src);
     }
   }
-  return ($src, Call([ @stmt ]));
+  return ($src, Call(List([ @stmt ])));
 }
 
 sub _inflate_ws { () }
@@ -105,7 +105,7 @@ sub _inflate_semicolon { die "Semicolon only valid within {}" }
 
 sub _inflate_list ($self, $, $src) {
   ($_[2], my $ret) = $self->parse_expr_list($src);
-  return Call([ Name('list'), @$ret ]);
+  return Call(List([ Name('list'), @$ret ]));
 }
 
 sub _inflate_call ($self, $, $src) {
@@ -115,7 +115,7 @@ sub _inflate_call ($self, $, $src) {
 
 sub _inflate_block ($self, $, $src) {
   ($_[2], my $ret) = $self->parse_statement_list($src, 'leave_block');
-  return Call([ Name('progn'), @$ret ]);
+  return Call(List([ Name('progn'), @$ret ]));
 }
 
 1;

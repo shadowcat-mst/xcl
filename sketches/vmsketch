@@ -69,7 +69,7 @@ sub Err ($err, $metadata = {}) { Result({ err => $err }, $metadata) }
 sub XCL::V::Escape::eval ($self, $env) { Val($self->data) }
 
 sub XCL::V::Call::eval ($self, $env) {
-  my ($command, @args) = @{$self->data};
+  my ($command, @args) = @{$self->data->data};
   if ((my $res = $command->eval($env))->is_ok) {
     return $res->val->invoke($env, @args);
   } else {
@@ -231,7 +231,7 @@ package XCL::Builtins {
     $thing->eval($env);
   }
   sub fexpr ($env, $argspec, $block) {
-    my (undef, @argspec) = @{$argspec->data};
+    my (undef, @argspec) = @{$argspec->data->data};
     my @argnames = map $_->data, @argspec;
     Val(Fexpr({
       argnames => \@argnames,
