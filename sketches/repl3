@@ -1,6 +1,7 @@
 use Caroline;
 use Devel::DDCWarn;
 use strictures 2;
+STDOUT->autoflush(1);
 BEGIN {
   require './sketches/vmsketch';
   require './sketches/parser4';
@@ -15,7 +16,7 @@ my $l = Caroline->new;
 
 while (my $line = $l->readline('> ')) {
   if (my $res = eval { $p->parse_statement($line) }) {
-    unless (eval { ::Dwarn($res->eval($env)); 1 }) {
+    unless (eval { print $res->eval($env)->display(3)."\n"; 1 }) {
       warn "Error executing ${line}: $@\n";
     }
   } else {

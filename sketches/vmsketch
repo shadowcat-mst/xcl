@@ -12,19 +12,20 @@ use experimental 'signatures';
 # call, block
 
 package XCL::V {
-  XCL::Values->import(qw(Val Err));
+  XCL::Values->import(qw(Val Err Name String));
   sub eval ($self, $env) { Val($self) }
   sub data ($self) { $self->{data} }
   sub metadata ($self) { $self->{metadata} }
-  sub invoke ($self, @) { Err([ CANT_INVOKE => $self->type ]) }
+  sub invoke ($self, @) { Err([ Name('CANT_INVOKE') => String($self->type) ]) }
   sub is ($self, $type) {
     $self->isa("XCL::V::${type}");
   }
   sub type ($self) {
     (split '::', ref($self))[-1];
   }
-  sub bool ($self) { Err([ CANT_BOOLEAN => $self->type ]) }
-  sub string ($self) { Err([ CANT_STRINGIFY => $self->type ]) }
+  sub display ($self, @) { $self->type.'()' }
+  sub bool ($self) { Err([ Name('CANT_BOOLEAN') => String($self->type) ]) }
+  sub string ($self) { Err([ Name('CANT_STRINGIFY') => String($self->type) ]) }
 }
 
 sub list ($env, @args) {
@@ -64,7 +65,9 @@ BEGIN {
 }
 
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
-sub Err ($err, $metadata = {}) { Result({ err => $err }, $metadata) }
+sub Err ($err, $metadata = {}) {
+  Result({ err => Call(List($err)) }, $metadata);
+}
 
 sub XCL::V::Escape::eval ($self, $env) { Val($self->data) }
 
@@ -77,7 +80,19 @@ sub XCL::V::Call::eval ($self, $env) {
   }
 }
 
+sub XCL::V::Call::display ($self, $depth) {
+  return $self->SUPER::display(0) unless $depth;
+  my $in_depth = $depth - 1;
+  my @res;
+  foreach my $val ($self->data->values) {
+    push @res, $val->display($in_depth);
+  }
+  return '[ '.join(' ', @res).' ]';
+}
+
 sub XCL::V::Name::eval ($self, $env) { $env->get($self->data) }
+
+sub XCL::V::Name::display ($self, @) { $self->data }
 
 sub XCL::V::Fexpr::invoke ($self, @args) {
   my ($argnames, $env, $body) = @{$self->data}{qw(argnames env body)};
@@ -85,8 +100,12 @@ sub XCL::V::Fexpr::invoke ($self, @args) {
   $body->eval($env->derive(\%merge));
 }
 
+sub XCL::V::Fexpr::display ($self, @) {
+  return 'fexpr ('.join(', ', @{$self->data->{argnames}}).') { ... }';
+}
+
 package XCL::V::Dict {
-  use XCL::Values qw(Result Val Err List Dict);
+  use XCL::Values qw(Result Val Err List Dict String);
   sub get ($self, $key) {
     my $dict = $self->data;
     Result({
@@ -101,7 +120,7 @@ package XCL::V::Dict {
     return Val($self->data->{$key} = $value);
   }
   sub invoke ($self, $, $string, @) {
-    return Err([ NOT_A_STRING => $string->type ])
+    return Err([ Name('NOT_A_STRING') => String($string->type) ])
       unless $string->is('String');
     $self->get($self, $string->data);
   }
@@ -113,6 +132,19 @@ package XCL::V::Dict {
   }
   sub values ($self) {
     @{$self->data}{sort CORE::keys %{$self->data}};
+  }
+  sub display ($self, $depth) {
+    return $self->SUPER::display(0) unless $depth;
+    my $in_depth = $depth - 1;
+    my @res;
+    foreach my $key ($self->keys) {
+      push @res, '('
+        .$key->display($in_depth)
+        .', '
+        .$self->data->{$key->data}->display($in_depth)
+        .')';
+    }
+    return '%('.join(', ', @res).')';
   }
 }
 
@@ -128,6 +160,10 @@ sub XCL::V::Var::invoke ($self, $env = undef) {
   });
 }
 
+sub XCL::V::Var::display ($self, $depth) {
+  'Var('.$self->data->display($depth).')'
+}
+
 package XCL::V::Environment {
   use XCL::Values qw(Result Val Err List Dict Var Environment);
   sub get ($self, $key) {
@@ -141,7 +177,7 @@ package XCL::V::Environment {
     $self->data->data->{$key} = $value;
   }
   sub invoke ($self, $env, $string, @) {
-    return Err([ NOT_A_STRING => $string->type ])
+    return Err([ Name('NOT_A_STRING') => String($string->type) ])
       unless $string->is('String');
     return $self->get($string->data);
   }
@@ -150,6 +186,9 @@ package XCL::V::Environment {
   }
   sub snapshot ($self) {
     Environment(Dict({ %{$self->data->data} }));
+  }
+  sub display ($self, $depth) {
+    'Environment('.$self->data->display($depth).')'
   }
 }
 
@@ -168,11 +207,12 @@ package XCL::V::List {
   sub set ($self, $idx, $value) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
-    return Err([ NO_SUCH_INDEX => $idx ]) if $idx > @$ary;
+    return Err([ Name('NO_SUCH_INDEX') => Int($idx) ]) if $idx > @$ary;
     return Val($ary->[$idx] = $value);
   }
   sub invoke ($self, $, $idx, @) {
-    return Err([ NOT_AN_INT => $idx->type ]) unless $idx->is('Int');
+    return Err([ Name('NOT_AN_INT') => String($idx->type) ])
+      unless $idx->is('Int');
     $self->get($idx->data);
   }
   sub keys ($self) {
@@ -181,6 +221,15 @@ package XCL::V::List {
   }
   sub values ($self) {
     return @{$self->data};
+  }
+  sub display ($self, $depth) {
+    return $self->SUPER::display(0) unless $depth;
+    my $in_depth = $depth - 1;
+    my @res;
+    foreach my $val ($self->values) {
+      push @res, $val->display($in_depth);
+    }
+    return '('.join(', ', @res).')';
   }
 }
 
@@ -192,12 +241,20 @@ package XCL::V::Result {
   sub set ($self, $value) {
     $self->data->{set}->($value);
   }
+  sub display ($self, $depth) {
+    if ($self->is_ok) {
+      return 'Val('.$self->val->display($depth).')';
+    }
+    return 'Err('.$self->err->display($depth).')';
+  }
 }
 
 sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  use XCL::Values qw(Result Val Var Err List Int Float Native Fexpr list);
+  use XCL::Values qw(
+    Result Val Var Err List Int Float Name String Native Fexpr list
+  );
   sub progn ($env, @args) {
     my $res;
     foreach my $arg (@args) {
@@ -214,16 +271,18 @@ package XCL::Builtins {
   }
   sub set ($env, $set, $valproto) {
     my $place = $set->eval($env);
-    return Err([ NOT_SETTABLE => 'FIXME' ]) unless $place->can_set;
+    return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
+      unless $place->can_set;
     my $valres = $valproto->eval($env);
     return $valres unless $valres->is_ok;
     return $place->set($valres->val);
   }
   sub var ($env, $name) {
-    return Err([ NOT_A_NAME => $name->type ]) unless $name->is('Name');
+    return Err([ Name('NOT_A_NAME') => String($name->type) ])
+      unless $name->is('Name');
     my $_set = $env->curry::weak::set($name->data);
     return Result({
-      err => [ INTRO_REQUIRES_SET => $name->data ],
+      err => [ Name('INTRO_REQUIRES_SET') => String($name->data) ],
       set => sub { $_set->(Var($_[0])) },
     });
   }
@@ -242,6 +301,22 @@ package XCL::Builtins {
   sub current_env ($env) {
     Val($env);
   }
+  sub is {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my ($thisval, $thing) = @{$res->val->data};
+    return Err([ Name('NOT_A_STRING') => String($thing->type) ])
+      unless $thing->is('String');
+    return Bool($thisval->is($thing->data) ? 1 : 0);
+  }
+  sub call_list ($env, $call) {
+    my $res = $call->eval($env);
+    return $res unless $res->is_ok;
+    my $data = $res->val->data;
+    return Err([ Name('CALL_SHOULD_CONTAIN_LIST') => $data ])
+      unless $data->is('List');
+    return Val($data);
+  }
 }
 
 package XCL::Builtins {
@@ -251,12 +326,13 @@ package XCL::Builtins {
     return $res unless $res->is_ok;
     my ($first, @rest) = $res->val->values;
     my $type = ref($first);
-    return Err([ TYPES_MUST_MATCH => map $_->type, ($first, @rest) ])
-      if grep ref($_) ne $type, @rest;
+    return Err([
+      Name('TYPES_MUST_MATCH') => map String($_->type), ($first, @rest)
+    ]) if grep ref($_) ne $type, @rest;
     my $acc = $first->data;
     foreach my $val (map $_->data, @rest) {
       if ($type =~ /Int$/ and $MAX_SAFE_INT - $acc < $val) {
-        return Err('INT_OVERFLOW');
+        return Err([ Name('INT_OVERFLOW') ]);
       }
       $acc += $val;
     }
@@ -271,7 +347,7 @@ package XCL::Builtins {
     my $acc = $first->data;
     foreach my $val (map $_->data, @rest) {
       if ($type =~ /Int$/ and $MAX_SAFE_INT / $acc > $val) {
-        return Err('INT_OVERFLOW');
+        return Err([ Name('INT_OVERFLOW') ]);
       }
       $acc *= $val;
     }
@@ -295,7 +371,7 @@ package XCL::Builtins {
     my $res = list(@_);
     return $res unless $res->is_ok;
     my ($v) = $res->val->values;
-    return Err([ BAD_TYPE => $v->type ])
+    return Err([ Name('BAD_TYPE') => String($v->type) ])
       unless $v->is('Int') or $v->is('Float');
     return Val(Int(int($v->data)));
   }
@@ -303,7 +379,7 @@ package XCL::Builtins {
     my $res = list(@_);
     return $res unless $res->is_ok;
     my ($v) = $res->val->values;
-    return Err([ BAD_TYPE => $v->type ])
+    return Err([ Name('BAD_TYPE') => String($v->type) ])
       unless $v->is('Int') or $v->is('Float');
     return Val(Float($v->data));
   }
@@ -333,7 +409,7 @@ sub XCL::Builtins::if ($env, $cond, $true, $false = undef) {
     return defined($false) ? $ret : Val($ret);
   }
   return $false->eval($denv) if defined($false);
-  return Val(Err([ NO_SUCH_VALUE => 'else' ]));
+  return Val(Err([ Name('NO_SUCH_VALUE') => String('else') ]));
 }
 
 sub XCL::Builtins::while ($env, $cond, $body) {
@@ -357,12 +433,24 @@ sub XCL::Builtins::while ($env, $cond, $body) {
 }
 
 sub XCL::V::String::string ($self) { Val($self) }
+sub XCL::V::String::display ($self, @) { q{'}.$self->data.q{'} }
 
-sub XCL::V::Int::string ($self) { Val(String(''.$self->data)) }
-sub XCL::V::Float::string ($self) { Val(String(''.$self->data)) }
+sub XCL::V::Int::string ($self) { Val(String($self->display)) }
+sub XCL::V::Int::display ($self, @) { ''.$self->data }
+
+sub XCL::V::Float::string ($self) { Val(String($self->display)) }
+sub XCL::V::Float::display ($self, @) {
+  my $str = ''.$self->data;
+  if ($str =~ /^-?[0-9]+$/) { return "${str}.0" }
+  return $str;
+}
 
 sub XCL::V::Bool::string ($self) {
-  Val(String($self->data ? 'true' : 'false'))
+  Val(String($self->display))
+}
+
+sub XCL::V::Bool::display ($self, @) {
+ $self->data ? 'true' : 'false'
 }
 
 sub XCL::Builtins::string ($env, @args) {
@@ -390,12 +478,14 @@ package XCL::Builtins {
         return $res unless $res->is_ok;
         my ($l, $r) = $res->val->values;
         if ($l->is("Int") or $l->is("Float")) {
-          return Err([ VALUE_TYPE => $r->type ])
+          return Err([ Name("VALUE_TYPE") => String($r->type) ])
             unless $r->is("Int") or $r->is("Float");
           return Val(Bool(($l->data '.$numop.' $r->data) ? 1 : 0));
         }
-        return Err([ VALUE_TYPE => $l->type ]) unless $l->is("String");
-        return Err([ VALUE_TYPE => $r->type ]) unless $r->is("String");
+        return Err([ Name("VALUE_TYPE") => String($l->type) ])
+          unless $l->is("String");
+        return Err([ Name("VALUE_TYPE") => String($r->type) ])
+          unless $r->is("String");
         return Val(Bool(($l->data '.$key.' $r->data)));
       } 1' or die "Compilation failed for ${key}: $@";
     }
