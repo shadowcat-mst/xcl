@@ -105,7 +105,7 @@ sub XCL::V::Fexpr::display ($self, @) {
 }
 
 package XCL::V::Dict {
-  use XCL::Values qw(Result Val Err List Dict String);
+  use XCL::Values qw(Result Val Err List Dict String Name);
   sub get ($self, $key) {
     my $dict = $self->data;
     Result({
@@ -122,7 +122,7 @@ package XCL::V::Dict {
   sub invoke ($self, $, $string, @) {
     return Err([ Name('NOT_A_STRING') => String($string->type) ])
       unless $string->is('String');
-    $self->get($self, $string->data);
+    $self->get($string->data);
   }
   sub has_key ($self, $key) {
     $self->data->{$key} ? 1 : 0;
@@ -149,7 +149,7 @@ package XCL::V::Dict {
 }
 
 sub XCL::V::Var::set_data ($self, $val) {
-  $self->{data} = $val;
+  Val($self->{data} = $val);
 }
 
 sub XCL::V::Var::invoke ($self, $env = undef) {
@@ -174,7 +174,7 @@ package XCL::V::Environment {
     return $val->invoke;
   }
   sub set ($self, $key, $value) {
-    $self->data->data->{$key} = $value;
+    Val($self->data->data->{$key} = $value);
   }
   sub invoke ($self, $env, $string, @) {
     return Err([ Name('NOT_A_STRING') => String($string->type) ])
@@ -253,7 +253,7 @@ sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
   use XCL::Values qw(
-    Result Val Var Err List Int Float Name String Native Fexpr list
+    Result Val Var Err List Dict Int Float Name String Native Fexpr list
   );
   sub progn ($env, @args) {
     my $res;
@@ -316,6 +316,17 @@ package XCL::Builtins {
     return Err([ Name('CALL_SHOULD_CONTAIN_LIST') => $data ])
       unless $data->is('List');
     return Val($data);
+  }
+  sub dict ($env, @args) {
+    my $res = list(@_);
+    return $res unless $res->is_ok;
+    my @pairs = $res->val->values;
+    return Err([ Name('NOT_PAIRS'), String('FIXME') ])
+      if grep !($_->is('List') and @{$_->data} == 2), @pairs;
+    return Val(Dict({
+      map +($_->data->[0]->string->val->data, $_->data->[1]),
+        @pairs
+    }));
   }
 }
 
@@ -504,7 +515,7 @@ our $Builtins = Environment(Dict {
   my %ops = (
     %XCL::Builtins::ops,
     add => '+', multiply => '*', subtract => '-', divide => '/',
-    id => '$',
+    id => '$', dict => '%',
   );
   $builtins->{$ops{$_}} = $builtins->{$_}
     for CORE::keys %ops;
