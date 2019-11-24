@@ -15,8 +15,12 @@ my $env = $XCL::Values::Builtins->snapshot;
 my $l = Caroline->new;
 
 while (my $line = $l->readline('> ')) {
-  if (my $res = eval { $p->parse_statement($line) }) {
-    unless (eval { print $res->eval($env)->display(3)."\n"; 1 }) {
+  if (my $top = eval { $p->parse_statement($line) }) {
+    unless (eval {
+      my $res = $top->eval($env);
+      print +($res->is_ok ? $res->val : $res)->display(3)."\n";
+      1;
+    }) {
       warn "Error executing ${line}: $@\n";
     }
   } else {
