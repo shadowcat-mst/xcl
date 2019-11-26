@@ -107,6 +107,9 @@ sub parse_statement ($self, $src, $end = '') {
       push @stmt, $this;
     }
   }
+  if (@stmt == 1 and $stmt[0]->is('Compound')) {
+    return ($src, $stmt[0]);
+  }
   return ($src, Call(List([ @stmt ])));
 }
 
