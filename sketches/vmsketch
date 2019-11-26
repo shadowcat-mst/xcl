@@ -46,6 +46,7 @@ BEGIN {
     Result Var
     Native
     Environment
+    Compound
   );
 
   our @EXPORT = (@Types, qw(Val Err list));
@@ -102,6 +103,20 @@ sub XCL::V::Fexpr::invoke ($self, @args) {
 
 sub XCL::V::Fexpr::display ($self, @) {
   return 'fexpr ('.join(', ', @{$self->data->{argnames}}).') { ... }';
+}
+
+sub XCL::V::Compound::eval ($self, $env) {
+  my ($val, @rest) = @{$self->data};
+  my $res = $val->eval($env);
+  while (my $v = shift @rest) {
+    my @v = $v;
+    if ($v->is('Call') and $v->data->data->[0]->data eq 'list') {
+      @v = @{$v->data->data}[1..$#{$v->data->data}];
+    }
+    $res = $res->val->invoke($env, @v);
+    return $res unless $res->is_ok;
+  }
+  return $res;
 }
 
 package XCL::V::Dict {

@@ -5,7 +5,7 @@ use experimental 'signatures';
 
 BEGIN { require './sketches/vmsketch' }
 
-use XCL::Values qw(Name String Int Float Call List);
+use XCL::Values qw(Name String Int Float Call List Compound);
 
 our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\^_|~';
 
@@ -81,23 +81,26 @@ sub parse_expr_list ($self, $src) {
   return ($src, \@list);
 }
 
-sub parse_statement ($self, $src, $end = undef) {
+sub parse_statement ($self, $src, $end = '') {
   my @stmt;
   while ((my ($type, $tok), $src) = $self->extract_next($src)) {
-    if ($end and $type eq $end) {
+    if ($type eq $end) {
       last;
     } elsif ($type eq 'ws') {
       # nothing
     } else {
       my $this = $self->${\"_inflate_${type}"}($tok, $src);
-      my $next = my ($ntype, $ntok, $nsrc) = $self->extract_next($src);
+      my $next = my ($ntype, $ntok) = $self->extract_next($src);
       if ($next and not $ntype eq 'ws') {
-        my @parts = $this;
-        while ((my ($ntype, $ntok), $nsrc) = $self->extract_next($nsrc)) {
-          last if $ntype eq 'ws';
-          push @parts, $self->${\"_inflate_${type}"}($ntok, $nsrc);
+        if ($ntype eq $end) {
+          push @stmt, $this;
+          last;
         }
-        $src = $nsrc;
+        my @parts = $this;
+        while ((my ($ntype, $ntok), $src) = $self->extract_next($src)) {
+          last if $ntype eq 'ws' or $ntype =~ /^leave/;;
+          push @parts, $self->${\"_inflate_${ntype}"}($ntok, $src);
+        }
         $this = Compound(\@parts);
       }
       # should explode if unexpected , or ; but handling that later
