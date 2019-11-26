@@ -34,6 +34,7 @@ our @TOKEN_TYPES = (do {
 sub new { bless({}, ref($_[0])||$_[0]) }
 
 sub extract_next ($self, $src) {
+  return () unless defined($src) and length($src);
   foreach my $type (@TOKEN_TYPES) {
     my ($name, $identify, $slurp) = @$type;
     if ($src =~ /\A${identify}/sm) {
@@ -47,8 +48,7 @@ sub extract_next ($self, $src) {
 sub parse_statement_list ($self, $src, $end = undef) {
   my @list;
   my @stmt;
-  while (length $src) {
-    (my ($type, $tok), $src) = $self->extract_next($src);
+  while ((my ($type, $tok), $src) = $self->extract_next($src)) {
     if ($type eq 'semicolon') {
       push @list, Call(List([ @stmt ]));
       @stmt = ();
@@ -65,8 +65,7 @@ sub parse_statement_list ($self, $src, $end = undef) {
 sub parse_expr_list ($self, $src) {
   my @list;
   my @expr;
-  while (length $src) {
-    (my ($type, $tok), $src) = $self->extract_next($src);
+  while ((my ($type, $tok), $src) = $self->extract_next($src)) {
     if ($type eq 'comma') {
       push @list, @expr == 1 ? $expr[0] : Call(List([ @expr ]));
       @expr = ();
@@ -84,12 +83,25 @@ sub parse_expr_list ($self, $src) {
 
 sub parse_statement ($self, $src, $end = undef) {
   my @stmt;
-  while (length $src) {
-    (my ($type, $tok), $src) = $self->extract_next($src);
+  while ((my ($type, $tok), $src) = $self->extract_next($src)) {
     if ($end and $type eq $end) {
       last;
+    } elsif ($type eq 'ws') {
+      # nothing
     } else {
-      push @stmt, $self->${\"_inflate_${type}"}($tok, $src);
+      my $this = $self->${\"_inflate_${type}"}($tok, $src);
+      my $next = my ($ntype, $ntok, $nsrc) = $self->extract_next($src);
+      if ($next and not $ntype eq 'ws') {
+        my @parts = $this;
+        while ((my ($ntype, $ntok), $nsrc) = $self->extract_next($nsrc)) {
+          last if $ntype eq 'ws';
+          push @parts, $self->${\"_inflate_${type}"}($ntok, $nsrc);
+        }
+        $src = $nsrc;
+        $this = Compound(\@parts);
+      }
+      # should explode if unexpected , or ; but handling that later
+      push @stmt, $this;
     }
   }
   return ($src, Call(List([ @stmt ])));
