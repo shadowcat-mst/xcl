@@ -1,0 +1,98 @@
+# lambda, keys_of, (values_of?), count_of, make_call, symbol_to_string
+
+set [var newvar] [ fexpr (env, name, value) {
+  newvar c make_call (set, make_call (var, name), value);
+  evaluate env c;
+} ]
+
+newvar : [fexpr (env, key) {
+  newvar str symbol_to_string(key);
+  lambda (val) { $ (str, val) }
+}]
+
+newvar push [lambda (lst, v) { set lst(count_of lst) v }]
+
+newvar foreach [fexpr (env, name, lproto, body) {
+  newvar lst [evaluate env lproto];
+  newvar end [count_of lst];
+  newvar cur 0;
+  newvar res ();
+  while (< cur end) {
+    newvar denv [ derive_env env %((name, lst(cur))) ];
+    push res [ evaluate denv [ make_call (body) ] ];
+    set cur [+ cur 1];
+  }
+  $res;
+}]
+
+newvar range [lambda (min, max) {
+  newvar cur min;
+  newvar end max;
+  newvar res ();
+  while (<= cur end) {
+    push res cur;
+    set cur [+ cur 1];
+  }
+  $res;
+}];
+
+newvar map [fexpr (env, call, lproto) {
+  evaluate env [make_call [list foreach _ lproto call]];
+}
+  
+newvar weave_dict [lambda (dict) {
+  newvar ret %();
+  foreach k keys_of(dict) {
+    set ret(k) weave(dict k)
+  }
+  $ret
+}]
+
+newvar weave_list [lambda (lst) [
+  newvar ret ();
+  foreach v lst {
+    push ret weave(v)
+  }
+  $ret
+}]
+
+newvar weave_call [lambda (call) {
+  newvar op_idx 0;
+  newvar op_prec 0;
+  newvar lst call_list(call);
+  foreach idx keys_of(lst) {
+    if idx {
+      if has_key(ops, lst(idx)) {
+        newvar this_op lst(idx);
+        newvar this_prec ops(this_op);
+        if [< this_prec op_prec] {
+          set op_idx idx;
+          set op_prec this_prec;
+        }
+      }
+    }
+  }
+  if op_idx {
+    newvar ret ();
+    newvar op lst(op_idx);
+    newvar left [map { lst _ } [range 0 [- op_idx 1 ]]];
+    newvar right [map { lst _ } range(+ op_idx 1, - count_of(lst) 1);
+    make_call (op, weave_call(make_call left)), weave_call(make_call right)));
+  } {
+    # no binop found
+    make_call weave_list(lst);
+  }
+}]
+
+newvar weaver_for %(
+  :Int $,
+  :Float $,
+  :String $,
+  :List weave_list,
+  :Dict weave_dict,
+  :Call weave_call,
+);
+
+newvar weave [fexpr (env, args) {
+  weaver_for(type_of args) args;
+}]
