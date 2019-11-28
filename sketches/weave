@@ -1,4 +1,4 @@
-# lambda, keys_of, (values_of?), count_of, make_call, symbol_to_string
+# lambda, keys_of, pairs_of, (values_of?), count_of, make_call, symbol_to_string
 
 set [var newvar] [ fexpr (env, name, value) {
   newvar c make_call (set, make_call (var, name), value);
@@ -41,19 +41,11 @@ newvar map [fexpr (env, call, lproto) {
 }
   
 newvar weave_dict [lambda (dict) {
-  newvar ret %();
-  foreach k keys_of(dict) {
-    set ret(k) weave(dict k)
-  }
-  $ret
+  %(map { $ (_.0, weave _.1) } pairs_of(dict));
 }]
 
 newvar weave_list [lambda (lst) [
-  newvar ret ();
-  foreach v lst {
-    push ret weave(v)
-  }
-  $ret
+  map { weave _ } lst;
 }]
 
 newvar weave_call [lambda (call) {
