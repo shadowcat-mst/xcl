@@ -1,16 +1,16 @@
-# lambda, keys_of, pairs_of, (values_of?), count_of, make_call, symbol_to_string
+# keys_of, pairs_of, (values_of?), count_of, make_call, symbol_to_string
 
-set [var newvar] [ fexpr (env, name, value) {
+set [var newvar] [fexpr (env, name, value) {
   newvar c make_call (set, make_call (var, name), value);
   evaluate env c;
-} ]
+}];
 
 newvar : [fexpr (env, key) {
   newvar str symbol_to_string(key);
   lambda (val) { $ (str, val) }
-}]
+}];
 
-newvar push [lambda (lst, v) { set lst(count_of lst) v }]
+newvar push [lambda (lst, v) { set lst(count_of lst) v }];
 
 newvar foreach [fexpr (env, name, lproto, body) {
   newvar lst [evaluate env lproto];
@@ -23,7 +23,7 @@ newvar foreach [fexpr (env, name, lproto, body) {
     set cur [+ cur 1];
   }
   $res;
-}]
+}];
 
 newvar range [lambda (min, max) {
   newvar cur min;
@@ -38,15 +38,15 @@ newvar range [lambda (min, max) {
 
 newvar map [fexpr (env, call, lproto) {
   evaluate env [make_call [list foreach _ lproto call]];
-}
+}];
   
 newvar weave_dict [lambda (dict) {
   %(map { $ (_.0, weave _.1) } pairs_of(dict));
-}]
+}];
 
 newvar weave_list [lambda (lst) [
   map { weave _ } lst;
-}]
+}];
 
 newvar weave_call [lambda (call) {
   newvar op_idx 0;
@@ -74,7 +74,7 @@ newvar weave_call [lambda (call) {
     # no binop found
     make_call weave_list(lst);
   }
-}]
+}];
 
 newvar weaver_for %(
   :Int $,
@@ -87,4 +87,4 @@ newvar weaver_for %(
 
 newvar weave [fexpr (env, args) {
   weaver_for(type_of args) args;
-}]
+}];
