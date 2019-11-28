@@ -16,7 +16,9 @@ package XCL::V {
   sub eval ($self, $env) { Val($self) }
   sub data ($self) { $self->{data} }
   sub metadata ($self) { $self->{metadata} }
-  sub invoke ($self, @) { Err([ Name('CANT_INVOKE') => String($self->type) ]) }
+  sub invoke ($self, @) {
+    Err([ Name('CANT_INVOKE') => String($self->display) ])
+  }
   sub is ($self, $type) {
     $self->isa("XCL::V::${type}");
   }
@@ -46,7 +48,7 @@ BEGIN {
     Result Var
     Native
     Environment
-    Compound
+    Compound Lambda
   );
 
   our @EXPORT = (@Types, qw(Val Err list));
@@ -103,6 +105,18 @@ sub XCL::V::Fexpr::invoke ($self, @args) {
 
 sub XCL::V::Fexpr::display ($self, @) {
   return 'fexpr ('.join(', ', @{$self->data->{argnames}}).') { ... }';
+}
+
+sub XCL::V::Lambda::invoke ($self, $outer_env, @args) {
+  my ($argnames, $env, $body) = @{$self->data}{qw(argnames env body)};
+  my $argvalres = list($outer_env, @args);
+  return $argvalres unless $argvalres->is_ok;
+  my %merge; @merge{@$argnames} = map Val($_), $argvalres->val->values;
+  $body->eval($env->derive(\%merge));
+}
+
+sub XCL::V::Lambda::display ($self, @) {
+  return 'lambda ('.join(', ', @{$self->data->{argnames}}).') { ... }';
 }
 
 sub XCL::V::Compound::eval ($self, $env) {
@@ -268,7 +282,7 @@ sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
   use XCL::Values qw(
-    Result Val Var Err List Dict Int Float Name String Native Fexpr list
+    Result Val Var Err List Dict Int Float Name String Native Fexpr Lambda list
   );
   sub progn ($env, @args) {
     my $res;
@@ -308,6 +322,15 @@ package XCL::Builtins {
     my (undef, @argspec) = @{$argspec->data->data};
     my @argnames = map $_->data, @argspec;
     Val(Fexpr({
+      argnames => \@argnames,
+      env => $env->snapshot,
+      body => $block
+    }));
+  }
+  sub lambda ($env, $argspec, $block) {
+    my (undef, @argspec) = @{$argspec->data->data};
+    my @argnames = map $_->data, @argspec;
+    Val(Lambda({
       argnames => \@argnames,
       env => $env->snapshot,
       body => $block
