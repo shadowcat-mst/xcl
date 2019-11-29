@@ -541,11 +541,15 @@ package XCL::Builtins {
   }
 }
 
-our $Builtins = Environment(Dict {
-  map +($_ => Var(Native(XCL::Builtins->can($_)))),
+my $expand_ns = sub ($pkg, $ns) {
+  map +($_ => Var(Native($pkg->can($_)))),
     grep /^[a-z]/,
-    grep XCL::Builtins->can($_),
-    CORE::keys %XCL::Builtins::
+    grep $pkg->can($_),
+    CORE::keys %$ns;
+};
+
+our $Builtins = Environment(Dict {
+  $expand_ns->('XCL::Builtins', \%XCL::Builtins::),
 });
 
 {
