@@ -1,4 +1,4 @@
-# pairs_of, (values_of?), count_of, symbol_to_string
+# pairs_of, count_of, symbol_to_string
 
 set [var make] [lambda (type, data) { [type 'make'] data }];
 

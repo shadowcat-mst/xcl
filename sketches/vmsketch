@@ -140,7 +140,7 @@ package XCL::V::Dict {
     Result({
       ($dict->{$key}
         ? (val => $dict->{$key})
-        : (err => [ NO_SUCH_VALUE => $key ])
+        : (err => List([ Name('NO_SUCH_VALUE') => $key ]))
       ),
       set => $self->curry::weak::set($key),
     });
@@ -157,7 +157,7 @@ package XCL::V::Dict {
     $self->data->{$key} ? 1 : 0;
   }
   sub keys ($self) {
-    map String($_), sort keys %{$self->data};
+    map String($_), sort CORE::keys %{$self->data};
   }
   sub values ($self) {
     @{$self->data}{sort CORE::keys %{$self->data}};
@@ -222,14 +222,14 @@ package XCL::V::Environment {
 }
 
 package XCL::V::List {
-  use XCL::Values qw(Result Val Err List);
+  use XCL::Values qw(Result Val Err List Int);
   sub get ($self, $idx) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
     Result({
      ($idx <= $#$ary
        ? (val => $ary->[$idx])
-       : (err => [ NO_SUCH_VALUE => $idx ])),
+       : (err => List([ Name('NO_SUCH_VALUE') => Int($idx) ]))),
      (set => $self->curry::weak::set($idx)),
     });
   }
@@ -311,7 +311,7 @@ package XCL::Builtins {
       unless $name->is('Name');
     my $_set = $env->curry::weak::set($name->data);
     return Result({
-      err => [ Name('INTRO_REQUIRES_SET') => String($name->data) ],
+      err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
       set => sub { $_set->(Var($_[0])) },
     });
   }
@@ -346,14 +346,6 @@ package XCL::Builtins {
     return Err([ Name('NOT_A_STRING') => String($thing->type) ])
       unless $thing->is('String');
     return Bool($thisval->is($thing->data) ? 1 : 0);
-  }
-  sub call_list ($env, $call) {
-    my $res = $call->eval($env);
-    return $res unless $res->is_ok;
-    my $data = $res->val->data;
-    return Err([ Name('CALL_SHOULD_CONTAIN_LIST') => $data ])
-      unless $data->is('List');
-    return Val($data);
   }
   sub dict ($env, @args) {
     my $res = list(@_);
@@ -541,6 +533,33 @@ package XCL::Builtins {
   }
 }
 
+package XCL::Builtins::Call {
+  use XCL::Values qw(Call Val);
+  sub make ($env, $lst) {
+    my $proto = $lst->eval($env);
+    return $proto unless $proto->is_ok;
+    return Val(Call($proto->val));
+  }
+  sub list ($env, $call) {
+    my $res = $call->eval($env);
+    return $res unless $res->is_ok;
+    my $data = $res->val->data;
+    return Err([ Name('CALL_SHOULD_CONTAIN_LIST') => $data ])
+      unless $data->is('List');
+    return Val($data);
+  }
+}
+
+package XCL::Builtins::List {
+  use XCL::Values qw(Int list);
+  sub make { list(@_) }
+  sub count_of ($env, $lst) {
+    my $proto = $lst->eval($env);
+    return $proto unless $proto->is_ok;
+    return Int(scalar @{$proto->val->data});
+  }
+}
+
 my $expand_ns = sub ($pkg, $ns) {
   map +($_ => Var(Native($pkg->can($_)))),
     grep /^[a-z]/,
@@ -550,6 +569,12 @@ my $expand_ns = sub ($pkg, $ns) {
 
 our $Builtins = Environment(Dict {
   $expand_ns->('XCL::Builtins', \%XCL::Builtins::),
+  Call => Val(Environment(
+    Dict(+{ $expand_ns->('XCL::Builtins::Call', \%XCL::Builtins::Call::) })
+  )),
+  List => Val(Environment(
+    Dict(+{ $expand_ns->('XCL::Builtins::List', \%XCL::Builtins::List::) })
+  )),
 });
 
 {
