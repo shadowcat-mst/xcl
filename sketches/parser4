@@ -7,7 +7,7 @@ BEGIN { require './sketches/vmsketch' }
 
 use XCL::Values qw(Name String Int Float Call List Compound);
 
-our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\^_|~';
+our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\\^_|~';
 
 our $IS_ATOM = qr{^(?:word|symbol|number|int|float|compound|list|call|block)$};
 

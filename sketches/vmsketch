@@ -122,6 +122,7 @@ sub XCL::V::Lambda::display ($self, @) {
 sub XCL::V::Compound::eval ($self, $env) {
   my ($val, @rest) = @{$self->data};
   my $res = $val->eval($env);
+  return $res unless $res->is_ok;
   while (my $v = shift @rest) {
     my @v = $v;
     if ($v->is('Call') and $v->data->data->[0]->data eq 'list') {
@@ -134,13 +135,13 @@ sub XCL::V::Compound::eval ($self, $env) {
 }
 
 package XCL::V::Dict {
-  use XCL::Values qw(Result Val Err List Dict String Name);
+  use XCL::Values;
   sub get ($self, $key) {
     my $dict = $self->data;
     Result({
       ($dict->{$key}
         ? (val => $dict->{$key})
-        : (err => List([ Name('NO_SUCH_VALUE') => $key ]))
+        : (err => List([ Name('NO_SUCH_VALUE') => String($key) ]))
       ),
       set => $self->curry::weak::set($key),
     });
@@ -161,6 +162,10 @@ package XCL::V::Dict {
   }
   sub values ($self) {
     @{$self->data}{sort CORE::keys %{$self->data}};
+  }
+  sub pairs ($self) {
+    my $d = $self->data;
+    return List([ map List([ String($_), $d->{$_} ]), sort CORE::keys %$d ]);
   }
   sub display ($self, $depth) {
     return $self->SUPER::display(0) unless $depth;
@@ -194,10 +199,10 @@ sub XCL::V::Var::display ($self, $depth) {
 }
 
 package XCL::V::Environment {
-  use XCL::Values qw(Result Val Err List Dict Var Environment);
+  use XCL::Values;
   sub get ($self, $key) {
     my $res = $self->data->get($key);
-    return Err($res->err) unless $res->is_ok;
+    return $res unless $res->is_ok;
     my $val = $res->val;
     return $val if $val->is('Result');
     return $val->invoke;
@@ -222,7 +227,7 @@ package XCL::V::Environment {
 }
 
 package XCL::V::List {
-  use XCL::Values qw(Result Val Err List Int);
+  use XCL::Values;
   sub get ($self, $idx) {
     die "NOT YET" if $idx < 0;
     my $ary = $self->data;
@@ -281,9 +286,7 @@ package XCL::V::Result {
 sub XCL::V::Native::invoke ($self, @args) { $self->data->(@args) }
 
 package XCL::Builtins {
-  use XCL::Values qw(
-    Result Val Var Err List Dict Int Float Name String Native Fexpr Lambda list
-  );
+  use XCL::Values;
   sub progn ($env, @args) {
     my $res;
     foreach my $arg (@args) {
@@ -534,12 +537,13 @@ package XCL::Builtins {
 }
 
 package XCL::Builtins::Call {
-  use XCL::Values qw(Call Val);
+  use XCL::Values;
   sub make ($env, $lst) {
     my $proto = $lst->eval($env);
     return $proto unless $proto->is_ok;
     return Val(Call($proto->val));
   }
+  no warnings 'redefine';
   sub list ($env, $call) {
     my $res = $call->eval($env);
     return $res unless $res->is_ok;
@@ -551,12 +555,19 @@ package XCL::Builtins::Call {
 }
 
 package XCL::Builtins::List {
-  use XCL::Values qw(Int list);
+  use XCL::Values;
   sub make { list(@_) }
   sub count_of ($env, $lst) {
     my $proto = $lst->eval($env);
     return $proto unless $proto->is_ok;
-    return Int(scalar @{$proto->val->data});
+    return Val(Int(scalar @{$proto->val->data}));
+  }
+}
+
+package XCL::Builtins::Name {
+  use XCL::Values;
+  sub to_string ($env, $name) {
+    Val(String($name->data));
   }
 }
 
@@ -574,6 +585,9 @@ our $Builtins = Environment(Dict {
   )),
   List => Val(Environment(
     Dict(+{ $expand_ns->('XCL::Builtins::List', \%XCL::Builtins::List::) })
+  )),
+  Name => Val(Environment(
+    Dict(+{ $expand_ns->('XCL::Builtins::Name', \%XCL::Builtins::Name::) })
   )),
 });
 
