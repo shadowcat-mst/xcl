@@ -1,5 +1,3 @@
-# pairs_of, count_of, symbol_to_string
-
 set [var make] [lambda (type, data) { [type 'make'] data }];
 
 set [var newvar] [fexpr (env, name, value) {
@@ -42,7 +40,7 @@ newvar map [fexpr (env, call, lproto) {
 }];
   
 newvar weave_dict [lambda (dict) {
-  %(map { $ (_.0, weave _.1) } pairs_of(dict));
+  %(map { $ (_.0, weave _.1) } [Dict 'pairs_of'](dict));
 }];
 
 newvar weave_list [lambda (lst) [
