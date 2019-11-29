@@ -1,35 +1,36 @@
-# keys_of, pairs_of, (values_of?), count_of, make_call, symbol_to_string
+# pairs_of, (values_of?), count_of, symbol_to_string
+
+set [var make] [lambda (type, data) { [type 'make'] data }];
 
 set [var newvar] [fexpr (env, name, value) {
-  newvar c make_call (set, make_call (var, name), value);
+  newvar c [make Call (set, make Call (var, name), value)];
   evaluate env c;
 }];
 
 newvar : [fexpr (env, key) {
-  newvar str symbol_to_string(key);
+  newvar str [Name 'to_string'](key);
   lambda (val) { $ (str, val) }
 }];
 
-newvar push [lambda (lst, v) { set lst(count_of lst) v }];
+newvar push [lambda (lst, v) { set lst([List 'count_of'] lst) v }];
 
 newvar foreach [fexpr (env, name, lproto, body) {
   newvar lst [evaluate env lproto];
-  newvar end [count_of lst];
+  newvar end [[List 'count_of'] lst];
   newvar cur 0;
   newvar res ();
   while (< cur end) {
     newvar denv [ derive_env env %((name, lst(cur))) ];
-    push res [ evaluate denv [ make_call (body) ] ];
+    push res [ evaluate denv [ make Call (body) ] ];
     set cur [+ cur 1];
   }
   $res;
 }];
 
-newvar range [lambda (min, max) {
-  newvar cur min;
-  newvar end max;
+newvar range [lambda (from, to) {
+  newvar cur from;
   newvar res ();
-  while (<= cur end) {
+  while (<= cur to) {
     push res cur;
     set cur [+ cur 1];
   }
@@ -37,7 +38,7 @@ newvar range [lambda (min, max) {
 }];
 
 newvar map [fexpr (env, call, lproto) {
-  evaluate env [make_call [list foreach _ lproto call]];
+  evaluate env [make Call [make List foreach _ lproto call]];
 }];
   
 newvar weave_dict [lambda (dict) {
@@ -51,10 +52,10 @@ newvar weave_list [lambda (lst) [
 newvar weave_call [lambda (call) {
   newvar op_idx 0;
   newvar op_prec 0;
-  newvar lst call_list(call);
-  foreach idx keys_of(lst) {
+  newvar lst [Call 'list'](call);
+  foreach idx range(0, - count_of(lst) 1) {
     if idx {
-      if has_key(ops, lst(idx)) {
+      if [Dict 'has'](ops, lst(idx)) {
         newvar this_op lst(idx);
         newvar this_prec ops(this_op);
         if [< this_prec op_prec] {
@@ -69,10 +70,13 @@ newvar weave_call [lambda (call) {
     newvar op lst(op_idx);
     newvar left [map { lst _ } [range 0 [- op_idx 1 ]]];
     newvar right [map { lst _ } range(+ op_idx 1, - count_of(lst) 1);
-    make_call (op, weave_call(make_call left)), weave_call(make_call right)));
+    make Call (op,
+      weave_call(make Call left),
+      weave_call(make Call right)
+    );
   } {
     # no binop found
-    make_call weave_list(lst);
+    make Call weave_list(lst);
   }
 }];
 
