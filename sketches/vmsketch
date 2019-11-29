@@ -309,6 +309,15 @@ package XCL::Builtins {
     return $valres unless $valres->is_ok;
     return $place->set($valres->val);
   }
+  sub val ($env, $name) {
+    return Err([ Name('NOT_A_NAME') => String($name->type) ])
+      unless $name->is('Name');
+    my $_set = $env->curry::weak::set($name->data);
+    return Result({
+      err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
+      set => sub { $_set->(Val($_[0])) },
+    });
+  }
   sub var ($env, $name) {
     return Err([ Name('NOT_A_NAME') => String($name->type) ])
       unless $name->is('Name');
