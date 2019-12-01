@@ -1,0 +1,46 @@
+sherlock$ perl sketches/repl3
+> + 1 3
+4
+> set [var x] [fexpr (env, y) { evaluate env y }]
+Var(fexpr (env, y) { ... })
+> $ x
+fexpr (env, y) { ... }
+> x 3
+3
+> set [var y] 'foo'
+Var('foo')
+> x y
+'foo'
+
+sherlock$ perl sketches/repl3
+> set [var curry_add] [fexpr (env, x) { fexpr (env, val) { + x val } }]
+Var(fexpr (env, x) { ... })
+> curry_add(3) 4
+7
+> curry_add(3)
+fexpr (env, val) { ... }
+> set [var add3] [curry_add 3]
+Var(fexpr (env, val) { ... })
+> add3 4
+7
+
+sherlock$ perl sketches/repl3
+> set [var quote] [fexpr (env, x) { $ x }]
+Var(fexpr (env, x) { ... })
+> set [var c] [quote [ 1 2 3 ]]
+Var([ 1 2 3 ])
+> [ Call 'list' ] c
+(1, 2, 3)
+
+sherlock$ perl sketches/repl3
+> set [var \] [fexpr (env, x) { $ x }]
+Var(fexpr (env, x) { ... })
+> [Call 'list'] \[4 5 6]
+(4, 5, 6)
+> Call('make') (+, 1, 3)
+[ Native() 1 3 ]
+> evaluate [current_env] [Call('make') (+, 1, 3)]
+4
+> evaluate [current_env] \[+ 1 3]
+4
+
