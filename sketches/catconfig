@@ -1,0 +1,10 @@
+let db_host = 'mydb.company.com';
+let db_user = 'myapp';
+
+model DB {
+  connect_info {
+    user $db_user;
+    host $db_host;
+    pass env.MYAPP_DB_PASSWORD;
+  }
+}
