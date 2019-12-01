@@ -1,0 +1,19 @@
+
+{
+  let x = 3;
+  let add_x (n) { + n x };
+  let x = 7;
+  say add_x(3);
+  say x;
+}
+
+(let (x 3)
+  (let (add_x (f (n) (+ n x)))
+    (let (x 7)
+      (progn
+        (say (add_x 3))
+        (say x)
+      )
+    )
+  )
+)
