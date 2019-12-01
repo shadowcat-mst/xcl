@@ -546,13 +546,12 @@ package XCL::Builtins {
 }
 
 package XCL::Builtins::Call {
-  use XCL::Values;
+  use XCL::Values qw(Val Call);
   sub make ($env, $lst) {
     my $proto = $lst->eval($env);
     return $proto unless $proto->is_ok;
     return Val(Call($proto->val));
   }
-  no warnings 'redefine';
   sub list ($env, $call) {
     my $res = $call->eval($env);
     return $res unless $res->is_ok;
@@ -570,6 +569,19 @@ package XCL::Builtins::List {
     my $proto = $lst->eval($env);
     return $proto unless $proto->is_ok;
     return Val(Int(scalar @{$proto->val->data}));
+  }
+  sub map ($env, $lproto, $sym, $call) {
+    my $lst_res = $lproto->eval($env);
+    return $lst_res unless $lst_res->is_ok;
+    my $name = $sym->data;
+    my @val;
+    foreach my $el ($lst_res->val->values) {
+      my $denv = $env->derive($name => $el);
+      my $res = $call->eval($denv);
+      return $res unless $res->is_ok;
+      push @val, $res->val;
+    }
+    return Val(List(\@val));
   }
 }
 
