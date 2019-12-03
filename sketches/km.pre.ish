@@ -1,0 +1,31 @@
+
+let keymangle (file, livekeys, deadkeys) {
+  let dk = %(deadkeys.map(_ : 1));
+  let lk = %(livekeys.map(_ : 1));
+  let keylines = copy let orig = fs.file(file).content.lines;
+  foreach l in keylines {
+    delete l if dk.$l;
+    delete lk.$l;
+  }
+  push keylines @{keys k};
+  if (keylines != orig) {
+    fs.file(file).content = join "\n" @keylines '';
+  }
+}
+
+let keymangle-pull (configdir, livelines) {
+  let currlines = fs.file(configdir.child('live_keys')).content.lines;
+  let linesdict = %(currlines.map(_ : 1));
+  foreach n in currlines {
+    delete linesdict(n);
+  }
+  push currlines [ sort keys linesdict ];
+}
+
+  let dead_config := config_dir.child('dead.conf');
+  let keylines := home_dir.child('.ssh')('authorized_keys').content.lines;
+  ensure {
+    foreach l in live_config { keylines.includes(l) }
+    foreach d in dead_config { keylines.remove(d) }
+  };
+}
