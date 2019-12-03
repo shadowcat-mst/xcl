@@ -1,0 +1,49 @@
+
+foo bar baz;
+
+[ call => [
+  [ name => 'foo' ]
+
+[ call => [
+  [ name => 'foo' ],
+  [ name => 'bar' ],
+
+[ call => [
+  [ name => 'foo' ],
+  [ name => 'bar' ],
+  [ name => 'baz' ],
+]
+
+foo [ bar baz ] quux;
+
+[ call => [
+  [ name => 'foo' ],
+
+[ call => [
+  [ name => 'foo' ],
+  [ call => ],
+
+my @stack = $_->[0], $_->[1][1]; # the inner [ call
+[ call => [
+  [ name => 'foo' ],
+  [ call => [ name => 'bar' ] ],
+
+[ call => [
+  [ name => 'foo' ],
+  [ call => [ name => 'bar' ], [ name => 'baz' ] ],
+
+[ call => [
+  [ name => 'foo' ],
+  [ call => [ name => 'bar' ], [ name => 'baz' ] ],
+  [ name => 'quux' ],
+]
+
+foo bar(1, 2, 3)
+
+[ call => [
+  [ name => 'foo' ],
+  [ compound =>
+     [ name => 'bar' ],
+     [ list => [ int => 1 ], [ int => 2 ], [ int => 3 ] ]
+  ],
+];
