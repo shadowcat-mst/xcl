@@ -1,0 +1,23 @@
+A script is a sequence of statements, separated by ;
+
+A statement is a sequence of atoms, separated by whitespace
+
+An atom is a word/symbol/number/compound/list/call/block/qstring/qqstring
+
+A word begins with [a-zA-Z_] and is /^[a-zA-Z_]\w*$/
+
+A symbol begins with [$SYMBOL_CHARS] and is /^[$SYMBOL_CHARS]+$/
+
+A number begins with [0-9] and is /^[0-9]+$/ # int; float to come
+
+A compound is a sequence of atoms with no whitespace separating them
+
+A call is [ statement ]
+
+A block is { script }
+
+A list is (atom|statement, atom|statement, ...)
+
+A qstring is '...\'...\\...'
+
+A qqstring is "<qstring>\<char><qstring>$<expr>" where expr one of () [] {}
