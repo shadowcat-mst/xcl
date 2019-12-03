@@ -1,0 +1,24 @@
+
+let cold_restart () {
+  sh apt-get update;
+  sh apt-get upgrade;
+  sh /etc/init.d/apache2 stop;
+  let apbin = [ capture which 'apache2' ];
+  timeout 20 {
+    while (
+      sh(ps ax | grep $apbin).lines.count > 0;
+    ) {
+      say "Waiting for apaches to die";
+      sleep 1;
+    }
+  } else {
+    sh killall -9 'apache2';
+    sleep 1;
+  }
+  sh /etc/init.d/apache2 start;
+}
+
+foreach w in webservers {
+  on w { sudo cold_restart }
+  sleep 180
+}

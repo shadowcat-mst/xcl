@@ -1,0 +1,115 @@
+# imagine checking ssh connections to N machines
+
+foreach h in $(ARGV) :parallel(10) {
+  # let res = [ ssh h bash -c 'echo 1' ];
+  let res = [ ssh h bash -c 'echo 1' ]?;
+  if (let err = res.Error) {
+    log warn "Error contacting $(h): $(err)";
+  }
+}
+
+#  lazy gecos (self) {
+#    [ +
+#       self.first_name ' ' self.last_name ' '
+#       '<' email '>'
+#    ]
+#  }
+
+class User {
+  has (uid, first_name, last_name, email);
+  lazy gecos "${self.first_name} ${self.last_name} <${self.email}>";
+}
+
+let user = User.new(:uid(334), :first_name(...), :last_name(...), :email(...));
+
+say user.gecos;
+
+
+####################################
+
+let uptimes = hosts.map(on _ { uptime });
+
+hosts.map((_, on _ { uptime }))
+     .map((_0, m'up (\d+) days'(_1)))
+     .grep(_1 > 100)
+     .each(say "$(_0) hasn't been rebooted for $(_1) days");
+
+
+
+foreach h in hosts {
+  let days = m'up (\d+) days'[ on h uptime ];
+  if (days > 100) {
+    say "$(h) hasn't been rebooted for $(days) days";
+  }
+}
+
+
+
+
+  let days = m'up (\d+) days'[ on h uptime ];
+
+  let days = m('up (\d+) days')([ on h uptime ];
+
+  let days_regex_src = 'up (\d+) days';
+  let days_matcher = m(days_regex_src);
+  let days = days_matcher [ on h uptime ];
+
+
+
+let live_keys = %@(fs.file('.keymangler/live_keys').lines);
+let dead_keys = %@(fs.file('.keymangler/live_keys').lines);
+let hosts = fs.file('.keymangler/hosts');
+
+foreach h in hosts {
+  on h {
+    let kf = fs.file('.ssh/authorized_keys');
+    let h_keys = kf.lines;
+    let nondead_keys = grep !dead_keys(_) h_keys;
+    let nd_lookup = %@(nondead_keys);
+    lot unadded = grep !nd_lookup(_) live_keys;
+    let new_keys = (@nondead_keys, @unadded);
+    let new_kf_content = ^new_keys.join("\n");
+    if (kf.content != new_kf_content) {
+      kf.content = new_kf_content;
+    }
+  }
+}
+    
+let reconcile (orig, ensure, revoke) {
+  let map_r = %@revoke;
+  let non_r = ^orig.grep !map_r;
+  let nonmap_r = %@non_r;
+  return (@non_r, @(^ensure.grep !nonmap_r));
+}
+
+let live_keys = fs.file('.keymangler/live_keys').lines;
+let dead_keys = fs.file('.keymangler/live_keys').lines;
+let hosts = fs.file('.keymangler/hosts');
+
+foreach h in hosts {
+  on h {
+    let kf = fs.file('.ssh/authorized_keys');
+    let h_keys = kf.lines;
+    let new_keys = reconcile h_keys live_keys dead_keys;
+    kf.lines = new_keys;
+  }
+}
+
+
+
+
+
+    let nondead_keys = grep !dead_keys(_) h_keys;
+    let nd_lookup = %@(nondead_keys);
+    lot unadded = grep !nd_lookup(_) live_keys;
+    let new_keys = (@nondead_keys, @unadded);
+    let new_kf_content = ^new_keys.join("\n");
+    if (kf.content != new_kf_content) {
+      kf.content = new_kf_content;
+    }
+  }
+}
+
+
+
+

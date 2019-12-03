@@ -1,0 +1,10 @@
+
+let servers = ...;
+
+let hostsdir = fs.path './hostsfiles/';
+
+let fetchhosts () {
+  foreach host in servers {
+    scp "$(host):/etc/hosts" hostsdir.child("$(host).hosts");
+  }
+}
