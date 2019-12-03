@@ -2,10 +2,7 @@ use Caroline;
 use Devel::DDCWarn;
 use strictures 2;
 STDOUT->autoflush(1);
-BEGIN {
-  require './sketches/vmsketch';
-  require './sketches/parser4';
-}
+use XCL::Parser;
 use XCL::Values qw(Native Environment Dict);
 
 my $p = XCL::Parser->new;
