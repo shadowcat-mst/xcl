@@ -1,0 +1,58 @@
+use strictures 2;
+use XCL::Value;
+use Try::Tiny;
+use experimental qw(signatures);
+use feature qw(say);
+
+sub plus ($x, $y) {
+  if ($x->type eq 'Int' and $y->type eq 'Int') {
+    return $x->new_value($x->data + $y->data);
+  }
+  if ($x->type eq 'String' and $y->type eq 'String') {
+    return $x->new_value($x->data.$y->data);
+  }
+  die "No handler for (${\join(',',map $_->type, @_)})\n";
+}
+
+sub eval_expr ($env, $expr) {
+  if ($expr->type eq 'Name') {
+    if (my $val = $env->{$expr->data}) {
+      return $val;
+    }
+    die "No such name in scope: ${\$expr->data}\n";
+  }
+  return $expr;
+}
+
+sub eval_command ($env, $cmd_proto, @args) {
+  my $cmd = eval_expr($env, $cmd_proto);
+  die "Not a valid command\n" unless $cmd->type eq 'Command';
+  $cmd->data->($env, @args);
+}
+
+sub wrap ($thing) {
+  return sub ($env, @args) {
+    $thing->(map eval_expr($env, $_), @args)
+  };
+}
+
+sub Int ($v) { XCL::Value->new(type => 'Int', data => $v) }
+sub String ($v) { XCL::Value->new(type => 'String', data => $v) }
+sub Name ($v) { XCL::Value->new(type => 'Name', data => $v) }
+sub Command ($v) { XCL::Value->new(type => 'Command', data => $v) }
+
+my $plus = wrap \&plus;
+
+say +($plus->({}, map Int($_), 1, 4)->data);
+
+say +($plus->({}, map String($_), 'Hello ', 'World!')->data);
+
+try { $plus->({}, Int(1), String(3)) } catch { print $_ };
+
+my $env = { x => Int(3), y => Int(7), z => Int(10) };
+
+say +($plus->($env, Name('x'), Name('z'))->data);
+
+$env->{'+'} = Command($plus);
+
+say eval_command($env, Name('+'), Name('y'), Int(4))->data;
