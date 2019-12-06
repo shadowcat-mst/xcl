@@ -42,7 +42,7 @@ sub _weave_Compound ($self, $env, $thing) {
 # let _weave_apply (self, env, type, thing) {
 #   let make = type.make;
 #   let list = thing.to_list();
-#   let ops = env.ops;
+#   let ops = env('ops');
 #   let op_indices = list . pairs
 #     . where(_(1).is 'Name')
 #     . where(ops.has_key _(1).to_string())
