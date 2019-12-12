@@ -1,16 +1,8 @@
-set [var make] [lambda (type, data) { [type 'make'] data }];
+#{{{
 
-set [var newvar] [fexpr (env, name, value) {
-  newvar c [make Call (set, make Call (var, name), value)];
-  evaluate env c;
-}];
+let make (type, data) { type.make data };
 
-newvar : [fexpr (env, key) {
-  newvar str [Name 'to_string'](key);
-  lambda (val) { $ (str, val) }
-}];
-
-newvar push [lambda (lst, v) { set lst([List 'count_of'] lst) v }];
+let push (list, v) { list[list.count] = v };
 
 newvar foreach [fexpr (env, name, lproto, body) {
   newvar lst [evaluate env lproto];
@@ -25,15 +17,49 @@ newvar foreach [fexpr (env, name, lproto, body) {
   $res;
 }];
 
-newvar range [lambda (from, to) {
-  newvar cur from;
-  newvar res ();
+let range (from, to) {
+  let var cur = from;
+  let var res = ();
   while (<= cur to) {
     push res cur;
-    set cur [+ cur 1];
+    ++cur;
   }
   $res;
 }];
+
+}}}#
+
+let weave_call (call) {
+  let call_list = call.list();
+  if [ exists let op_idx = call_list
+                             . pairs()
+                             . where_val(_OPS.has)
+                             . min_by_val(_OPS)
+                             . keys ] {
+    Call.make (
+      call_list(op_idx),
+      weave_call(Call.make call_list(0 .. op_idx-1)),
+      weave_call(Call.make call_list(op_idx+1 .. call_list.last_index()),
+    );
+  } {
+    Call.make weave_list(call_list);
+  }
+}
+
+let weaver_for %(
+  :Int $,
+  :Float $,
+  :String $,
+  :List list => list.map(weave),
+  :Dict dict => dict.map_val(weave),
+  :Call weave_call,
+);
+
+let weave (args) {
+  weaver_for(type_of args) args;
+};
+
+__END__
 
 newvar map [fexpr (env, call, lproto) {
   evaluate env [make Call [make List foreach _ lproto call]];
