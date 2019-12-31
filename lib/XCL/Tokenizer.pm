@@ -5,38 +5,46 @@ use warnings;
 
 our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\\^_|~';
 
-our @TOKEN_TYPES = (do {
-  my @s = (
-    [ ws => '\s' => '(\s+)' ],
-    [ word => '[a-zA-Z]' => '(\w+)' ],
-    [ number => '[0-9]', "([0-9]+(?:\\.[0-9]+)?)" ],
-    [ symbol => "[\Q${SYMBOL_CHARS}\E]", "([\Q${SYMBOL_CHARS}\E]+)" ],
-    [ string => "'", q{'((?:[^'\\\\]+|\\\\.)*)'} ],
-    [ comma => ',' ],
-    [ semicolon => ';' ],
-    [ start_call => "\\[" ],
-    [ end_call => "\\]" ],
-    [ start_list => "\\(" ],
-    [ end_list => "\\)" ],
-    [ start_block => "\\{" ],
-    [ end_block => "\\}" ],
-    [ comment => '#' => '#.*?(\n|\z)' ],
-  );
-  $s[$_][2] ||= '('.$s[$_][1].')' for 0..$#s;
-  @s;
-});
+our %LOOKUP = (
+  ' ' => 'ws',
+  "\t" => 'ws',
+  "\n" => 'ws',
+  (map +("$_" => 'number'), 0..9),
+  (map +($_ => 'word'), ('a' .. 'z'), ('A' .. 'Z'), '_'),
+  (map +($_ => 'symbol'), split '', $SYMBOL_CHARS),
+  "'" => 'string',
+  "," => 'comma',
+  ";" => 'semicolon',
+  '[' => 'start_call',
+  '(' => 'start_list',
+  '{' => 'start_block',
+  ']' => 'end_call',
+  ')' => 'end_list',
+  '}' => 'end_block',
+  '#' => 'comment',
+);
+
+our %TOKEN_REGEXPS = (
+  ws => '\s+',
+  word => '\w+',
+  number => '[0-9]+(?:\\.[0-9]+)?',
+  symbol => "[\Q${SYMBOL_CHARS}\E]+",
+  string => q{'((?:[^'\\\\]+|\\\\.)*)'},
+  comment => q{#(?:.*?\n|({+)(.*?)\1#)},
+);
 
 sub extract_next {
   my ($self, $src) = @_;
   return () unless defined($src) and length($src);
-  foreach my $type (@TOKEN_TYPES) {
-    my ($name, $identify, $slurp) = @$type;
-    if ($src =~ /\A${identify}/sm) {
-      $src =~ s/\A${slurp}//sm or die "WHAT";
-      return ($name => $1, $src);
-    }
+  my $type = $LOOKUP{substr($src,0,1)};
+  die "no idea wtf happened here, blame mst" unless $type;
+  my $re = $TOKEN_REGEXPS{$type}||'.';
+  if ($src =~ s/^(${re})//s) {
+    my $tok = $1;
+    return ($type, $tok, $src);
   }
-  die "no idea wtf happened here, blame mst";
+  # need to complain loudly with lots of information
+  die "READ THE COMMENTS";
 }
 
 sub tokenize {
