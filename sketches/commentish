@@ -1,0 +1,88 @@
+
+let func (...) {
+  #{{{
+    This function exists for whatever.
+  }}}#
+  ...
+}
+
+let func (...) {
+  #{{{ purpose
+    This function exists for whatever.
+  }}}#
+  ...
+}
+
+#{{{ docs('pod')
+
+=head1 NAME
+
+  myscript - .....
+
+=head1 SYNOPSIS
+
+...
+
+=head1 DESCRIPTION
+
+...
+
+}}}#
+
+#{{{ docs('md')
+
+# NAME
+
+  myscript - .....
+
+# SYNOPSIS
+
+...
+
+# DESCRIPTION
+
+...
+
+}}}#
+
+#{{{ This is a digression, but read it anyway.
+
+Herein a giant bag of shite about the philosophy of the code because I will
+totally write one at some point but yeah ...
+
+}}}#
+
+### ...
+
+let func (x, y, :z) {
+  #{{{ docs('md')
+    ## func
+
+    Arguments: x, y, :z
+  }}}#
+  ...
+}
+
+### ...
+
+#{{{
+
+  Default names:
+
+  * let
+  * var
+  * val
+  * fexpr
+  * lambda
+  * if (and ?:)
+  * while
+  * foreach
+  * set (=)
+  * id ($)
+  * eq (==)
+  * gt (>)
+  * ge (>=)
+  * lt (<)
+  * le (<=)
+
+}}}]

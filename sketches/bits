@@ -1,0 +1,44 @@
+
+from 'foo@bar.com' {
+  move_to 'foldername';
+}
+
+let special = ('foo@bar.com', 'baz@quux.com', ...);
+
+special.each s => {
+  from s { move_to 'foldername' }
+}
+
+incoming . where(w => { w.from == any(special) })
+         . do(m => { m.move_to 'foldername' });
+
+
+x.foo({ ... }) \
+ .bar ...;
+
+#{{{
+  $x->foo(sub { ... })
+    ->bar(...)
+}}}#
+
+x . foo({ ... })
+  . bar();
+
+x.foo(...) .bar;
+
+[ [ . x foo(...) ] [ . bar ] ];
+
+x . foo(...) . bar;
+
+[ . [ . x foo(...) ] bar ];
+
+fs . file('/etc/httpd.conf')
+   . with( ApacheConfigFile )
+   . contains_vhost(host)
+   . ensure(v => {
+       v . contents
+         . after('ServerName')
+         . line("ServerAlias dev.$(host)");
+     });
+
+

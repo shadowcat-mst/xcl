@@ -1,0 +1,37 @@
+config {
+  foo = 3;
+  bar = 'blah';
+  baz = env.CONFIG_TYPE;
+  quux = (% :x(1) :y(3), % :x(2) :y(4));
+
+#{{{
+  quux = ({
+    x = 1;
+    y = 3;
+  }, {
+    x = 2;
+    y = 4;
+  });
+}}}#
+
+}
+
+versus
+
+{
+  "foo": 3,
+  "bar": "blah",
+  "baz": "no equivalent but stuff here",
+  "quux": [
+    { "x": 1, "y": 3 },
+    { "x": 2, "y": 4 },
+}
+
+
+config {
+  view TT {
+    TEMPLATE_EXTENSION = '.tt';
+    INCLUDE_PATH = (c.path_to('root', 'src'), c.path_to('root', 'lib'));
+    expose_methods = ('do_foo', 'do_bar')
+  }
+}

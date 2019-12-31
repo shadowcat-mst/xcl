@@ -32,6 +32,10 @@ sub _weave_Compound ($self, $env, $thing) {
   $self->_weave_apply($env, \&Compound, $thing):
 }
 
+#   let op_indices = list . pairs
+#     . where((?, v) => v.is 'Name')
+#     . where((?, v) => ops.has_key v.to_string())
+#     . map (k, ?) => k;
 
 # let _weave_Call (self, env, thing) {
 #   self._weave_apply(env, Call, thing);

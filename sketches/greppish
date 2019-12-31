@@ -1,0 +1,85 @@
+(ins)[0]lacey@schala:~$ ./test2.sh 
+0 found matthewt
+1 didn't find mst
+(ins)[0]lacey@schala:~$ cat test2.sh 
+#!/usr/bin/env bash
+
+if $(grep matthewt /etc/passwd &>/dev/null); then
+	echo "$? found matthewt"
+else 
+	echo "$? didn't find matthewt"
+fi
+
+if $(grep mst /etc/passwd &>/dev/null); then
+	echo "$? found mst"
+else 
+	echo "$? didn't find mst"
+fi
+(ins)[0]lacey@schala:~$ 
+
+#!/usr/bin/env xcl
+
+use xcl 1;
+use fs 1;
+
+let check (name) {
+  if fs.file('/etc/passwd').has_line.containing(name) {
+    say "Found $(name)";
+  } {
+    say "Didn't find $(name)";
+  }
+}
+
+check('matthewt');
+check('mst');
+
+
+
+------------------------
+
+#!/usr/bin/env xcl
+
+use xcl 1;
+use shell 1;
+
+let grep = shell.Command.which('grep');
+
+if (0 == let ec = exit_code grep matthewt '/etc/passwd') {
+  echo "$(ec) found matthewt"
+} {
+  echo "$(ec) didn't find matthewt"
+}
+
+if (0 == let ec = exit_code grep mst '/etc/passwd') {
+  echo "$(ec) found mst"
+} {
+  echo "$(ec) didn't find mst"
+}
+
+-------------------------
+
+let grep = shell.which('grep');
+
+let check (name) { exit_ok grep $name '/etc/passwd' }
+
+if check('matthewt') {
+  echo "found matthewt";
+} {
+  echo "didn't find matthewt":
+}
+
+-------------------------
+
+let grep = shell.which('grep');
+
+let check (name) { exit_ok grep $name '/etc/passwd' }
+
+say "$(?: check('matthewt') "found" "didn't find") matthewt";
+
+------------------------
+
+let checkout (name) {
+  say "$(
+    if [exit_ok run grep $name '/etc/passwd'] "found" "didn't find"
+  ) $(name)";
+}

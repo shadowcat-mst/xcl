@@ -1,0 +1,213 @@
+
+thing = {
+  x = y;
+  z = 3;
+}
+
+command_name 'arg' 3 %(:key 'value')
+
+my @bar = map $_>3,  @foo;
+
+let bar = foo.where x => { x > 3 };
+
+let wheremin (min) {
+  f (thing) {
+    thing.where x => { x > min };
+  }
+}
+let bar = [ wheremin 3 ] foo;
+
+let Int.at_least (Int, int, at_least) { int >= at_least };
+
+let ten_and_up = list_of_ints.where x => x.at_least(10);
+
+#####
+
+use thing;
+
+thing.export = fexpr(scope) {
+  scope.eval \[ let Int.at_least = exports('at_least') ];
+}
+
+#####
+
+let ten_and_up = {
+  let Int.at_least (Int, int, at_least) { int >= at_least };
+
+  list_of_ints.where x => x.at_least(10)
+}
+
+
+
+
+let subset = orig.where x => { x > 3 };
+
+let keys = fs.file('.ssh/authorized_keys').lines;
+
+keys.delete_where k => { ! dead_keys(k) };
+
+
+thing.delete_except t => { t.expiry > time.now };
+
+#{{{
+
+C3 MRO plus the mojo helper trick plus superclass injection into affected
+classes (yes, unshifting to their @ISA) plus 5.10+ style %^H *should* allow
+lexically scoped extension methods with a little clever.
+
+}}}#
+
+#{{{
+
+  @unixaccount { 'lacey':
+    status     => 'enabled',
+    uid        => 10000,
+    gid        => 10000,
+    groups     => ['sudo'],
+    password   => '$6$TrWWl8D52s$2...',
+    sshkeyname => 'lacey@lacey-desktop',
+    sshkey     => 'AAAAB3NzaC1yc2EAAAA...==',
+    comment    => 'Lacey Powers',
+  }
+
+}}}#
+
+#{{{
+
+  { "matthewt": [ "m_key1", "m_key2" ],
+    "lacey": [ "l_key1", "l_key2" ] }
+
+}}}#
+
+let keyconfig = fs.file('/wherever/the/fuck.json').as_json();
+
+let key_is_dead = Dict.new
+  fs.file('/my/config/dead.keys').lines.map k => :(k)(true)
+  :default(false)
+;
+
+keyconfig('matthewt').delete_where key_is_dead;
+
+let dead_keys = Dict.new
+  fs.file('/my/config/dead.keys').lines.map k => :(k)(true);
+
+keyconfig('matthewt').delete_where dead_keys.has;
+
+
+
+let cfg = config_dict();
+
+let required = Dict.new required_config_names.map n => :n(false);
+
+let missing = required.except cfg.has;
+
+if (missing) {
+  error "Missing config keys: ${missing.join(', ')}";
+}
+
+let ping = shell.command('/bin/ping');
+
+let ping = shell.which('ping').allow_ec(*).map_val(v => { v.ex == 0 });
+
+let responsive = servers.where s => ping(s);
+
+let responsive = servers.where ping;
+
+let responsive = servers.where s => network_check(blah, s):
+
+let responsive = servers.where network_check.curry(blah):
+
+let responsive = servers.where network_check.++(blah):
+
+
+
+######################
+
+let bah = () {
+  var summer = f (@args) { + @args };
+
+  foreach line in stream.lines {
+    summer = summer.++(Int.make line);
+  }
+
+  summer;
+}
+
+let sum (args) { args.map(Int.make).reduce(+,  .++) }
+
+let sum (args) { + @args }
+
+let sum = args => \[+ @args];
+
+let sum = $(+).apply;
+
+let numbers = (1, 3, 5, 7, 9);
+
+let total = sum numbers;
+
+let total = + 1 3 5 7 9;
+
+
+######################
+
+
+let three = 1 + 2;
+
+let three = + 1 2;
+
+let x = y + [ x / z() ];
+
+let x = [ + y [ / x z() ] ];
+
+let blah = + x y z;
+
+let blah = x + y + z;
+
+let blah = + @blah_factors;
+
+let blah = sum blah_factors;
+
+
+###################
+
+
+let log_message = l => {
+  let formatted = datetime_format(time.now());
+  "$(formatted): $(l)";
+}
+
+stderr.say(log_message "aaaaaaaaargh");
+
+let log_message = l => \[ ++ datetime_format(time.now) ': ' l ];
+
+let thing = %{
+#  let add (x, y) { x + y }
+#  let sub (x, y) { x - y }
+#  let mul (x, y) { x * y }
+#  let div (x, y) { x / y }
+
+   let (add, sub, mul, div) = (+, -, *, /);
+};
+
+let three = thing.add 1 2;
+
+letf sum (scope, args) { args.reduce thing.add }
+
+#  let Int.at_least (Int, int, at_least) { int >= at_least };
+
+letextend List %{
+  let as_thing ........;
+}
+
+
+# let Str.spoo (Str, str, other) { Str.gt(str, other) }
+
+###############
+
+ls | .where r'foo'
+
+ls | .where r'^d'
+
+ls | .where .is_dir | say
+
+

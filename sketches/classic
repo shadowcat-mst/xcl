@@ -1,0 +1,9 @@
+letf class (scope, block) {
+  {
+    let realvar = var;
+    let var = fexpr (scope, v) { <push name onto list> <call original> }
+    scope.eval(\[ block ]);
+  }
+}
+
+let Point = class { var x; var y; let area (self) { x * y } }

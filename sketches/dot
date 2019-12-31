@@ -1,0 +1,67 @@
+
+letopf . (scope, lproto, r) {
+  let l = scope.eval(lproto);
+  meta(l)('.')(l, r);
+}
+meta(List)('.') = lambda(List, r) {
+  let call = List(r.to_string());
+  lambda args { call List @args }
+}
+inscope List {
+  let new (list) {
+    list.with_meta(
+      :'.' fexpr(scope, self, r) {
+             let f = scope('List').r;
+             lambda args { f self @args }
+           }
+    );
+  }
+}
+
+let List.where (List, self, \predicate) {
+  List.map_flatten self [ ?: predicate(self) (self) () ];
+}
+
+let selected = List.where list _('foo');
+
+or
+
+let selected = list.where _('foo');
+
+# ...
+
+# Ok, so, methodish stuff is .
+
+let ans = obj.ask_question q;
+
+# And then a quick shortening for calling is
+
+let answers = objects.map(.ask_question.curry(q));
+
+# But that means that unary . returns a function of one argument ...
+# ... which means that
+
+let ans = .ask_question obj q;
+
+# totally works. But if you can do that, rather than having functions
+# like lines_of, length_of as I'd been pondering, you can instead do:
+
+foreach l [ .lines $(git diff) ] {
+  ...
+}
+
+# This is tricky to read right the first time:
+
+foreach l (command with @complicated arguments and @options).lines() {
+
+# This is easier:
+
+foreach l [ .lines $(command with @complicated arguments and @options) ] {
+
+# also means I can write things like (in place increment of a list of ints)
+
+let inclist (list) { .each list ++ }
+
+# functional version
+
+let inclistf (list) { .map list $_+1 }
