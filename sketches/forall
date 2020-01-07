@@ -1,0 +1,9 @@
+async sub forall {
+  my ($scope, $args) = @_;
+  my ($proto, $block) = $args->values;
+  my $res = await $proto->evaluate_against($scope);
+  return $res unless $res->is_ok;
+  return fmap_scalar sub ($v) {
+    $block->invoke($scope, List($v))
+  } foreach => [ $res->val->values ], parallel => 5;
+}

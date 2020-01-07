@@ -1,0 +1,11 @@
+package Call {
+
+  let evaluate_against (Self, self, scope) {
+    let (command, @args) = self.data.data;
+    #let cmd = command.evaluate_against scope;
+    #cmd.invoke(scope, args);
+    #command.evaluate_against(scope).invoke(scope, args);
+    command . evaluate_against(scope)
+            . invoke(scope, args);
+  }
+}
