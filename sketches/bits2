@@ -210,4 +210,110 @@ ls | .where r'^d'
 
 ls | .where .is_dir | say
 
+###############
+
+let contents = fs.file(file_name).contents();
+
+shell.run ...
+
+let client = socket.tcp(host, 80);
+
+################
+
+let command_with_prefix (cmd, @prefix) {
+  f (@args) { shell.run cmd @prefix @args }
+}
+
+let apt_get_dry = command_with_prefix('apt-get', '--dry-run');
+
+apt_get_dry upgrade; # apt-get --dry-run upgrade
+
+#################
+
+listen = '*:80';
+
+vhost 'www.foo.com' {
+  root = '/var/www/vhosts/www.foo.com';
+}
+
+vhost 'docs.foo.com' {
+  root = '/var/www/vhosts/docs.foo.com';
+}
+
+_vhost('docs.foo.com') = %(:root('/var/www/vhosts/docs.foo.com'));
+
+#################
+
+config_spec {
+  var listen = '*:80';
+  dict_by_block vhost { var root = '/no/such/path' }
+}
+
+let Scope.eval_name (Scope, this, expr) {
+  .to_string [ ?: Name.is(expr) expr this.eval(expr) ]
+}
+
+fexpr dict_by_block (scope, thing, default_block) {
+  let block_name = scope.eval_name thing;
+  let dict = %;
+  let f = fexpr (inner, name, block) {
+    let name = inner.eval name;
+    let block_scope = inner.derive();
+    default_block.call_inplace block_scope;
+    block.call_inplace block_scope;
+    dict(name) = block_scope.top.to_dict();
+  }
+  let f_name = block_name.to_name();
+  let store_name = "_$(block_name)".to_name();
+  scope.eval \${
+    let $$f_name = $$f;
+    let $$store_name = $$dict;
+  };
+}
+
+#################
+
+listen = '*:80';
+
+vhost 'www.foo.com' {
+  root = '/var/www/vhosts/www.foo.com';
+}
+
+vhost 'docs.foo.com' {
+  root = '/var/www/vhosts/docs.foo.com';
+}
+
+# could also be
+
+foreach h ('www', 'docs') {
+  let fqdn = "$(h).foo.com";
+  vhost fqdn { root = "/var/www/vhosts/$(fqdn)" }
+}
+
+foreach h ('www', 'docs') {
+  let fqdn = h ++ '.foo.com';
+  vhost fqdn { root = '/var/www/vhosts/' ++ fqdn }
+}
+
+###################
+
+# 'a' x 5 -> 'aaaaa'
+
+let s = .join @( 'a'.repeat(5) );
+
+let s = 'a'.repeat(5).join();
+
+    default_block.call_inplace block_scope;
+    block.call_inplace block_scope;
+
+    x.call_inplace block_scope foreach x (default_block, block);
+
+    .call_inplace default_block block_scope;
+    .call_inplace block block_scope;
+
+foreach file fs.path(base_dir).all_files :parallel(5) {
+  shell.run ingest file;
+}
+
+
 
