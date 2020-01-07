@@ -1,9 +1,7 @@
 package XCL::Values;
 
-use strictures 2;
-use curry;
+use Mojo::Base -strict, -signatures, -async;
 use Exporter 'import';
-use experimental 'signatures';
 
 # string, bytes
 # float, int
@@ -11,10 +9,10 @@ use experimental 'signatures';
 # list, dict
 # call, block
 
-sub _list ($env, @args) {
+async sub _list ($env, @args) {
   my @ret;
   foreach my $arg (@args) {
-    my $r = $arg->eval($env);
+    my $r = await $arg->eval($env);
     return $r unless $r->is_ok;
     push @ret, $r->val;
   }
@@ -34,9 +32,11 @@ our @EXPORT = (@Types, qw(Val Err _list));
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
+  my $file = "XCL/V/${type}.pm";
   {
     no strict 'refs';
     *{$type} = sub ($data, $metadata = {}) {
+      require $file;
       bless({ data => $data, metadata => $metadata }, $class);
     }
   }
@@ -45,11 +45,6 @@ foreach my $type (@Types) {
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
 sub Err ($err, $metadata = {}) {
   Result({ err => Call(List($err)) }, $metadata);
-}
-
-unless ($XCL::V::Loading) {
-  local $INC{'XCL/Values.pm'} = __FILE__;
-  require XCL::V
 }
 
 1;
