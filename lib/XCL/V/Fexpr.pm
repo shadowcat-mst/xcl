@@ -1,10 +1,7 @@
 package XCL::V::Fexpr;
 
 use XCL::Values;
-use Role::Tiny::With;
-use Mojo::Base 'XCL::V', -signatures;
-
-with 'XCL::V::Role::Callable';
+use Mojo::Base 'XCL::V', -signatures, -async;
 
 sub invoke ($self, $outer_scope, $vals) {
   my ($argnames, $scope, $body) = @{$self->data}{qw(argnames scope body)};
@@ -14,6 +11,19 @@ sub invoke ($self, $outer_scope, $vals) {
 
 sub display ($self, @) {
   return 'fexpr ('.join(', ', @{$self->data->{argnames}}).') { ... }';
+}
+
+async sub c_fx_make {
+  my ($class, $scope, $lst) = @_;
+  my ($argspec, $body_proto) = $lst->values;
+  my $res = await $body_proto->eval_against($scope);
+  return $res unless $res->is_ok;
+  my @argnames = map $_->data, $argspec->values;
+  Val($class->new(
+    argnames => \@argnames,
+    scope => $scope,
+    body => $res->val,
+  ));
 }
 
 1;
