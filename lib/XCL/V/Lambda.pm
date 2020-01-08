@@ -1,7 +1,10 @@
 package XCL::V::Lambda;
 
 use XCL::Values;
+use Role::Tiny::With;
 use Mojo::Base 'XCL::V', -signatures, -async;
+
+with 'XCL::V::Role::Callable';
 
 async sub invoke {
   my ($self, $outer_scope, $vals) = @_;

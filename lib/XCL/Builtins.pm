@@ -3,90 +3,16 @@ use experimental 'signatures';
 
 package XCL::Builtins {
   use XCL::Values;
-  sub list { _list(@_) }
-  sub block ($env, @args) {
-    my $res;
-    $env = $env->snapshot;
-    foreach my $arg (@args) {
-      $res = $arg->eval($env);
-      return $res unless $res->is_ok;
-    }
-    return $res;
-  }
-  sub evaluate {
-    my $res = _list(@_);
-    return $res unless $res->is_ok;
-    my ($thisenv, $thing) = @{$res->val->data};
-    $thing->eval($thisenv);
-  }
-  sub set ($env, $set, $valproto) {
-    my $place = $set->eval($env);
+  sub set ($scope, $set, $valproto) {
+    my $place = $set->eval($scope);
     return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
       unless $place->can_set;
-    my $valres = $valproto->eval($env);
+    my $valres = $valproto->evaluate_against($scope);
     return $valres unless $valres->is_ok;
     return $place->set($valres->val);
   }
-  sub val ($env, $name) {
-    return Err([ Name('NOT_A_NAME') => String($name->type) ])
-      unless $name->is('Name');
-    my $_set = $env->curry::weak::set($name->data);
-    return Result({
-      err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
-      set => sub { $_set->(Val($_[0])) },
-    });
-  }
-  sub var ($env, $name) {
-    return Err([ Name('NOT_A_NAME') => String($name->type) ])
-      unless $name->is('Name');
-    my $_set = $env->curry::weak::set($name->data);
-    return Result({
-      err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
-      set => sub { $_set->(Var($_[0])) },
-    });
-  }
-  sub id ($env, $thing) {
-    $thing->eval($env);
-  }
-  sub fexpr ($env, $argspec, $block) {
-    my (undef, @argspec) = @{$argspec->data->data};
-    my @argnames = map $_->data, @argspec;
-    Val(Fexpr({
-      argnames => \@argnames,
-      env => $env->snapshot,
-      body => $block
-    }));
-  }
-  sub lambda ($env, $argspec, $block) {
-    my (undef, @argspec) = @{$argspec->data->data};
-    my @argnames = map $_->data, @argspec;
-    Val(Lambda({
-      argnames => \@argnames,
-      env => $env->snapshot,
-      body => $block
-    }));
-  }
-  sub current_env ($env) {
-    Val($env);
-  }
-  sub is {
-    my $res = _list(@_);
-    return $res unless $res->is_ok;
-    my ($thisval, $thing) = @{$res->val->data};
-    return Err([ Name('NOT_A_STRING') => String($thing->type) ])
-      unless $thing->is('String');
-    return Bool($thisval->is($thing->data) ? 1 : 0);
-  }
-  sub dict ($env, @args) {
-    my $res = _list(@_);
-    return $res unless $res->is_ok;
-    my @pairs = $res->val->values;
-    return Err([ Name('NOT_PAIRS'), String('FIXME') ])
-      if grep !($_->is('List') and @{$_->data} == 2), @pairs;
-    return Val(Dict({
-      map +($_->data->[0]->string->val->data, $_->data->[1]),
-        @pairs
-    }));
+  sub id ($scope, $thing) {
+    $thing->evaluate_against($scope);
   }
 }
 

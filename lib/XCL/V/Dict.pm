@@ -58,6 +58,16 @@ sub display ($self, $depth) {
   return '%('.join(', ', @res).')';
 }
 
-sub bool ($self) {  Val(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
+sub bool ($self) { Val(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
+
+sub c_f_make ($class, $lst) {
+  my @pairs = $lst->values;
+  return Err([ Name('NOT_PAIRS'), String('FIXME') ])
+    if grep !($_->is('List') and @{$_->data} == 2), @pairs;
+  return Val(Dict({
+    map +($_->data->[0]->data, $_->data->[1]),
+      @pairs
+  }));
+}
 
 1;

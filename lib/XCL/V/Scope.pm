@@ -35,4 +35,20 @@ sub display ($self, $depth) {
   'Scope('.$self->data->display($depth).')'
 }
 
+sub fx_val ($self, $, $lst) { $self->intro(\&Val, $lst); }
+sub fx_var ($self, $, $lst) { $self->intro(\&Var, $lst); }
+
+sub intro ($self, $type, $lst) {
+  my ($name) = @{$lst->data};
+  return Err([ Name('NOT_A_NAME') => String($name->type) ])
+    unless $name->is('Name');
+  my $_set = $env->curry::weak::set($name->data);
+  return Result({
+    err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
+    set => sub { $_set->($type->($_[0])) },
+  });
+}
+
+sub c_fx_current ($class, $scope, $lst) { $scope }
+
 1;
