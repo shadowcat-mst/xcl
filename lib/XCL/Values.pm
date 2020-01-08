@@ -9,12 +9,13 @@ use Exporter 'import';
 # list, dict
 # call, block
 
-async sub _list ($env, @args) {
+async sub _list {
+  my ($scope, @args) = @_;
   my @ret;
   foreach my $arg (@args) {
-    my $r = await $arg->eval($env);
-    return $r unless $r->is_ok;
-    push @ret, $r->val;
+    my $res = await $arg->evaluate_against($scope);
+    return $res unless $res->is_ok;
+    push @ret, $res->val;
   }
   return Val(List(\@ret));
 }
@@ -24,7 +25,7 @@ our @Types = qw(
   Bool Fexpr Dict List Name Call
   Result Var
   Native
-  Environment
+  Scope Block
   Compound Lambda
 );
 

@@ -24,13 +24,11 @@ sub _reify_list ($self, @args) {
 }
 
 sub _reify_call ($self, @args) {
-  Call(List([ map $self->reify_ast($_), @args ]));
+  Call([ map $self->reify_ast($_), @args ]);
 }
 
 sub _reify_block ($self, @args) {
-  return Call(List([
-    Native(XCL::Builtins->can($type)), map $self->reify_ast(@$_), @args
-  ]));
+  Block([ map $self->reify_ast(@$_), @args ]);
 }
 
 1;

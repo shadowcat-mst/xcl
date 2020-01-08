@@ -5,7 +5,7 @@ use Mojo::Base 'XCL::V', -async, -signatures;
 
 async sub evaluate_against {
   my ($self. $scope) = @_;
-  my ($command, @args) = @{$self->data->data};
+  my ($command, @args) = @{$self->data};
   my $res = await $command->evaluate_against($scope);
   return $res unless $is->ok;
   return $res->val->invoke($scope, List(\@args));
