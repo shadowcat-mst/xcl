@@ -113,13 +113,6 @@ package XCL::Builtins {
   }
 }
 
-package XCL::Builtins::Name {
-  use XCL::Values;
-  sub to_string ($env, $name) {
-    Val(String($name->data));
-  }
-}
-
 my $expand_ns = sub ($pkg, $ns) {
   map +($_ => Var(Native($pkg->can($_)))),
     grep /^[a-z]/,
