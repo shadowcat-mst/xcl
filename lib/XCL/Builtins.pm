@@ -156,40 +156,6 @@ package XCL::Builtins {
   }
 }
 
-sub XCL::Builtins::if ($env, $cond, $true, $false = undef) {
-  my $denv = $env->derive;
-  my $res = $cond->eval($denv);
-  return $res unless $res->is_ok;
-  my $bool = $res->val->bool;
-  return $bool unless $bool->is_ok;
-  if ($bool->val->data) {
-    my $ret = $true->eval($denv);
-    return defined($false) ? $ret : Val($ret);
-  }
-  return $false->eval($denv) if defined($false);
-  return Val(Err([ Name('NO_SUCH_VALUE') => String('else') ]));
-}
-
-sub XCL::Builtins::while ($env, $cond, $body) {
-  my $denv = $env->derive;
-  my $did;
-  WHILE: while (1) {
-    my $res = $cond->eval($denv);
-    return $res unless $res->is_ok;
-    my $bool = $res->val->bool;
-    return $bool unless $bool->is_ok;
-    if ($bool->val->data) {
-      $did ||= 1;
-      my $benv = $denv->derive;
-      my $res = $body->eval($benv);
-      return $res unless $res->is_ok;
-    } else {
-      last WHILE;
-    }
-  }
-  return Val(Bool($did));
-}
-
 sub XCL::Builtins::string ($env, @args) {
   my $res = _list(@_);
   return $res unless $res->is_ok;
