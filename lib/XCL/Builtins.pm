@@ -113,38 +113,6 @@ package XCL::Builtins {
   }
 }
 
-package XCL::Builtins::List {
-  use XCL::Values;
-  sub make { _list(@_) }
-  sub count_of ($env, $lst) {
-    my $proto = $lst->eval($env);
-    return $proto unless $proto->is_ok;
-    return Val(Int(scalar @{$proto->val->data}));
-  }
-  sub map ($env, $lproto, $sym, $call) {
-    my $lst_res = $lproto->eval($env);
-    return $lst_res unless $lst_res->is_ok;
-    my $name = $sym->data;
-    my @val;
-    foreach my $el ($lst_res->val->values) {
-      my $denv = $env->derive($name => $el);
-      my $res = $call->eval($denv);
-      return $res unless $res->is_ok;
-      push @val, $res->val;
-    }
-    return Val(List(\@val));
-  }
-}
-
-package XCL::Builtins::Dict {
-  use XCL::Values;
-  sub pairs_of ($env, $dict) {
-    my $proto = $dict->eval($env);
-    return $proto unless $proto->is_ok;
-    Val(List[ $proto->val->pairs ]);
-  }
-}
-
 package XCL::Builtins::Name {
   use XCL::Values;
   sub to_string ($env, $name) {

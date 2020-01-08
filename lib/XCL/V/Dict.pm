@@ -70,4 +70,8 @@ sub c_f_make ($class, $lst) {
   }));
 }
 
+sub f_pairs ($self, $) {
+  Val List [ $self->pairs ];
+}
+
 1;
