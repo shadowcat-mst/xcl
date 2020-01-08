@@ -4,3 +4,4 @@ val fexpr = Fexpr.make;
 val lambda = Lambda.make;
 val % = val dict = Dict.make;
 val current_scope = Scope.current;
+val string = String.make;

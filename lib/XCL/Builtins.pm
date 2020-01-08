@@ -1,19 +1,23 @@
-use strictures 2;
-use experimental 'signatures';
+package XCL::Builtins;
 
-package XCL::Builtins {
-  use XCL::Values;
-  sub set ($scope, $set, $valproto) {
-    my $place = $set->eval($scope);
-    return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
-      unless $place->can_set;
-    my $valres = $valproto->evaluate_against($scope);
-    return $valres unless $valres->is_ok;
-    return $place->set($valres->val);
-  }
-  sub id ($scope, $thing) {
-    $thing->evaluate_against($scope);
-  }
+use XCL::Values;
+use Mojo::Base -base, -signatures, -async;
+
+async sub c_fx_set {
+  my ($class, $scope, $lst) = @_;
+  my ($set, $valproto) = $lst->values;
+  my $pres = await $set->evaluate_against($scope);
+  return $pres unless $pres->is_ok;
+  my $place = $pres->val;
+  return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
+    unless $place->can_set;
+  my $valres = await $valproto->evaluate_against($scope);
+  return $valres unless $valres->is_ok;
+  return $place->set($valres->val);
+}
+
+sub c_fx_id ($class, $scope, $thing) {
+  $thing->evaluate_against($scope);
 }
 
 package XCL::Builtins {
@@ -82,18 +86,6 @@ package XCL::Builtins {
   }
 }
 
-sub XCL::Builtins::string ($env, @args) {
-  my $res = _list(@_);
-  return $res unless $res->is_ok;
-  my $str = '';
-  foreach my $el ($res->val->values) {
-    my $res = $el->string;
-    return $res unless $res->is_ok;
-    $str .= $res->val->data;
-  }
-  return Val(String($str));
-}
-
 package XCL::Builtins {
   BEGIN {
     our %ops = (
@@ -118,23 +110,6 @@ package XCL::Builtins {
         return Val(Bool(($l->data '.$key.' $r->data)));
       } 1' or die "Compilation failed for ${key}: $@";
     }
-  }
-}
-
-package XCL::Builtins::Call {
-  use XCL::Values;
-  sub make ($env, $lst) {
-    my $proto = $lst->eval($env);
-    return $proto unless $proto->is_ok;
-    return Val(Call($proto->val));
-  }
-  sub list ($env, $call) {
-    my $res = $call->eval($env);
-    return $res unless $res->is_ok;
-    my $data = $res->val->data;
-    return Err([ Name('CALL_SHOULD_CONTAIN_LIST') => $data ])
-      unless $data->is('List');
-    return Val($data);
   }
 }
 
