@@ -37,4 +37,17 @@ sub f_concat ($self, $lst) {
   ValF($self->new(data => [ map $_->values, $self, $lst->values ]));
 }
 
+sub f_keys ($self, $) { ValF List [ $self->keys ] }
+sub f_values ($self, $) { ValF List [ $self->values ] }
+
+sub f_head ($self, $) {
+  my $val = $self->data->[0];
+  defined($val) ? ValF($val) : ErrF([ Name('NO_SUCH_VALUE') ]);
+}
+
+sub f_tail ($self, $) {
+  my ($first, @rest) = $self->values;
+  defined($first) ? ValF(List \@rest) : ErrF([ Name('NO_SUCH_VALUE') ]);
+}
+
 1;

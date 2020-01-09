@@ -12,7 +12,7 @@ sub display ($self, @) { q{'}.$self->data.q{'} }
 sub c_f_make ($class, $lst) {
   return ValF String join '', map {
     my $res = $_->string;
-    return Future->done($res) unless $res->is_ok;
+    return ResultF($res) unless $res->is_ok;
     $res->val->data;
   } $lst->values;
 }

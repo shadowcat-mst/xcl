@@ -26,4 +26,9 @@ async sub c_fx_make {
   ));
 }
 
+sub f_concat ($self, $lst) {
+  return $_ for $self->_same_types($lst, 'List');
+  ValF Call(data => [ $self, map $_->values, $lst->values ]);
+}
+
 1;

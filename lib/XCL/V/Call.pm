@@ -31,4 +31,8 @@ sub display ($self, $depth) {
   return '[ '.join(' ', @res).' ]';
 }
 
+sub f_to_list ($self, $) {
+  ValF List[ $self->values ];
+}
+
 1;

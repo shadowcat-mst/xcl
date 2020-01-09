@@ -49,7 +49,13 @@ sub Err ($err, $metadata = {}) {
   Result({ err => Call($err) }, $metadata);
 }
 
-sub ResultF { Future->done(Result(@_)) }
+sub ResultF {
+  if (blessed($_[0]) and $_[0]->isa('XCL::V::Result')) {
+    Future->done($_[0])
+  } else {
+    Future->done(Result(@_))
+  }
+}
 sub ValF { Future->done(Val(@_)) }
 sub ErrF { Future->done(Err(@_)) }
 
