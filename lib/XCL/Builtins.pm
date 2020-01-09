@@ -29,10 +29,10 @@ async sub c_fx_if {
   my $bool = $res->val->bool;
   return $bool unless $bool->is_ok;
   if ($bool->val->data) {
-    my $res = await $true->evaluate_against($dscope);
+    my $res = await $true->invoke($dscope);
     return defined($false) ? $res : Val($res);
   }
-  return await $false->evaluate_against($dscope) if $false;
+  return await $false->invoke($dscope) if $false;
   return Val(Err([ Name('NO_SUCH_VALUE') => String('else') ]));
 }
 
@@ -49,7 +49,7 @@ async sub c_fx_while {
     if ($bool->val->data) {
       $did ||= 1;
       my $bscope = $dscope->derive;
-      my $res = await $body->evaluate_against($bscope);
+      my $res = await $body->invoke($bscope);
       return $res unless $res->is_ok;
     } else {
       last WHILE;
