@@ -16,4 +16,16 @@ sub c_f_make ($class, $lst) {
   } $lst->values;
 }
 
+foreach my $op (qw(eq ne gt lt ge le)) {
+  my $txt = ' 
+    sub f_THISOP ($self, $lst) {
+      return $_ for $self->_same_types($lst);
+      Val Bool $self->data THISOP $lst->data->[0]->data;
+    }
+    1;
+  ';
+  $txt =~ s/THISOP/$op/g;
+  eval $txt or die "Failure evaluationg f_${op}: $@";
+}
+
 1;

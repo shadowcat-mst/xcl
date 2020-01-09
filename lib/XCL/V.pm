@@ -25,4 +25,16 @@ sub bool ($self) { Err([ Name('CANT_BOOLEAN') => String($self->type) ]) }
 
 sub string ($self) { Err([ Name('CANT_STRINGIFY') => String($self->type) ]) }
 
+# maybe doesn't belong here but in a role but shrug
+
+sub _same_types ($self, $lst) {
+  my $type = $self->type;
+  if (grep $_->type ne $type, $lst->values) {
+    return Err([
+      Name('TYPES_MUST_MATCH') => map String($_->type), ($self, $lst->values)
+    ]);
+  }
+  return ();
+}
+
 1;

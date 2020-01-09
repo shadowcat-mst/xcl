@@ -5,15 +5,6 @@ use Mojo::Base -role, -signatures;
 
 my $MAX_SAFE_INT = 2**53;
 
-sub _same_types ($self, $lst) {
-  if (grep $_->type ne $type, $lst->values) {
-    return Err([
-      Name('TYPES_MUST_MATCH') => map String($_->type), ($self, $lst->values)
-    ]);
-  }
-  return ();
-}
-
 sub f_plus ($self, $lst) {
   return $_ for $self->_same_types($lst);
   my $acc = $self->data;
@@ -50,5 +41,59 @@ sub f_divide ($self, $lst) {
 
 sub f_to_int ($self, $) { return Int($self->data) }
 sub f_to_float ($self, $) { return Float($self->data) }
+
+sub _is_zero ($self, $num) {
+  # hack, move this to the classes
+  if ($self->type eq 'Float') {
+    return 0+!!($num >= -1e-6 and $num <= 1e-6);
+  }
+  return 0+!!($num == 0);
+}
+
+sub _is_positive ($self, $num) {
+  # hack, move this to the classes
+  if ($self->type eq 'Float') {
+    return 0+!!($num > 1e-6);
+  }
+  return 0+!!($num > 0);
+}
+
+sub _isnt_negative ($self, $num) {
+  # hack, move this to the classes
+  if ($self->type eq 'Float') {
+    return 0+!!($num >= -1e-6);
+  }
+  return 0+!!($num >= 0);
+}
+
+sub f_eq ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return Val Bool $self->_is_zero($self->data - $lst->data->[0]->data);
+}
+
+sub f_ne ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return Val Bool 0+!!$self->_is_zero($self->data - $lst->data->[0]->data);
+}
+
+sub f_gt ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return Val Bool $self->_is_positive($self->data - $lst->data->[0]->data);
+}
+
+sub f_lt ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return Val Bool $self->_is_positive($lst->data->[0]->data - $self->data);
+}
+
+sub f_ge ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return Val Bool $self->_isnt_negative($self->data - $lst->data->[0]->data);
+}
+
+sub f_le ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return Val Bool $self->_isnt_negative($lst->data->[0]->data - $self->data);
+}
 
 1;
