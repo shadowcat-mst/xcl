@@ -1,0 +1,41 @@
+val lst = \((x, y, z));
+
+# or, with a space:
+
+val lst = \ (x, y, z);
+
+#{{{
+
+  \(x) -> \x
+  \(x + 1) -> x + 1
+  \(x, y) # invalid
+  \((x, y)) -> (x, y)
+  \ (x, y) -> (x, y)
+
+}}}#
+
+let nextval = do {
+  let currval = 0;
+  #() => \[inc currval];
+  \[inc currval];
+}
+
+say nextval();
+say nextval();
+say nextval();
+
+#############################
+
+val args = \ (x, y);
+val body = { x + y };
+
+foreach name (names) {
+  functions(name) = lambda args body;
+}
+
+#############################
+
+let ?. (l, r) { . [ ? l ] r }
+
+let ans = unreliable()?.or_else err => \"Error: $(err)";
+
