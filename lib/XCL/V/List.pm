@@ -15,39 +15,12 @@ async sub evaluate_against {
   return List(\@ret);
 }
 
-sub get ($self, $idx) {
-  die "NOT YET" if $idx < 0;
-  my $ary = $self->data;
-  Result({
-   ($idx <= $#$ary
-     ? (val => $ary->[$idx])
-     : (err => List([ Name('NO_SUCH_VALUE') => Int($idx) ]))),
-   (set => $self->curry::weak::set($idx)),
-  });
-}
-
-sub set ($self, $idx, $value) {
-  die "NOT YET" if $idx < 0;
-  my $ary = $self->data;
-  return Err([ Name('NO_SUCH_INDEX') => Int($idx) ]) if $idx > @$ary;
-  return Val($ary->[$idx] = $value);
-}
-
 sub invoke ($self, $, $vals) {
   return Err([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($idx) = $vals->values) == 1;
   return Err([ Name('NOT_AN_INT') => String($idx->type) ])
     unless $idx->is('Int');
   $self->get($idx->data);
-}
-
-sub keys ($self) {
-  my $ary = $self->data;
-  return map Int($_), 0 .. $ary;
-}
-
-sub values ($self) {
-  return @{$self->data};
 }
 
 sub display ($self, $depth) {
@@ -76,11 +49,6 @@ async sub f_map {
     push @val, $res->val;
   }
   return Val List \@val;
-}
-
-sub f_concat ($self, $lst) {
-  return $_ for $self->_same_types($lst);
-  Val($self->new(data => [ map $_->values, $self, $lst->values ]));
 }
 
 1;

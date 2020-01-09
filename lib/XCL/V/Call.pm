@@ -1,7 +1,10 @@
 package XCL::V::Call;
 
 use XCL::Values;
+use Role::Tiny::With;
 use Mojo::Base 'XCL::V', -async, -signatures;
+
+with 'XCL::V::Role::Listish';
 
 sub evaluate_against ($self. $scope) {
   $self->_invoke($scope, @{$self->data});
