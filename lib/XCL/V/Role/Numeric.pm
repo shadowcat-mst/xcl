@@ -58,13 +58,7 @@ sub _is_positive ($self, $num) {
   return 0+!!($num > 0);
 }
 
-sub _isnt_negative ($self, $num) {
-  # hack, move this to the classes
-  if ($self->type eq 'Float') {
-    return 0+!!($num >= -1e-6);
-  }
-  return 0+!!($num >= 0);
-}
+sub _isnt_negative ($self, $num) { 0+!!$self->_is_positive(-$num) }
 
 sub f_eq ($self, $lst) {
   return $_ for $self->_same_types($lst);
