@@ -1,5 +1,6 @@
 package XCL::V::String;
 
+use XCL::Values;
 use Mojo::Base 'XCL::V', -signatures;
 
 sub bool ($self) { Val(Bool(length($self->data) ? 1 : 0)) }
@@ -26,6 +27,10 @@ foreach my $op (qw(eq ne gt lt ge le)) {
   ';
   $txt =~ s/THISOP/$op/g;
   eval $txt or die "Failure evaluationg f_${op}: $@";
+}
+
+sub f_concat ($self, $lst) {
+  $self->c_f_make(List [ $self, $lst->values ]);
 }
 
 1;
