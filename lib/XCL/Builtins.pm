@@ -1,5 +1,6 @@
 package XCL::Builtins;
 
+use XCL::V::Scope;
 use XCL::Values;
 use Mojo::Base -base, -signatures, -async;
 
@@ -58,6 +59,7 @@ async sub c_fx_while {
   return Val(Bool($did));
 }
 
-1;
+sub c_fx_var ($class, $scope, $lst) { $scope->fx_var($scope, $lst) }
+sub c_fx_val ($class, $scope, $lst) { $scope->fx_val($scope, $lst) }
 
 1;

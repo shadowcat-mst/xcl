@@ -1,5 +1,6 @@
 package XCL::Values;
 
+use Future;
 use Mojo::Base -strict, -signatures, -async;
 use Exporter 'import';
 
@@ -29,7 +30,7 @@ our @Types = qw(
   Compound Lambda
 );
 
-our @EXPORT = (@Types, qw(Val Err _list));
+our @EXPORT = (@Types, qw(ResultF Val ValF Err ErrF));
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
@@ -45,7 +46,11 @@ foreach my $type (@Types) {
 
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
 sub Err ($err, $metadata = {}) {
-  Result({ err => Call(List($err)) }, $metadata);
+  Result({ err => Call($err) }, $metadata);
 }
+
+sub ResultF { Future->done(Result(@_)) }
+sub ValF { Future->done(Val(@_)) }
+sub ErrF { Future->done(Err(@_)) }
 
 1;

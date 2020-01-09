@@ -8,7 +8,7 @@ sub get ($self, $key) {
   return $res unless $res->is_ok;
   my $val = $res->val;
   return $val if $val->is('Result');
-  return $val->invoke($self, List);
+  return $val->invoke($self, List []);
 }
 
 sub set ($self, $key, $value) {
@@ -43,12 +43,12 @@ sub intro ($self, $type, $lst) {
   return Err([ Name('NOT_A_NAME') => String($name->type) ])
     unless $name->is('Name');
   my $_set = $env->curry::weak::set($name->data);
-  return Result({
+  return ResultF({
     err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
     set => sub { $_set->($type->($_[0])) },
   });
 }
 
-sub c_fx_current ($class, $scope, $lst) { $scope }
+sub c_fx_current ($class, $scope, $lst) { ValF($scope) }
 
 1;

@@ -1,5 +1,6 @@
 package XCL::V;
 
+use Future; # needs to be somewhere
 use XCL::Values;
 use Mojo::Base -base, -signatures;
 
@@ -30,7 +31,7 @@ sub string ($self) { Err([ Name('CANT_STRINGIFY') => String($self->type) ]) }
 sub _same_types ($self, $lst) {
   my $type = $self->type;
   if (grep $_->type ne $type, $lst->values) {
-    return Err([
+    return ErrF([
       Name('TYPES_MUST_MATCH') => map String($_->type), ($self, $lst->values)
     ]);
   }

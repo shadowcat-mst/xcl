@@ -63,7 +63,7 @@ sub display ($self, $depth) {
 sub bool ($self) { Val(Bool(@{$self->data} ? 1 : 0)) }
 
 sub f_count ($self, $) {
-  Val Int scalar @{$self->data};
+  ValF Int scalar @{$self->data};
 }
 
 async sub f_map {
@@ -76,6 +76,11 @@ async sub f_map {
     push @val, $res->val;
   }
   return Val List \@val;
+}
+
+sub f_concat ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  Val($self->new(data => [ map $_->values, $self, $lst->values ]));
 }
 
 1;
