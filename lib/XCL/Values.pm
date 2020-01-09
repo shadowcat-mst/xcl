@@ -22,7 +22,7 @@ async sub _list {
 }
 
 our @Types = qw(
-  String Bytes Float Int
+  String Bytes Float Int Escape
   Bool Fexpr Dict List Name Call
   Result Var
   Native

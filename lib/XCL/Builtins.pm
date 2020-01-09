@@ -59,7 +59,6 @@ async sub c_fx_while {
   return Val(Bool($did));
 }
 
-sub c_fx_var ($class, $scope, $lst) { $scope->fx_var($scope, $lst) }
-sub c_fx_val ($class, $scope, $lst) { $scope->fx_val($scope, $lst) }
+sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
 1;
