@@ -88,6 +88,22 @@ async sub c_fx_dot {
   };
   my $l = $lr->val;
   my $res;
+  # let meta = metadata(l);
+  # if [exists let dm = meta('dot_methods')] {
+  #   if [exists let m = dm(r)] {
+  #     m ++ (l)
+  #   } {
+  #     meta('dot_via')(r) ++ (l);
+  #   }
+  # } {
+  #   if [exists let dv = meta('dot_via')] {
+  #     dv(r) ++ (l);
+  #   } {
+  #     let sym = Name.make l.type();
+  #     let m = scope.eval(sym) r;
+  #     m ++ (l);
+  #   }
+  # }
   if (my $methods = $l->metadata->{dot_methods}) {
     $res = await $methods->invoke($scope, $method_name);
     if (!$res->is_ok and $res->err->data->[0]->data ne 'NO_SUCH_VALUE') {
