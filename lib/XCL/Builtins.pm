@@ -25,6 +25,10 @@ sub c_fx_id ($class, $scope, $lst) {
 
 sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
+sub c_fx_result_of ($class, $scope, $lst) {
+   ValF $class->c_fx_id($scope, $lst)->get;
+}
+
 async sub c_fx_if {
   my ($class, $scope, $lst) = @_;
   my ($cond, $true, $false) = @{$lst->data};
