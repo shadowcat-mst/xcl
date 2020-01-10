@@ -11,7 +11,7 @@ async sub evaluate_against {
   my ($self, $scope) = @_;
   my @ret;
   foreach my $el (@{$self->data}) {
-    my $res = await $el->evaluate_against($scope);
+    my $res = await $scope->eval($el);
     return $res unless $res->is_ok;
     push @ret, $res->val;
   }
@@ -47,7 +47,7 @@ async sub f_map {
   my ($f) = $lst->values;
   my @val;
   foreach my $el ($self->values) {
-    my $res = await Call([ $f, $el ])->evaluate_against(Scope({}));
+    my $res = await Scope({})->eval(Call([ $f, $el ]));
     return $res unless $res->is_ok;
     push @val, $res->val;
   }

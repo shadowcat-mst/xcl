@@ -7,7 +7,7 @@ async sub invoke {
   my $iscope = $scope->snapshot;
   my $res;
   foreach my $stmt (@{$self->data}) {
-    $res = await $stmt->evaluate_against($iscope);
+    $res = await $iscope->eval($stmt);
     return $res unless $res->is_ok;
   }
   return $res;

@@ -6,7 +6,7 @@ use Mojo::Base 'XCL::V', -signatures, -async;
 sub invoke ($self, $outer_scope, $vals) {
   my ($argnames, $scope, $body) = @{$self->data}{qw(argnames scope body)};
   my %merge; @merge{@$argnames} = map Val($_), $outer_scope, $vals->values;
-  $body->evaluate_against($scope->derive(\%merge));
+  $scope->derive(\%merge)->eval($body);
 }
 
 sub display ($self, @) {

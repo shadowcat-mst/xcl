@@ -7,20 +7,20 @@ use Mojo::Base -base, -signatures, -async;
 async sub c_fx_set {
   my ($class, $scope, $lst) = @_;
   my ($set, $valproto) = $lst->values;
-  my $pres = await $set->evaluate_against($scope);
+  my $pres = await $scope->eval($set);
   return $pres unless $pres->is_ok;
   my $place = $pres->val;
   return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
     unless $place->can_set;
-  my $valres = await $valproto->evaluate_against($scope);
+  my $valres = await $scope->eval($valproto);
   return $valres unless $valres->is_ok;
   return $place->set($valres->val);
 }
 
 sub c_fx_id ($class, $scope, $lst) {
   my @values = $lst->values;
-  return ResultF $values[0]->evaluate_against($scope) if @values == 1;
-  return ResultF Call(\@values)->evaluate_against($scope);
+  return ResultF $scope->eval($values[0]) if @values == 1;
+  return ResultF $scope->eval(Call(\@values));
 }
 
 sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
@@ -29,7 +29,7 @@ async sub c_fx_if {
   my ($class, $scope, $lst) = @_;
   my ($cond, $true, $false) = @{$lst->data};
   my $dscope = $scope->derive;
-  my $res = await $cond->evaluate_against($dscope);
+  my $res = await $dscope->eval($cond);
   return $res unless $res->is_ok;
   my $bool = $res->val->bool;
   return $bool unless $bool->is_ok;
@@ -47,7 +47,7 @@ async sub c_fx_while {
   my $dscope = $scope->derive;
   my $did;
   WHILE: while (1) {
-    my $res = await $cond->evaluate_against($dscope);
+    my $res = await $dscope->eval($cond);
     return $res unless $res->is_ok;
     my $bool = $res->val->bool;
     return $bool unless $bool->is_ok;
@@ -64,19 +64,19 @@ async sub c_fx_while {
 }
 
 sub c_fx_do ($class, $scope, $lst) {
-  Call([ $lst->values ])->evaluate_against($scope);
+  $scope->val(Call([ $lst->values ]);
 }
 
 async sub c_fx_dot {
   my ($class, $scope, $lst) = @_;
   my ($lp, $rp) = $lst->values;
-  my $lr = await $lp->evaluate_against($scope);
+  my $lr = await $scope->($lp);
   return $lr unless $lr->is_ok;
   my $method_name = String do {
     if ($rp->is('Name')) {
       $rp->data;
     } else {
-      my $res = await $rp->evaluate_against($scope);
+      my $res = await $scope->eval($rp);
       return $res unless $res->is_ok;
       return Err([ Name('WRONG_TYPE') ]) unless $res->val->is('String')
       $res->val->data;
@@ -93,9 +93,9 @@ async sub c_fx_dot {
   unless ($res and $res->is_ok) {
     # only fall back to the object type by default in absence of dot_methods
     if (my $dot_via = $l->metadata->{dot_via} || ($res and Name($l->type))) {
-      $res = await Call([
+      $res = await $scope->eval(Call([
         Name('.'), $dot_via, $method_name
-      ])->evaluate_against($scope);
+      ]));
       return $res unless $res->is_ok;
     }
   }

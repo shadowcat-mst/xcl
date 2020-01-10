@@ -16,7 +16,7 @@ sub invoke ($self. $scope, $lst) {
 
 async sub _invoke {
   my ($self, $scope, $command, @args) = @_;
-  my $res = await $command->evaluate_against($scope);
+  my $res = await $scope->eval($command);
   return $res unless $res->is_ok;
   return $res->val->invoke($scope, List(\@args));
 }

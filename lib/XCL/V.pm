@@ -41,7 +41,7 @@ sub DESTROY {
   my ($self) = @_;
   return if ${^GLOBAL_PHASE} eq 'DESTRUCT';
   return unless my $drop = $self->metadata->{drop};
-  $drop->invoke(Scope, $self);
+  $drop->invoke(Scope({}), $self);
   return;
 }
 

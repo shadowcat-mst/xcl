@@ -6,7 +6,7 @@ use Mojo::Base 'XCL::V::Fexpr', -signatures, -async;
 
 async sub invoke {
   my ($self, $outer_scope, $vals) = @_;
-  my $argvalres = await $vals->evaluate_against($outer_scope);
+  my $argvalres = await $scope->eval($vals);
   return $argvalres unless $argvalres->is_ok;
   return await $self->SUPER::invoke($outer_scope, $argvalres->val);
 }

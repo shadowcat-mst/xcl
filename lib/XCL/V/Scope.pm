@@ -3,6 +3,8 @@ package XCL::V::Scope;
 use XCL::Values;
 use Mojo::Base 'XCL::V', -signatres;
 
+sub eval ($self, $thing) { $thing->evaluate_against($self) }
+
 sub get ($self, $key) {
   my $res = $self->data->get($key);
   return $res unless $res->is_ok;
@@ -50,5 +52,9 @@ sub intro ($self, $type, $lst) {
 }
 
 sub c_fx_current ($class, $scope, $lst) { ValF($scope) }
+
+sub f_eval ($self, $, $lst) {
+  $self->eval($lst->data->[0]);
+}
 
 1;
