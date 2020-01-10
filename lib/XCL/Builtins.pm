@@ -17,9 +17,13 @@ async sub c_fx_set {
   return $place->set($valres->val);
 }
 
-sub c_fx_id ($class, $scope, $thing) {
-  $thing->evaluate_against($scope);
+sub c_fx_id ($class, $scope, $lst) {
+  my @values = $lst->values;
+  return ResultF $values[0]->evaluate_against($scope) if @values == 1;
+  return ResultF Call(\@values)->evaluate_against($scope);
 }
+
+sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
 async sub c_fx_if {
   my ($class, $scope, $lst) = @_;
@@ -59,6 +63,47 @@ async sub c_fx_while {
   return Val(Bool($did));
 }
 
-sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
+sub c_fx_do ($class, $scope, $lst) {
+  Call([ $lst->values ])->evaluate_against($scope);
+}
+
+async sub c_fx_dot {
+  my ($class, $scope, $lst) = @_;
+  my ($lp, $rp) = $lst->values;
+  my $lr = await $lp->evaluate_against($scope);
+  return $lr unless $lr->is_ok;
+  my $method_name = String do {
+    if ($rp->is('Name')) {
+      $rp->data;
+    } else {
+      my $res = await $rp->evaluate_against($scope);
+      return $res unless $res->is_ok;
+      return Err([ Name('WRONG_TYPE') ]) unless $res->val->is('String')
+      $res->val->data;
+    }
+  };
+  my $l = $lr->val;
+  my $res;
+  if (my $methods = $l->metadata->{dot_methods}) {
+    $res = await $methods->invoke($scope, $method_name);
+    if (!$res->is_ok and $res->err->data->[0]->data ne 'NO_SUCH_VALUE') {
+      return $res;
+    }
+  }
+  unless ($res and $res->is_ok) {
+    # only fall back to the object type by default in absence of dot_methods
+    if (my $dot_via = $l->metadata->{dot_via} || ($res and Name($l->type))) {
+      $res = await Call([
+        Name('.'), $dot_via, $method_name
+      ])->evaluate_against($scope);
+      return $res unless $res->is_ok;
+    }
+  }
+  return Val Call [ $res->val, $l ];
+}
+
+sub c_f_metadata ($class, $lst) {
+  Dict($lst->[0]->metadata);
+}
 
 1;

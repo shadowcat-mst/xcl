@@ -2,7 +2,10 @@ package XCL::V::List;
 
 use curry;
 use XCL::Values;
+use Role::Tiny::With;
 use Mojo::Base 'XCL::V', -signatures, -async;
+
+with 'XCL::V::Role::Listish';
 
 async sub evaluate_against {
   my ($self, $scope) = @_;

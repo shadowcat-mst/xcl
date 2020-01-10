@@ -37,4 +37,12 @@ sub _same_types ($self, $lst, $type = $self->type) {
   return ();
 }
 
+sub DESTROY {
+  my ($self) = @_;
+  return if ${^GLOBAL_PHASE} eq 'DESTRUCT';
+  return unless my $drop = $self->metadata->{drop};
+  $drop->invoke(Scope, $self);
+  return;
+}
+
 1;
