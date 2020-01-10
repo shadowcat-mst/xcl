@@ -20,7 +20,7 @@ sub extract_compoundish {
   my @compound;
   while (my ($now_toks, $thing) = $self->extract_atomish(@toks)) {
     push @compound, $thing;
-    @$toks = $now_toks;
+    @toks = @$now_toks;
   }
   return () unless @compound;
   return (\@toks, $compound[0]) if @compound == 1;
@@ -31,7 +31,8 @@ sub _extract_spacecall {
   my ($self, $end, @toks) = @_;
   my @spc;
   while (@toks) {
-    if ($toks[0][0] eq 'ws' or $toks[0][0] eq 'comment') {
+    my $type = $toks[0][0];
+    if ($type eq 'ws' or $type eq 'comment') {
       shift @toks;
       next;
     }
@@ -43,14 +44,14 @@ sub _extract_spacecall {
     }
     last;
   }
-  return (\@toks, (@spc ? [ call => @spc ] : ());
+  return (\@toks, (@spc ? [ call => @spc ] : ()));
 }
 
 sub _extract_combi {
   my ($self, $mid, $end, $combi_type, @toks) = @_;
   my @ret;
   while (@toks) {
-    if (my ($toks, $val) = $self->_extract_spacecall('', $maybe_expr, @toks)) {
+    if (my ($toks, $val) = $self->_extract_spacecall('', $end, @toks)) {
       push @ret, $val;
       @toks = @$toks;
     }

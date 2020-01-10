@@ -7,6 +7,7 @@ my $MAX_SAFE_INT = 2**53;
 
 sub f_plus ($self, $lst) {
   return $_ for $self->_same_types($lst);
+  my $type = $self->type;
   my $acc = $self->data;
   foreach my $val (map $_->data, $lst->values) {
     if ($type eq 'Int' and $MAX_SAFE_INT - $acc < $val) {
@@ -19,8 +20,9 @@ sub f_plus ($self, $lst) {
 
 sub f_multiply ($self, $lst) {
   return $_ for $self->_same_types($lst);
+  my $type = $self->type;
   my $acc = $self->data;
-  foreach my $val (map $_->data, @rest) {
+  foreach my $val (map $_->data, $lst->values) {
     if ($type =~ /Int$/ and $MAX_SAFE_INT / $acc > $val) {
       return ErrF([ Name('INT_OVERFLOW') ]);
     }

@@ -1,7 +1,7 @@
 package XCL::V::Scope;
 
 use XCL::Values;
-use Mojo::Base 'XCL::V', -signatres;
+use Mojo::Base 'XCL::V', -signatures;
 
 sub eval ($self, $thing) { $thing->evaluate_against($self) }
 
@@ -44,7 +44,7 @@ sub intro ($self, $type, $lst) {
   my ($name) = @{$lst->data};
   return Err([ Name('NOT_A_NAME') => String($name->type) ])
     unless $name->is('Name');
-  my $_set = $env->curry::weak::set($name->data);
+  my $_set = $self->curry::weak::set($name->data);
   return ResultF({
     err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
     set => sub { $_set->($type->($_[0])) },

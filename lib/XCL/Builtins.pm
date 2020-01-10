@@ -64,7 +64,7 @@ async sub c_fx_while {
 }
 
 sub c_fx_do ($class, $scope, $lst) {
-  $scope->val(Call([ $lst->values ]);
+  $scope->val(Call([ $lst->values ]));
 }
 
 async sub c_fx_dot {
@@ -78,7 +78,7 @@ async sub c_fx_dot {
     } else {
       my $res = await $scope->eval($rp);
       return $res unless $res->is_ok;
-      return Err([ Name('WRONG_TYPE') ]) unless $res->val->is('String')
+      return Err([ Name('WRONG_TYPE') ]) unless $res->val->is('String');
       $res->val->data;
     }
   };

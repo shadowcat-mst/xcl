@@ -24,11 +24,11 @@ sub _weave_List ($self, $scope, $thing) {
 }
 
 sub _weave_Call ($self, $scope, $thing) {
-  $self->_weave_apply($scope, \&Call, $thing):
+  $self->_weave_apply($scope, \&Call, $thing);
 }
 
 sub _weave_Compound ($self, $scope, $thing) {
-  $self->_weave_apply($scope, \&Compound, $thing):
+  $self->_weave_apply($scope, \&Compound, $thing);
 }
 
 sub _weave_apply ($self, $scope, $make, $thing) {

@@ -1,7 +1,7 @@
 package XCL::V::Result;
 
 use XCL::Values;
-use Mojo::Base 'XCL::V';
+use Mojo::Base 'XCL::V', -signatures;
 
 sub is_ok ($self) { exists $self->data->{val} }
 

@@ -5,10 +5,10 @@ use Role::Tiny::With;
 use Mojo::Base 'XCL::V::Fexpr', -signatures, -async;
 
 async sub invoke {
-  my ($self, $outer_scope, $vals) = @_;
-  my $argvalres = await $scope->eval($vals);
-  return $argvalres unless $argvalres->is_ok;
-  return await $self->SUPER::invoke($outer_scope, $argvalres->val);
+  my ($self, $scope, $vals) = @_;
+  my $res = await $scope->eval($vals);
+  return $res unless $res->is_ok;
+  return await $self->SUPER::invoke($scope, $res->val);
 }
 
 sub display ($self, @) {

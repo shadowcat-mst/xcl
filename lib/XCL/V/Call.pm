@@ -6,11 +6,11 @@ use Mojo::Base 'XCL::V', -async, -signatures;
 
 with 'XCL::V::Role::Listish';
 
-sub evaluate_against ($self. $scope) {
+sub evaluate_against ($self, $scope) {
   $self->_invoke($scope, @{$self->data});
 }
 
-sub invoke ($self. $scope, $lst) {
+sub invoke ($self, $scope, $lst) {
   $self->_invoke($scope, @{$self->data}, $lst->values);
 }
 

@@ -11,7 +11,7 @@ sub reify_ast {
 }
 
 sub _reify_number ($, $num) {
-  $num =~ /\./ ? Float($num) ? Int($num)
+  $num =~ /\./ ? Float($num) : Int($num)
 }
 
 sub _reify_word { Name($_[1]) }
