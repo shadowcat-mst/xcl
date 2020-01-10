@@ -1,6 +1,6 @@
 set = set;
-[Scope.val val] = Scope.val;
-val var = Scope.var;
+[Scope.current.val val] = \Scope.current.val;
+val var = \Scope.current.var;
 val fexpr = Fexpr.make;
 val => = val lambda = Lambda.make;
 val % = val dict = Dict.make;

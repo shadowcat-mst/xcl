@@ -10,17 +10,6 @@ use Exporter 'import';
 # list, dict
 # call, block
 
-async sub _list {
-  my ($scope, @args) = @_;
-  my @ret;
-  foreach my $arg (@args) {
-    my $res = await $arg->evaluate_against($scope);
-    return $res unless $res->is_ok;
-    push @ret, $res->val;
-  }
-  return Val(List(\@ret));
-}
-
 our @Types = qw(
   String Bytes Float Int Escape
   Bool Fexpr Dict List Name Call
