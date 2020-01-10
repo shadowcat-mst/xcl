@@ -1,0 +1,64 @@
+let obj_count = 0;
+let obj_store = %;
+
+let methods = %(
+  :new lambda (cls, value) {
+    let obj_id = 'OBJ' ++ [ obj_count = obj_count + 1 ];
+    let obj_data = %(value);
+    obj_store(obj_id) = obj_data;
+    let obj = (obj_id);
+    metadata(obj)('drop') = lambda () { obj_store.delete(obj_id) }
+    metadata(obj)('dot_via') = cls;
+    $ obj;
+  },
+  :value lambda (cls, obj) {
+    let data = obj_store(obj(0));
+    data('value');
+  }
+  #{{{
+  :value lambda (cls, obj, ?val) {
+    let data = obj_store(obj(0));
+    if (exists val) {
+      data('value') = val;
+      $ obj;
+    } {
+      data('value');
+    }
+  }
+  }}}#
+);
+
+let MyCls = \MyCls;
+
+metadata(MyCls)('dot_methods') = methods;
+
+let ex = MyCls.new(3);
+
+say ex.value(); # 3
+
+ex.value() = 5;
+
+say ex.value(); # 5
+
+let MyCls.vplus = f (MyCls, self) { self.value() + 1 }
+
+say ex.vplus(); # 6
+
+say ex.value(3).vplus(); # 4
+
+# List.thing(ex);
+# let obj_id = ex(0);
+
+
+
+############
+
+let override_methods = metadata(Thing)('dot_methods').snapshot();
+override_methods('over_ridden') = over_func;
+let new_thing = Thing.snapshot();
+metadata(new_thing)('dot_methods') = override_methods;
+
+############
+
+metadata(obj)('dot_methods') = %(:extra fexpr ...);
+metadata(obj)('dot_via') = obj.type();
