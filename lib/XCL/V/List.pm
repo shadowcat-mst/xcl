@@ -36,7 +36,7 @@ sub display ($self, $depth) {
   return '('.join(', ', @res).')';
 }
 
-sub bool ($self) { Val(Bool(@{$self->data} ? 1 : 0)) }
+sub bool ($self) { ValF(Bool(@{$self->data} ? 1 : 0)) }
 
 sub f_count ($self, $) {
   ValF Int scalar @{$self->data};

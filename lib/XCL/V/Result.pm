@@ -22,4 +22,6 @@ sub display ($self, $depth) {
   return 'Err('.$self->err->display($depth).')';
 }
 
+sub f_get ($self) { ResultF $self }
+
 1;

@@ -35,7 +35,7 @@ async sub c_fx_if {
   my $dscope = $scope->derive;
   my $res = await $dscope->eval($cond);
   return $res unless $res->is_ok;
-  my $bool = $res->val->bool;
+  my $bool = await $res->val->bool;
   return $bool unless $bool->is_ok;
   if ($bool->val->data) {
     my $res = await $true->invoke($dscope);
@@ -53,7 +53,7 @@ async sub c_fx_while {
   WHILE: while (1) {
     my $res = await $dscope->eval($cond);
     return $res unless $res->is_ok;
-    my $bool = $res->val->bool;
+    my $bool = await $res->val->bool;
     return $bool unless $bool->is_ok;
     if ($bool->val->data) {
       $did ||= 1;
@@ -97,11 +97,10 @@ async sub c_fx_dot {
   #   }
   # } {
   #   if [exists let dv = meta('dot_via')] {
-  #     dv(r) ++ (l);
+  #     scope.eval(dv.r) ++ (l);
   #   } {
   #     let sym = Name.make l.type();
-  #     let m = scope.eval(sym) r;
-  #     m ++ (l);
+  #     scope.eval(sym.r) ++ (l);
   #   }
   # }
   if (my $methods = $l->metadata->{dot_methods}) {

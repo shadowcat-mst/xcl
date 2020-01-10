@@ -3,7 +3,7 @@ package XCL::V::String;
 use XCL::Values;
 use Mojo::Base 'XCL::V', -signatures;
 
-sub bool ($self) { Val(Bool(length($self->data) ? 1 : 0)) }
+sub bool ($self) { ValF(Bool(length($self->data) ? 1 : 0)) }
 
 # This is naive/wrong
 

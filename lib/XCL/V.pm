@@ -22,7 +22,7 @@ sub type ($self) {
 
 sub display ($self, @) { $self->type.'()' }
 
-sub bool ($self) { Err([ Name('CANT_BOOLEAN') => String($self->type) ]) }
+sub bool ($self) { ErrF([ Name('CANT_BOOLEAN') => String($self->type) ]) }
 
 sub string ($self) { Err([ Name('CANT_STRINGIFY') => String($self->type) ]) }
 

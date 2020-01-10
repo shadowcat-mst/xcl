@@ -58,7 +58,7 @@ sub display ($self, $depth) {
   return '%('.join(', ', @res).')';
 }
 
-sub bool ($self) { Val(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
+sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
 
 sub c_f_make ($class, $lst) {
   my @pairs = $lst->values;
