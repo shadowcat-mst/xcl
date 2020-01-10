@@ -22,7 +22,7 @@ our %LOOKUP = (
   ')' => 'end_list',
   '}' => 'end_block',
   '#' => 'comment',
-  '`' => 'blockstring',
+  #'`' => 'blockstring',
 );
 
 our %TOKEN_REGEXPS = (
@@ -31,9 +31,10 @@ our %TOKEN_REGEXPS = (
   number => '[0-9]+(?:\\.[0-9]+)?',
   symbol => "[\Q${SYMBOL_CHARS}\E]+",
   string => q{'((?:[^'\\\\]+|\\\\.)*)'},
+  comment => q{#(.*?)\n},
   # this regexp is bollocks because \1 needed to be }}}
-  comment => q{#(?:.*?\n|({+)(.*?)\1#)},
-  blockstring => q{`(.*?)`(.*?)\1)},
+  # comment => q{#(?:.*?\n|({+)(.*?)\1#)},
+  # blockstring => q{`(.*?)`(.*?)\1)},
 );
 
 sub extract_next {
@@ -43,7 +44,7 @@ sub extract_next {
   die "no idea wtf happened here, blame mst" unless $type;
   my $re = $TOKEN_REGEXPS{$type}||'.';
   if ($src =~ s/^(${re})//s) {
-    return ($type, (defined($2) ? [$1, $2] : $1), $src);
+    return ($type, $1, $src);
   }
   # need to complain loudly with lots of information
   die "READ THE COMMENTS";
