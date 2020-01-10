@@ -1,6 +1,6 @@
 let x = `q`!foo 'bar' "baz" quux!;
 
-let x = .unindent `q`{{{
+let x = .unindent `{{{`
   stuff
   goes
   here
@@ -11,10 +11,14 @@ let x = .unindent `q`{{{
 
 #{{{
 
-  let str = .unindent `q`'''
+  let str = .unindent q`'''`
     triple
     quoted
     string
   ''';
+
+  let data = xml`<<<`
+    <foo />
+  >>>;
 
 }}}#

@@ -18,6 +18,7 @@ sub _reify_word { Name($_[1]) }
 sub _reify_symbol { Name($_[1]) }
 
 sub _reify_string { String($_[1]) }
+sub _reify_blockstring { String($_[1]) }
 
 sub _reify_list ($self, @args) {
   List([ map $self->reify_ast($_), @args ]);
