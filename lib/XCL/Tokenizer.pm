@@ -1,7 +1,6 @@
 package XCL::Tokenizer;
 
-use strict;
-use warnings;
+use Mojo::Base -base;
 
 our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\\^_|~';
 
@@ -53,7 +52,7 @@ sub extract_next {
 sub tokenize {
   my ($self, $src) = @_;
   my @tok;
-  while (my ($type, $tok, $src) = $self->extract_next($self, $src)) {
+  while ((my ($type, $tok), $src) = $self->extract_next($src)) {
     push @tok, [ $type, $tok ];
   }
   return @tok;
