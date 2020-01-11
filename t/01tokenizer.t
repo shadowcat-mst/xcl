@@ -6,8 +6,6 @@ use experimental 'signatures';
 use feature 'state';
 use XCL::Tokenizer;
 
-my $tk = XCL::Tokenizer->new;
-
 sub tk ($str) { state $tk = XCL::Tokenizer->new; [ $tk->tokenize($str) ] }
 
 is tk('x'), [[ word => 'x' ]];

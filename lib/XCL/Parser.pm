@@ -1,10 +1,13 @@
 package XCL::Parser;
 
-use strict;
-use warnings;
+use Mojo::Base -base, -signatures;
 
-sub extract_atomish {
-  my ($self, $this, @rest) = @_;
+has tokenizer => sub {
+  require XCL::Tokenizer;
+  XCL::Tokenizer->new
+};
+
+sub extract_atomish ($self, $this, @rest) {
   my ($type, $tok) = @$this;
   if ($type eq 'word' or $type eq 'symbol' or $type eq 'number') {
     return (\@rest, $this);
@@ -15,10 +18,17 @@ sub extract_atomish {
   return ();
 }
 
-sub extract_compoundish {
-  my ($self, @toks) = @_;
+sub parse ($self, $type, $str) {
+  my ($left, $parse) = $self->${\"extract_${type}"}(
+    $self->tokenizer->tokenize($str)
+  );
+  die "ARGH" if @$left;
+  return $parse;
+}
+
+sub extract_compoundish ($self, @toks) {
   my @compound;
-  while (my ($now_toks, $thing) = $self->extract_atomish(@toks)) {
+  while (@toks and my ($now_toks, $thing) = $self->extract_atomish(@toks)) {
     push @compound, $thing;
     @toks = @$now_toks;
   }
@@ -27,16 +37,15 @@ sub extract_compoundish {
   return (\@toks, [ compound => @compound ]);
 }
 
-sub _extract_spacecall {
-  my ($self, $end, @toks) = @_;
+sub _extract_spacecall ($self, $end, @toks) {
   my @spc;
   while (@toks) {
     my $type = $toks[0][0];
     if ($type eq 'ws' or $type eq 'comment') {
-      shift @toks;
+      my $t = shift @toks;
+      last if @spc and $spc[-1][0] eq 'block' and $t->[1] =~ /\n/;
       next;
     }
-    last if $type eq $end;
     if (my ($toks, $val) = $self->extract_compoundish(@toks)) {
       @toks = @$toks;
       push @spc, $val;
@@ -47,24 +56,31 @@ sub _extract_spacecall {
   return (\@toks, (@spc ? [ call => @spc ] : ()));
 }
 
-sub _extract_combi {
-  my ($self, $mid, $end, $combi_type, @toks) = @_;
+sub _extract_combi ($self, $mid, $end, $combi_type, @toks) {
   my @ret;
   while (@toks) {
-    if (my ($toks, $val) = $self->_extract_spacecall('', $end, @toks)) {
+    if (my ($toks, $val) = $self->_extract_spacecall($end//'', @toks)) {
       push @ret, $val;
       @toks = @$toks;
     }
+    last unless @toks;
+    next if $combi_type eq 'block' and $ret[-1][-1][0] eq 'block';
     my $type = $toks[0][0];
-    last if $type eq $end;
-    next if $type eq $mid;
+    shift @toks and last if $type eq $end;
+    shift @toks and next if $type eq $mid;
     die "Invalid token type ${type} in ${combi_type}";
   }
-  return (@toks, [ $combi_type => @ret ]);
+  return (\@toks, [ $combi_type => @ret ]);
 }
 
-sub extract_call { shift->_extract_spacecall(']', @_) }
-sub extract_list { shift->_extract_combi(',', ')', 'list', @_) }
-sub extract_block { shift->_extract_combi(';', '}', 'block', @_) }
+sub extract_stmt_list ($self, @toks) {
+  $self->_extract_combi(';', '', 'block', @toks);
+}
+
+sub extract_call { shift->_extract_spacecall('end_call', @_) }
+sub extract_list { shift->_extract_combi('comma', 'end_list', 'list', @_) }
+sub extract_block {
+  shift->_extract_combi('semicolon', 'end_block', 'block', @_)
+}
 
 1;
