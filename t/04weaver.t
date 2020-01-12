@@ -25,6 +25,10 @@ is(xw('x + 1'), xw('+ x 1'));
 
 is(xw('x y + z'), xw('+ [ x y ] z'));
 
+is(xw('x + y + z'), xw('+ [ + x y ] z'));
+
+is(xw('x()+y'), xw('+ x() y'));
+
 $w->ops({ '.' => 3 });
 
 is(xw('a b . c d'), xw('a [ . b c ] d'));

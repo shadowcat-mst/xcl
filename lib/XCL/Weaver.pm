@@ -47,7 +47,9 @@ sub _weave_Call ($self, $thing) {
 }
 
 sub _weave_Compound ($self, $thing) {
-  $self->_weave_apply($thing, @{$thing->data});
+  my @data = @{$thing->data};
+  return $self->weave($data[0]) if @data == 1;
+  $self->_weave_apply($thing, @data);
 }
 
 sub _weave_expr ($self, $thing, @exp) {
@@ -61,14 +63,15 @@ sub _weave_apply ($self, $thing, @list) {
     grep $list[$_]->is('Name'),
       1..$#list;
   return $thing->make([ map $self->weave($_), @list ]) unless @op_indices;
-  my $min_idx = min_by { $ops->{$list[$_]->data} } @op_indices;
-  if ($thing->is('Call') and $ops->{$list[$min_idx]->data} > 0) {
+  my @min_idxes = min_by { $ops->{$list[$_]->data} } @op_indices;
+  if ($ops->{$list[my $min_idx = $min_idxes[0]]->data} > 0) {
     splice(
       @list, $min_idx - 1, 3,
       Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
     );
-    return $self->_weave_expr('XCL::V::Call', @list);
+    return $self->_weave_expr($thing, @list);
   }
+  my $min_idx = $min_idxes[-1];
   return Call([
     $list[$min_idx],
     $self->_weave_expr($thing, @list[0..$min_idx-1]),
