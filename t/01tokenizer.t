@@ -1,9 +1,5 @@
-use strict;
-use warnings;
-use lib 'lib';
 use Test2::V0;
-use experimental 'signatures';
-use feature 'state';
+use Mojo::Base -strict, -signatures;
 use XCL::Tokenizer;
 
 sub tk ($str) { state $tk = XCL::Tokenizer->new; [ $tk->tokenize($str) ] }

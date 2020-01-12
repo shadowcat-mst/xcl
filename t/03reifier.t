@@ -1,5 +1,4 @@
 use Test2::V0;
-use lib 'lib';
 use Mojo::Base -strict, -signatures;
 use XCL::Values;
 use XCL::Reifier;

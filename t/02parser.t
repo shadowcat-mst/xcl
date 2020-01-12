@@ -1,9 +1,5 @@
-use strict;
-use warnings;
-use lib 'lib';
 use Test2::V0;
-use experimental 'signatures';
-use feature 'state';
+use Mojo::Base -strict, -signatures;
 use XCL::Parser;
 
 sub xp ($x) {

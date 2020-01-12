@@ -1,8 +1,5 @@
-use strict;
-use warnings;
-use lib 'lib';
 use Test2::V0;
-use experimental 'signatures';
+use Mojo::Base -strict, -signatures;
 use Mojo::File 'path';
 
 my @pm = path('lib')
