@@ -62,7 +62,7 @@ sub _weave_apply ($self, $thing, @list) {
       1..$#list;
   return $thing->make([ map $self->weave($_), @list ]) unless @op_indices;
   my $min_idx = min_by { $ops->{$list[$_]->data} } @op_indices;
-  if ($ops->{$list[$min_idx]->data} > 0) {
+  if ($thing->is('Call') and $ops->{$list[$min_idx]->data} > 0) {
     splice(
       @list, $min_idx - 1, 3,
       Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
