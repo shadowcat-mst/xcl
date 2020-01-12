@@ -6,37 +6,21 @@ use experimental 'signatures';
 use feature 'state';
 use XCL::Parser;
 
-sub xp (@x) {
+sub xp ($x) {
   state $p =  XCL::Parser->new;
-  my ($toks, $block) = $p->extract_stmt_list(@x);
-  is $toks, [];
-  #return ::Dwarn $block;
-  return $block;
+  my $parse = $p->parse(stmt_list => $x);
+  #return ::Dwarn $parse;
+  return $parse;
 }
 
-is xp(
-  [ word => 'x' ],
-  [ start_list => '(' ],
-  [ number => '1' ],
-  [ end_list => ')' ],
-), [
+is xp('x(1)'), [
   'block', [
     'stmt',
-    [ 'compound', [ 'word', 'x' ], [ 'list', [ 'call', [ 'number', 1 ] ] ] ],
+    [ 'compound', [ 'word', 'x' ], [ 'list', [ 'expr', [ 'number', 1 ] ] ] ],
   ],
 ];
 
-is xp(
-  [ word => 'x' ],
-  [ ws => ' ' ],
-  [ start_block => '{' ],
-  [ word => 'y' ],
-  [ ws => ' ' ],
-  [ word => 'z' ],
-  [ end_block => '}' ],
-  [ ws => "\n" ],
-  [ word => 'n' ],
-), [ block =>
+is xp("x { y z }\nn"), [ block =>
   [ stmt =>
     [ word => 'x' ],
     [ block => [ stmt => [ word => 'y' ], [ word => 'z' ] ] ],
