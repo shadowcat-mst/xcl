@@ -43,20 +43,19 @@ sub _weave_List ($self, $thing) {
 }
 
 sub _weave_Call ($self, $thing) {
-  $self->_weave_apply($thing);
+  $self->_weave_apply($thing, $thing->values);
 }
 
 sub _weave_Compound ($self, $thing) {
-  $self->_weave_apply($thing);
+  $self->_weave_apply($thing, @{$thing->data});
 }
 
 sub _weave_expr ($self, $thing, @exp) {
   return $self->weave($exp[0]) if @exp == 1;
-  $thing->make([ map $self->weave($_), @exp ]);
+  $self->_weave_apply($thing, @exp);
 }
 
-sub _weave_apply ($self, $thing) {
-  my @list = @{$thing->data};
+sub _weave_apply ($self, $thing, @list) {
   my $ops = $self->ops;
   my @op_indices = grep exists $ops->{$list[$_]->data},
     grep $list[$_]->is('Name'),

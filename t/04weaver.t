@@ -31,4 +31,6 @@ is(xw('a b . c d'), xw('a [ . b c ] d'));
 
 is(xw('a.b c'), xw('[ . a b ] c'));
 
+is(xw('x.y.z'), xw('. [ . x y ] z'));
+
 done_testing;
