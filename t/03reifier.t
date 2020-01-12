@@ -1,17 +1,18 @@
 use Test2::V0;
 use lib 'lib';
+use Mojo::Base -strict, -signatures;
 use XCL::Values;
 use XCL::Reifier;
 
-use Devel::DDCWarn;
+sub xr ($str) { state $r = XCL::Reifier->new; $r->parse(stmt_list => $str) }
 
 is(
-  XCL::Reifier->new->parse('stmt_list', 'f(1)'),
+  xr('f(1)'),
   Block [ Compound([ Name('f'), List([ Int(1) ]) ]) ]
 );
 
 is(
-  XCL::Reifier->new->parse('stmt_list', 'f(1) x'),
+  xr('f(1) x'),
   Block [ Call [ Compound([ Name('f'), List([ Int(1) ]) ]), Name('x') ] ]
 );
 
