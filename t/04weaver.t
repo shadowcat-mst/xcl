@@ -29,4 +29,6 @@ $w->ops({ '.' => 3 });
 
 is(xw('a b . c d'), xw('a [ . b c ] d'));
 
+is(xw('a.b c'), xw('[ . a b ] c'));
+
 done_testing;

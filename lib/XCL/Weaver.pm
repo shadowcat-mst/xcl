@@ -68,7 +68,7 @@ sub _weave_apply ($self, $thing) {
       @list, $min_idx - 1, 3,
       Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
     );
-    return Call(\@list);
+    return $self->_weave_expr('XCL::V::Call', @list);
   }
   return Call([
     $list[$min_idx],
