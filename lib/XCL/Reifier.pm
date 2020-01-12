@@ -31,26 +31,27 @@ sub _reify_string { String($_[1]) }
 sub _reify_blockstring { String($_[1]) }
 
 sub _reify_list ($self, @args) {
-  List([
-    map $self->reify_ast(@$_),
-      map { $_->[0] eq 'call' && @$_ == 2 ? $_->[1] : $_ }
-        @args 
-  ]);
+  List([ map $self->reify_ast(@$_), @args ]);
 }
 
 sub _reify_call ($self, @args) {
   Call([ map $self->reify_ast(@$_), @args ]);
 }
 
+sub _reify_expr ($self, @args) {
+  @args == 1
+    ? $self->reify_ast(@{$args[0]})
+    : $self->_reify_call(@args);
+}
+
+sub _reify_stmt ($self, @args) {
+  @args == 1 && $args[0][0] eq 'compound'
+    ? $self->reify_ast(@{$args[0]})
+    : $self->_reify_call(@args);
+}
+
 sub _reify_block ($self, @args) {
-  Block([
-    map $self->reify_ast(@$_),
-      map {
-        $_->[0] eq 'call' && @$_ == 2 && $_->[1][0] eq 'compound'
-          ? $_->[1]
-          : $_
-      } @args 
-  ]);
+  Block([ map $self->reify_ast(@$_), @args ])
 }
 
 sub _reify_compound ($self, @args) {

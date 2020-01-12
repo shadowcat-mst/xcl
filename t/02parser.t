@@ -21,7 +21,7 @@ is xp(
   [ end_list => ')' ],
 ), [
   'block', [
-    'call',
+    'stmt',
     [ 'compound', [ 'word', 'x' ], [ 'list', [ 'call', [ 'number', 1 ] ] ] ],
   ],
 ];
@@ -37,11 +37,11 @@ is xp(
   [ ws => "\n" ],
   [ word => 'n' ],
 ), [ block =>
-  [ call =>
+  [ stmt =>
     [ word => 'x' ],
-    [ block => [ call => [ word => 'y' ], [ word => 'z' ] ] ],
+    [ block => [ stmt => [ word => 'y' ], [ word => 'z' ] ] ],
   ],
-  [ call =>
+  [ stmt =>
     [ word => 'n' ]
   ]
 ];

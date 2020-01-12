@@ -37,7 +37,7 @@ sub extract_compoundish ($self, @toks) {
   return (\@toks, [ compound => @compound ]);
 }
 
-sub _extract_spacecall ($self, $end, @toks) {
+sub _extract_spacecall ($self, $call_type, @toks) {
   my @spc;
   while (@toks) {
     my $type = $toks[0][0];
@@ -53,13 +53,13 @@ sub _extract_spacecall ($self, $end, @toks) {
     }
     last;
   }
-  return (\@toks, (@spc ? [ call => @spc ] : ()));
+  return (\@toks, (@spc ? [ $call_type => @spc ] : ()));
 }
 
-sub _extract_combi ($self, $mid, $end, $combi_type, @toks) {
+sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {
   my @ret;
   while (@toks) {
-    if (my ($toks, $val) = $self->_extract_spacecall($end//'', @toks)) {
+    if (my ($toks, $val) = $self->_extract_spacecall($call_type, @toks)) {
       push @ret, $val;
       @toks = @$toks;
     }
@@ -74,13 +74,15 @@ sub _extract_combi ($self, $mid, $end, $combi_type, @toks) {
 }
 
 sub extract_stmt_list ($self, @toks) {
-  $self->_extract_combi(';', '', 'block', @toks);
+  $self->_extract_combi(';', '', 'stmt', 'block', @toks);
 }
 
-sub extract_call { shift->_extract_spacecall('end_call', @_) }
-sub extract_list { shift->_extract_combi('comma', 'end_list', 'list', @_) }
+sub extract_call { shift->_extract_spacecall('call', @_) }
+sub extract_list {
+  shift->_extract_combi('comma', 'end_list', 'expr', 'list', @_)
+}
 sub extract_block {
-  shift->_extract_combi('semicolon', 'end_block', 'block', @_)
+  shift->_extract_combi('semicolon', 'end_block', 'stmt', 'block', @_)
 }
 
 1;
