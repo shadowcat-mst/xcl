@@ -45,4 +45,8 @@ sub DESTROY {
   return;
 }
 
+sub make ($proto, $data, $metadata = {}) {
+  $proto->new(data => $data, metadata => $metadata);
+}
+
 1;
