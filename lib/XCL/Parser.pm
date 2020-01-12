@@ -53,7 +53,7 @@ sub _extract_spacecall ($self, $call_type, @toks) {
     }
     last;
   }
-  return (\@toks, (@spc ? [ $call_type => @spc ] : ()));
+  return (@spc ? (\@toks, [ $call_type => @spc ]) : ());
 }
 
 sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {

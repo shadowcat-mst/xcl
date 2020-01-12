@@ -33,4 +33,7 @@ is xp('+ [ x y ] z'), [
   ],
 ];
 
+is xp('x()'),
+  [ 'block', [ 'stmt', [ 'compound', [ 'word', 'x' ], [ 'list' ] ] ] ];
+
 done_testing;
