@@ -23,4 +23,6 @@ $w->ops({ '+' => -4 });
 
 is(xw('x + 1'), xw('+ x 1'));
 
+is(xw('x y + z'), xw('+ [ x y ] z'));
+
 done_testing;

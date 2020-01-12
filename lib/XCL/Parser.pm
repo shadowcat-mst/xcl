@@ -77,7 +77,11 @@ sub extract_stmt_list ($self, @toks) {
   $self->_extract_combi(';', '', 'stmt', 'block', @toks);
 }
 
-sub extract_call { shift->_extract_spacecall('call', @_) }
+sub extract_call ($self, @toks) {
+  my ($toks, $call) = $self->_extract_spacecall('call', @toks);
+  die "Confused" unless (shift @$toks)->[0] eq 'end_call';
+  return ($toks, $call);
+}
 sub extract_list {
   shift->_extract_combi('comma', 'end_list', 'expr', 'list', @_)
 }

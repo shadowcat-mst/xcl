@@ -26,4 +26,11 @@ is xp("x { y z }\nn"), [ block =>
   ]
 ];
 
+is xp('+ [ x y ] z'), [
+  'block', [
+    'stmt', [ 'symbol', '+' ], [ 'call', [ 'word', 'x' ], [ 'word', 'y' ] ],
+    [ 'word', 'z' ],
+  ],
+];
+
 done_testing;
