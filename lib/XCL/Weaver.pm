@@ -11,7 +11,7 @@ has reifier => sub {
 
 has 'scope';
 
-has _ops => sub ($self) {
+has ops => sub ($self) {
   return {} unless my $scope = $self->scope;
   my $ops_raw = $scope->get('_OPS')->val->data;
   # should check all Int here
@@ -50,15 +50,20 @@ sub _weave_Compound ($self, $thing) {
   $self->_weave_apply($thing);
 }
 
+sub _weave_expr ($self, $thing, @exp) {
+  return $self->weave($exp[0]) if @exp == 1;
+  $thing->make([ map $self->weave($_), @exp ]);
+}
+
 sub _weave_apply ($self, $thing) {
   my @list = @{$thing->data};
-  my $ops = $self->_ops;
-  my @op_indices = grep exists $ops->{$list[$_]},
+  my $ops = $self->ops;
+  my @op_indices = grep exists $ops->{$list[$_]->data},
     grep $list[$_]->is('Name'),
-      0..$#list;
+      1..$#list;
   return $thing->make([ map $self->weave($_), @list ]) unless @op_indices;
   my $min_idx = min_by { $ops->{$list[$_]->data} } @op_indices;
-  if ($min_idx > 0) {
+  if ($ops->{$list[$min_idx]->data} > 0) {
     splice(
       @list, $min_idx - 1, 3,
       Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
@@ -67,8 +72,8 @@ sub _weave_apply ($self, $thing) {
   }
   return Call([
     $list[$min_idx],
-    $self->weave($self->make([ @list[0..$min_idx-1] ])),
-    $self->weave($self->make([ @list[$min_idx+1..$#list] ])),
+    $self->_weave_expr($thing, @list[0..$min_idx-1]),
+    $self->_weave_expr($thing, @list[$min_idx+1..$#list]),
   ]);
 }
 

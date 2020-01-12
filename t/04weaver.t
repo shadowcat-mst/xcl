@@ -3,7 +3,9 @@ use Mojo::Base -strict, -signatures;
 use XCL::Values;
 use XCL::Weaver;
 
-sub xw ($str) { state $r = XCL::Weaver->new; $r->parse(stmt_list => $str) }
+my $w = XCL::Weaver->new;
+
+sub xw ($str) { $w->parse(stmt_list => $str) }
 
 is(
   xw('f(1)'),
@@ -14,5 +16,11 @@ is(
   xw('f(1) x'),
   Block [ Call [ Compound([ Name('f'), List([ Int(1) ]) ]), Name('x') ] ]
 );
+
+is(xw('x + 1'), Block [ Call [ Name('x'), Name('+'), Int(1) ] ]);
+
+$w->ops({ '+' => -4 });
+
+is(xw('x + 1'), xw('+ x 1'));
 
 done_testing;
