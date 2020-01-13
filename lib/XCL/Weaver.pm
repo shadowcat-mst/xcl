@@ -67,10 +67,13 @@ sub _weave_apply ($self, $thing, @list) {
     return $self->_weave_expr($thing, @list);
   }
   my $min_idx = $min_idxes[$assoc];
-  return Call([
-    $list[$min_idx],
+  my @sides = (
     $self->_weave_expr($thing, @list[0..$min_idx-1]),
     $self->_weave_expr($thing, @list[$min_idx+1..$#list]),
+  );
+  return Call([
+    $list[$min_idx],
+    $reverse ? reverse(@sides) : @sides
   ]);
 }
 
