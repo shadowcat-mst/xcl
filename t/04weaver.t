@@ -19,7 +19,7 @@ is(
 
 is(xw('x + 1'), Block [ Call [ Name('x'), Name('+'), Int(1) ] ]);
 
-$w->ops({ '+' => [ -4 ] });
+$w->ops({ '+' => [ -4, -1 ] });
 
 is(xw('x + 1'), xw('+ x 1'));
 
@@ -29,7 +29,7 @@ is(xw('x + y + z'), xw('+ [ + x y ] z'));
 
 is(xw('x()+y'), xw('+ x() y'));
 
-$w->ops({ '.' => [ 3 ] });
+$w->ops({ '.' => [ 3, 0 ] });
 
 is(xw('a b . c d'), xw('a [ . b c ] d'));
 
@@ -40,5 +40,9 @@ is(xw('x.y.z'), xw('. [ . x y ] z'));
 is(xw('x.y.z()'), xw('[ . [ . x y ] z ]()'));
 
 is(xw('x.y.z(1)'), xw('[ . [ . x y ] z ](1)'));
+
+$w->ops({ '+' => [ -4, -1 ], '=' => [ -20, 0 ] });
+
+is(xw('x = y = z + 3'), xw('= x [ = y [ + z 3 ] ]'));
 
 done_testing;

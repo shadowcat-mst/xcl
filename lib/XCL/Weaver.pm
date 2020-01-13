@@ -52,21 +52,21 @@ sub _weave_expr ($self, $thing, @exp) {
 sub _weave_apply ($self, $thing, @list) {
   return $thing->make([ map $self->weave($_), @list ]) unless @list > 2;
   my $ops = $self->ops;
-  my @op_indices = grep exists $ops->{$list[$_]->data},
-      grep $list[$_]->is('Name'),
+  my @op_indices = 
+      grep $list[$_]->is('Name') && exists $ops->{$list[$_]->data},
         1..($#list-1);
   return $thing->make([ map $self->weave($_), @list ]) unless @op_indices;
-  my @min_idxes = min_by { $ops->{$list[$_]->data} } @op_indices;
+  my @min_idxes = min_by { $ops->{$list[$_]->data}[0] } @op_indices;
   my ($prec, $assoc, $reverse) = @{$ops->{$list[$min_idxes[0]]->data}};
   if ($prec > 0) {
-    my $min_idx = $min_idxes[0];
+    my $min_idx = $min_idxes[$assoc];
     splice(
       @list, $min_idx - 1, 3,
       Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
     );
     return $self->_weave_expr($thing, @list);
   }
-  my $min_idx = $min_idxes[-1];
+  my $min_idx = $min_idxes[$assoc];
   return Call([
     $list[$min_idx],
     $self->_weave_expr($thing, @list[0..$min_idx-1]),
