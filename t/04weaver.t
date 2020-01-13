@@ -19,7 +19,7 @@ is(
 
 is(xw('x + 1'), Block [ Call [ Name('x'), Name('+'), Int(1) ] ]);
 
-$w->ops({ '+' => -4 });
+$w->ops({ '+' => [ -4 ] });
 
 is(xw('x + 1'), xw('+ x 1'));
 
@@ -29,7 +29,7 @@ is(xw('x + y + z'), xw('+ [ + x y ] z'));
 
 is(xw('x()+y'), xw('+ x() y'));
 
-$w->ops({ '.' => 3 });
+$w->ops({ '.' => [ 3 ] });
 
 is(xw('a b . c d'), xw('a [ . b c ] d'));
 

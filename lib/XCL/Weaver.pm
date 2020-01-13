@@ -9,15 +9,7 @@ has reifier => sub {
   XCL::Reifier->new;
 };
 
-has 'scope';
-
-has ops => sub ($self) {
-  return {} unless my $scope = $self->scope;
-  my $ops_raw = $scope->get('_OPS')->val->data;
-  # should check all Int here
-  my %ops = map +($_ => $ops_raw->{$_}->data), sort keys %$ops_raw;
-  \%ops
-};
+has ops => sub { {} };
 
 sub parse ($self, $type, $str) {
   $self->weave($self->reifier->parse($type, $str));
@@ -58,13 +50,16 @@ sub _weave_expr ($self, $thing, @exp) {
 }
 
 sub _weave_apply ($self, $thing, @list) {
+  return $thing->make([ map $self->weave($_), @list ]) unless @list > 2;
   my $ops = $self->ops;
   my @op_indices = grep exists $ops->{$list[$_]->data},
-    grep $list[$_]->is('Name'),
-      1..$#list;
+      grep $list[$_]->is('Name'),
+        1..($#list-1);
   return $thing->make([ map $self->weave($_), @list ]) unless @op_indices;
   my @min_idxes = min_by { $ops->{$list[$_]->data} } @op_indices;
-  if ($ops->{$list[my $min_idx = $min_idxes[0]]->data} > 0) {
+  my ($prec, $assoc, $reverse) = @{$ops->{$list[$min_idxes[0]]->data}};
+  if ($prec > 0) {
+    my $min_idx = $min_idxes[0];
     splice(
       @list, $min_idx - 1, 3,
       Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
