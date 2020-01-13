@@ -1,8 +1,8 @@
 set = set;
 set . dot;
 # <<<magic ensues to make them *now* binops>>>
-[Scope.current().val let] = \[Scope.current().val];
-let var = \[Scope.current().var];
+Scope.val_in_current let = Scope.val_in_current;
+let var = Scope.var_in_current;
 let fexpr = Fexpr.make;
 let => = let lambda = Lambda.make;
 let % = let dict = Dict.make;

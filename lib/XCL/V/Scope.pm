@@ -37,6 +37,9 @@ sub display ($self, $depth) {
   'Scope('.$self->data->display($depth).')'
 }
 
+sub c_fx_val_in_current ($class, $self, $lst) { $self->intro(\&Val, $lst); }
+sub c_fx_var_in_current ($class, $self, $lst) { $self->intro(\&Var, $lst); }
+
 sub fx_val ($self, $, $lst) { $self->intro(\&Val, $lst); }
 sub fx_var ($self, $, $lst) { $self->intro(\&Var, $lst); }
 

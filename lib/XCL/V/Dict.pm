@@ -74,4 +74,14 @@ sub f_pairs ($self, $) {
   ValF List [ $self->pairs ];
 }
 
+sub c_f_concat ($class, $lst) {
+  return $_ for $class->_same_types($lst);
+  ValF Dict +{ map %$_, $lst->values };
+}
+
+sub to_perl ($self) {
+  my %d = %{$self->data};
+  +{ map +($_ => $d{$_}->to_perl), CORE::keys %d };
+}
+
 1;

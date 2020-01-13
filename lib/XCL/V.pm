@@ -2,9 +2,12 @@ package XCL::V;
 
 use Future; # needs to be somewhere
 use XCL::Values;
-use Mojo::Base -base, -signatures;
+use Mojo::Base -base, -signatures, -async;
+use utf8 ();
 
 has [ qw(data metadata) ];
+
+sub but ($self, @args) { ref($self)->new(%$self, @args) }
 
 sub evaluate_against ($self, $) { Val($self) }
 
@@ -48,5 +51,48 @@ sub DESTROY {
 sub make ($proto, $data, $metadata = {}) {
   $proto->new(data => $data, metadata => $metadata);
 }
+
+sub to_perl ($self) { $self }
+
+sub from_perl ($class, $value) {
+  my $ref = ref($value);
+  if ($ref eq 'HASH') {
+    return Dict({ map +($_ => $class->from_perl($value->{$_})), @$value });
+  }
+  if ($ref eq 'ARRAY') {
+    return List([ map $class->from_perl($_), @$value ]);
+  }
+  return $value if $ref;
+  if (
+    !utf8::is_utf8($value)
+    && length((my $dummy = '') & $value)
+    && 0 + $value eq $value
+    && $value * 0 == 0
+  ) {
+    return $value =~ /\./ ? Float($value) : Int($value);
+  }
+  return String($value);
+}
+
+sub fx_or ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 0) }
+sub fx_and ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 1) }
+
+async sub _fx_bool {
+  my ($self, $scope, $lst, $check) = @_;
+  my $bres = await $self->bool;
+  return $bres unless $bres->is_ok;
+  return $self if $bres->val->data != $check;
+  return await $scope->eval($lst->data->[0]);
+}
+
+async sub fx_else {
+  my ($self, $scope, $lst) = @_;
+  my $bres = await $self->bool;
+  return $bres unless $bres->is_ok;
+  return $bres if $bres->val->data;
+  my $res = await $scope->eval($lst->data->[0]);
+  return $res unless $res->is_ok;
+  return await $res->val->bool;
+}  
 
 1;

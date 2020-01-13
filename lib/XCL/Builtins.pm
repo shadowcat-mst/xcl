@@ -2,127 +2,170 @@ package XCL::Builtins;
 
 use XCL::V::Scope;
 use XCL::Values;
+use XCL::Builtin::Functions;
 use Mojo::Base -base, -signatures, -async;
 
-async sub c_fx_set {
-  my ($class, $scope, $lst) = @_;
-  my ($set, $valproto) = $lst->values;
-  my $pres = await $scope->eval($set);
-  return $pres unless $pres->is_ok;
-  my $place = $pres->val;
-  return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
-    unless $place->can_set;
-  my $valres = await $scope->eval($valproto);
-  return $valres unless $valres->is_ok;
-  return $place->set($valres->val);
+sub _load_ops () {
+  my %ops = (
+    '**' => [ -5, -1 ],
+    '+' => [ -10, -1 ],
+    '-' => [ -10, -1 ],
+    '*' => [ -15, -1 ],
+    '/' => [ -15, -1 ],
+    '++' => [ -20, -1 ],
+    +(map +($_ => [ -30, -1 ]), qw(> < >= <=)),
+    +(map +($_ => [ -35, -1 ]), qw(== !=)),
+    '&&' => [ -50, 0 ],
+    '||' => [ -55, 0 ],
+    '..' => [ -60, 0 ],
+    '=' => [ -70, 0 ],
+    'and' => [ -80, 0 ],
+    'or' => [ -85, 0 ],
+    'if' => [ -90, 0, 1 ],
+    'unless' => [ -90, 0, 1 ],
+    'else' => [ -95, -1 ],
+
+    '.' => [ 10, 0 ],
+    '=>' => [ 15, 0 ],
+  );
+  \%ops;
 }
 
-sub c_fx_id ($class, $scope, $lst) {
-  my @values = $lst->values;
-  return ResultF $scope->eval($values[0]) if @values == 1;
-  return ResultF $scope->eval(Call(\@values));
+sub ops ($class) {
+  state $ops = _load_ops;
 }
 
-sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
-
-sub c_fx_result_of ($class, $scope, $lst) {
-   ValF $class->c_fx_id($scope, $lst)->get;
-}
-
-async sub c_fx_if {
-  my ($class, $scope, $lst) = @_;
-  my ($cond, $true, $false) = @{$lst->data};
-  my $dscope = $scope->derive;
-  my $res = await $dscope->eval($cond);
-  return $res unless $res->is_ok;
-  my $bool = await $res->val->bool;
-  return $bool unless $bool->is_ok;
-  if ($bool->val->data) {
-    my $res = await $true->invoke($dscope);
-    return defined($false) ? $res : Val($res);
-  }
-  return await $false->invoke($dscope) if $false;
-  return Val(Err([ Name('NO_SUCH_VALUE') => String('else') ]));
-}
-
-async sub c_fx_while {
-  my ($class, $scope, $lst) = @_;
-  my ($cond, $body) = $lst->values;
-  my $dscope = $scope->derive;
-  my $did;
-  WHILE: while (1) {
-    my $res = await $dscope->eval($cond);
-    return $res unless $res->is_ok;
-    my $bool = await $res->val->bool;
-    return $bool unless $bool->is_ok;
-    if ($bool->val->data) {
-      $did ||= 1;
-      my $bscope = $dscope->derive;
-      my $res = await $body->invoke($bscope);
-      return $res unless $res->is_ok;
+sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
+  my ($is_class, $fexpr, $name) = $stash_name =~ /^((?:c_)?)_f(x?)_(.*)/;
+  my $sub = $namespace->can($stash_name);
+  my $native = do {
+    if ($is_class) {
+      if ($fexpr) {
+        $sub;
+      } else {
+        async sub {
+          my ($scope, $lst) = @_;
+          my $res = await $scope->eval($lst);
+          return $res unless $res->is_ok;
+          $sub->($res->val->values);
+        };
+      }
     } else {
-      last WHILE;
-    }
-  }
-  return Val(Bool($did));
-}
-
-sub c_fx_do ($class, $scope, $lst) {
-  $scope->val(Call([ $lst->values ]));
-}
-
-async sub c_fx_dot {
-  my ($class, $scope, $lst) = @_;
-  my ($lp, $rp) = $lst->values;
-  my $lr = await $scope->($lp);
-  return $lr unless $lr->is_ok;
-  my $method_name = String do {
-    if ($rp->is('Name')) {
-      $rp->data;
-    } else {
-      my $res = await $scope->eval($rp);
-      return $res unless $res->is_ok;
-      return Err([ Name('WRONG_TYPE') ]) unless $res->val->is('String');
-      $res->val->data;
+      if ($fexpr) {
+        async sub {
+          my ($scope, $lst) = @_;
+          my ($obj, @args) = $lst->values;
+          my $ores = await $scope->eval($obj);
+          return $ores unless $ores->is_ok;
+          $sub->($ores->val, @args);
+        };
+      } else {
+        async sub {
+          my ($scope, $lst) = @_;
+          my $res = await $scope->eval($lst);
+          return $res unless $res->is_ok;
+          my ($obj, @args) = $res->val->values;
+          $sub->($obj, @args);
+        };
+      }
     }
   };
-  my $l = $lr->val;
-  my $res;
-  # let meta = metadata(l);
-  # if [exists let dm = meta('dot_methods')] {
-  #   if [exists let m = dm(r)] {
-  #     m ++ (l)
-  #   } {
-  #     meta('dot_via')(r) ++ (l);
-  #   }
-  # } {
-  #   if [exists let dv = meta('dot_via')] {
-  #     scope.eval(dv.r) ++ (l);
-  #   } {
-  #     let sym = Name.make l.type();
-  #     scope.eval(sym.r) ++ (l);
-  #   }
-  # }
-  if (my $methods = $l->metadata->{dot_methods}) {
-    $res = await $methods->invoke($scope, $method_name);
-    if (!$res->is_ok and $res->err->data->[0]->data ne 'NO_SUCH_VALUE') {
-      return $res;
-    }
-  }
-  unless ($res and $res->is_ok) {
-    # only fall back to the object type by default in absence of dot_methods
-    if (my $dot_via = $l->metadata->{dot_via} || ($res and Name($l->type))) {
-      $res = await $scope->eval(Call([
-        Name('.'), $dot_via, $method_name
-      ]));
-      return $res unless $res->is_ok;
-    }
-  }
-  return Val Call [ $res->val, $l ];
+  return Val Native $native unless $cls_unwrap;
+  return Val Native sub ($scope, $lst) {
+    # Possibly this should deref the name and include it in the scope?
+    my (undef, @args) = $lst->values;
+    $native->($scope, @args);
+  };
 }
 
-sub c_f_metadata ($class, $lst) {
-  Dict($lst->[0]->metadata);
+sub _builtin_names_of ($namespace) {
+  my $file = join('/', split '::', $namespace).'.pm';
+  require $file;
+  return
+    grep $namespace->can($_),
+      grep /^(?:c_)?_fx?_./,
+        sort do { no strict 'refs'; keys %{"${namespace}::"} };
+}
+
+sub _builtins_of ($namespace, $unwrap = 0) {
+  return +{
+    map +(
+      $_ =~ /^(?:c_)?_fx?_(.+)$/
+       => _construct_builtin($namespace, $_, $unwrap)
+    ), _builtin_names_of($namespace)
+  };
+}
+
+sub _load_builtins () {
+
+  my $builtins = _builtins_of('XCL::Builtin::Functions');
+
+  foreach my $vtype (@XCL::Values::Types) {
+    my $vbuiltins = _builtins_of("XCL::V::${vtype}", 'unwrap');
+    $builtins->{$vtype} = Val Name($vtype, { dot_methods => Dict($vbuiltins) });
+  }
+
+  my $scope = Scope $builtins;
+
+  my @map = (
+
+    '=' => 'set',
+    '.' => 'dot',
+
+    fexpr => 'Fexpr.make',
+    lambda => 'Lambda.make',
+    string => 'String.make',
+    dict => 'Dict.make',
+    escape => 'Escape.make',
+
+    '%' => 'dict',
+    "\\" => 'escape',
+    '=>' => 'lambda',
+
+    current_scope => 'Scope.current',
+    let => 'Scope.val_in_current',
+    var => 'Scope.var_in_current',
+
+    '==' => '.eq',
+    '!=' => '.ne',
+
+    '<' => '.lt',
+    '>' => '.gt',
+    '>=' => '.ge',
+    '<=' => '.le',
+
+    '+' => '.plus',
+    '-' => '.minus',
+    '*' => '.multiply',
+    '/' => '.divide',
+
+    '++' => '.concat',
+
+    '$' => 'id',
+    '?' => 'result_of',
+
+    'not' => 'Bool.not',
+    '!' => 'Bool.not',
+  );
+
+  while (my ($alias, $to) = splice @map, 0, 2) {
+    my @bits = split /\./, $to;
+    my $thing = do {
+      if (@bits > 1) {
+        XCL::V::Builtin::Functions->c_fx_dot(
+          $scope,
+          List [ map String($_), grep length, @bits ]
+        )->get->val;
+      } else {
+        $builtins->{$bits[0]}
+      }
+    };
+    $builtins->{$alias} = $thing;
+  }
+}
+
+sub builtins ($class) {
+  state $builtins = _load_builtins;
 }
 
 1;

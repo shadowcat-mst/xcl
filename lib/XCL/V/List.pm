@@ -54,4 +54,8 @@ async sub f_map {
   return Val List \@val;
 }
 
+sub to_perl ($self) {
+  [ map $_->to_perl, @{$self->data} ]
+}
+
 1;

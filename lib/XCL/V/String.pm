@@ -33,4 +33,6 @@ sub f_concat ($self, $lst) {
   $self->c_f_make(List [ $self, $lst->values ]);
 }
 
+sub to_perl ($self) { $self->data }
+
 1;
