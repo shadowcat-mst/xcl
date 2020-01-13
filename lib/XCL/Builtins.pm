@@ -91,18 +91,26 @@ sub _builtins_of ($namespace, $unwrap = 0) {
   return +{
     map +(
       $_ =~ /^(?:c_)?_fx?_(.+)$/
-       => _construct_builtin($namespace, $_, $unwrap)
-    ), _builtin_names_of($namespace)
+       => _construct_builtin $namespace, $_, $unwrap
+    ), _builtin_names_of $namespace
   };
 }
 
 sub _load_builtins () {
 
-  my $builtins = _builtins_of('XCL::Builtin::Functions');
+  my $builtins = _builtins_of 'XCL::Builtin::Functions';
+
+  $builtins->{Value} = Val Name(
+    Value => {
+      dot_methods => Dict(my $vbase = _builtins_of 'XCL::V', 'unwrap')
+    }
+  );
 
   foreach my $vtype (@XCL::Values::Types) {
-    my $vbuiltins = _builtins_of("XCL::V::${vtype}", 'unwrap');
-    $builtins->{$vtype} = Val Name($vtype, { dot_methods => Dict($vbuiltins) });
+    my $vbuiltins = _builtins_of "XCL::V::${vtype}", 'unwrap';
+    $builtins->{$vtype} = Val Name(
+      $vtype, { dot_methods => Dict({ %$vbase, %$vbuiltins }) }
+    );
   }
 
   my $scope = Scope $builtins;
@@ -141,6 +149,11 @@ sub _load_builtins () {
 
     '++' => '.concat',
 
+    '||' => '.or',
+    '&&' => '.and',
+    or => '.or',
+    and => '.and',
+
     '$' => 'id',
     '?' => 'result_of',
 
@@ -162,6 +175,8 @@ sub _load_builtins () {
     };
     $builtins->{$alias} = $thing;
   }
+
+  return $builtins;
 }
 
 sub builtins ($class) {

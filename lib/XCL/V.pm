@@ -85,16 +85,4 @@ async sub _fx_bool {
   return await $scope->eval($lst->data->[0]);
 }
 
-async sub fx_else {
-  my ($self, $scope, $lst) = @_;
-  my $bres = await $self->bool;
-  return $bres unless $bres->is_ok;
-  return $bres if $bres->val->data;
-  my $res = await $scope->eval($lst->data->[0]);
-  return $res unless $res->is_ok;
-  my $else_res = await $res->val->invoke($scope);
-  return $else_res unless $else_res->is_ok;
-  return await $else_res->val->bool;
-}
-
 1;

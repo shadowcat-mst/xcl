@@ -67,6 +67,20 @@ async sub c_fx_while {
   return Val(Bool($did));
 }
 
+async sub c_fx_else {
+  my ($class, $scope, $lst) = @_;
+  my ($lp, $rp) = $lst->values;
+  my $lr = await $scope->eval($lp);
+  return $lr unless $lr->is_ok;
+  my $bres = await $lr->val->bool;
+  return $bres unless $bres->is_ok;
+  return $bres if $bres->val->data;
+  my $else_res = await $rp->invoke($scope);
+  return $else_res unless $else_res->is_ok;
+  return await $else_res->val->bool;
+}
+
+
 sub c_fx_do ($class, $scope, $lst) {
   $scope->val(Call([ $lst->values ]));
 }
