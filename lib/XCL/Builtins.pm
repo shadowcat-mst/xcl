@@ -25,7 +25,7 @@ sub _load_ops () {
     'if' => [ -90, 0, 1 ],
     'unless' => [ -90, 0, 1 ],
 
-    'for' => [ -95, 0, 1 ],
+    'foreach' => [ -95, 0, 1 ],
     'forall' => [ -95, 0, 1 ],
 
     'else' => [ -100, -1 ],
@@ -83,7 +83,7 @@ sub _builtin_map () {
     'not' => 'Bool.not',
     '!' => 'Bool.not',
 
-    for => '.for',
+    foreach => '.foreach',
     forall => '.forall',
   );
 }
