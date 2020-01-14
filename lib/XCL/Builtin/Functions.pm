@@ -31,8 +31,8 @@ sub c_fx_result_of ($class, $scope, $lst) {
 
 async sub c_fx_if {
   my ($class, $scope, $lst) = @_;
-  my ($cond, $block) = @{$lst->data};
-  my $dscope = $scope->derive;
+  my ($cond, $block, $dscope) = @{$lst->data};
+  $dscope ||= $scope->snapshot;
   my $res = await $dscope->eval($cond);
   return $res unless $res->is_ok;
   my $boolp = await $res->val->bool;
@@ -47,8 +47,8 @@ async sub c_fx_if {
 
 async sub c_fx_while {
   my ($class, $scope, $lst) = @_;
-  my ($cond, $body) = $lst->values;
-  my $dscope = $scope->derive;
+  my ($cond, $body, $dscope) = $lst->values;
+  $dscope ||= $scope->snapshot;
   my $did;
   WHILE: while (1) {
     my $res = await $dscope->eval($cond);
@@ -70,19 +70,19 @@ async sub c_fx_while {
 async sub c_fx_else {
   my ($class, $scope, $lst) = @_;
   my ($lp, $rp) = $lst->values;
-  my $lr = await $scope->eval($lp);
+  my $dscope = $scope->snapshot;
+  my $lr = await $lp->invoke($scope, $dscope);
   return $lr unless $lr->is_ok;
   my $bres = await $lr->val->bool;
   return $bres unless $bres->is_ok;
   return $bres if $bres->val->data;
-  my $else_res = await $rp->invoke($scope);
+  my $else_res = await $rp->invoke($dscope);
   return $else_res unless $else_res->is_ok;
   return await $else_res->val->bool;
 }
 
-
 sub c_fx_do ($class, $scope, $lst) {
-  $scope->val(Call([ $lst->values ]));
+  $scope->eval(Call([ $lst->values ]));
 }
 
 async sub _dot_rhs_to_name {
