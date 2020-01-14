@@ -18,21 +18,74 @@ sub _load_ops () {
     '&&' => [ -50, 0 ],
     '||' => [ -55, 0 ],
     '..' => [ -60, 0 ],
+    'where' => [ -65, 0 ],
     '=' => [ -70, 0 ],
     'and' => [ -80, 0 ],
     'or' => [ -85, 0 ],
     'if' => [ -90, 0, 1 ],
     'unless' => [ -90, 0, 1 ],
-    'else' => [ -95, -1 ],
+
+    'for' => [ -95, 0, 1 ],
+    'forall' => [ -95, 0, 1 ],
+
+    'else' => [ -100, -1 ],
 
     '.' => [ 10, 0 ],
     '=>' => [ 15, 0 ],
+    'in' => [ 20, 0 ],
   );
   \%ops;
 }
 
-sub ops ($class) {
-  state $ops = _load_ops;
+sub _builtin_map () {
+  return (
+
+    '=' => 'set',
+    '.' => 'dot',
+
+    fexpr => 'Fexpr.make',
+    lambda => 'Lambda.make',
+    string => 'String.make',
+    dict => 'Dict.make',
+    escape => 'Escape.make',
+
+    '%' => 'dict',
+    "\\" => 'escape',
+    '=>' => 'lambda',
+
+    current_scope => 'Scope.current',
+    let => 'Scope.val_in_current',
+    var => 'Scope.var_in_current',
+
+    '==' => '.eq',
+    '!=' => '.ne',
+
+    '<' => '.lt',
+    '>' => '.gt',
+    '>=' => '.ge',
+    '<=' => '.le',
+
+    '+' => '.plus',
+    '-' => '.minus',
+    '*' => '.multiply',
+    '/' => '.divide',
+
+    '++' => '.concat',
+
+    '||' => '.or',
+    '&&' => '.and',
+    or => '.or',
+    and => '.and',
+
+    '$' => 'id',
+    '?' => 'result_of',
+
+    'not' => 'Bool.not',
+    '!' => 'Bool.not',
+
+    for => '.for',
+    forall => '.forall',
+  );
 }
 
 sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
@@ -115,51 +168,7 @@ sub _load_builtins () {
 
   my $scope = Scope $builtins;
 
-  my @map = (
-
-    '=' => 'set',
-    '.' => 'dot',
-
-    fexpr => 'Fexpr.make',
-    lambda => 'Lambda.make',
-    string => 'String.make',
-    dict => 'Dict.make',
-    escape => 'Escape.make',
-
-    '%' => 'dict',
-    "\\" => 'escape',
-    '=>' => 'lambda',
-
-    current_scope => 'Scope.current',
-    let => 'Scope.val_in_current',
-    var => 'Scope.var_in_current',
-
-    '==' => '.eq',
-    '!=' => '.ne',
-
-    '<' => '.lt',
-    '>' => '.gt',
-    '>=' => '.ge',
-    '<=' => '.le',
-
-    '+' => '.plus',
-    '-' => '.minus',
-    '*' => '.multiply',
-    '/' => '.divide',
-
-    '++' => '.concat',
-
-    '||' => '.or',
-    '&&' => '.and',
-    or => '.or',
-    and => '.and',
-
-    '$' => 'id',
-    '?' => 'result_of',
-
-    'not' => 'Bool.not',
-    '!' => 'Bool.not',
-  );
+  my @map = _builtin_map();
 
   while (my ($alias, $to) = splice @map, 0, 2) {
     my @bits = split /\./, $to;
@@ -177,6 +186,10 @@ sub _load_builtins () {
   }
 
   return $builtins;
+}
+
+sub ops ($class) {
+  state $ops = _load_ops;
 }
 
 sub builtins ($class) {

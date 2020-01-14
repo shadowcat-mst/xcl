@@ -49,14 +49,14 @@ async sub c_fx_while {
   my ($class, $scope, $lst) = @_;
   my ($cond, $body, $dscope) = $lst->values;
   $dscope ||= $scope->snapshot;
-  my $did;
+  my $did = 0;
   WHILE: while (1) {
     my $res = await $dscope->eval($cond);
     return $res unless $res->is_ok;
     my $bool = await $res->val->bool;
     return $bool unless $bool->is_ok;
     if ($bool->val->data) {
-      $did ||= 1;
+      $did++;
       my $bscope = $dscope->derive;
       my $res = await $body->invoke($bscope);
       return $res unless $res->is_ok;
@@ -64,7 +64,7 @@ async sub c_fx_while {
       last WHILE;
     }
   }
-  return Val(Bool($did));
+  return Val(Int($did));
 }
 
 async sub c_fx_else {
