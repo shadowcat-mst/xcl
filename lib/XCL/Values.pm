@@ -1,6 +1,6 @@
 package XCL::Values;
 
-use Future;
+use Mojo::Promise; # async will break if this isn't loaded currently
 use Mojo::Base -strict, -signatures, -async;
 use Exporter 'import';
 
@@ -40,12 +40,12 @@ sub Err ($err, $metadata = {}) {
 
 sub ResultF {
   if (blessed($_[0]) and $_[0]->isa('XCL::V::Result')) {
-    Future->done($_[0])
+    Mojo::Promise->new->resolve($_[0])
   } else {
-    Future->done(Result(@_))
+    Mojo::Promise->new->reject(Result(@_))
   }
 }
-sub ValF { Future->done(Val(@_)) }
-sub ErrF { Future->done(Err(@_)) }
+sub ValF { ResultF(Val(@_)) }
+sub ErrF { ResultF(Err(@_)) }
 
 1;

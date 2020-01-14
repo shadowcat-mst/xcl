@@ -60,4 +60,8 @@ sub f_eval ($self, $, $lst) {
   $self->eval($lst->data->[0]);
 }
 
+sub f_call ($self, $, $lst) {
+  $self->eval(Call [ @{$lst->data} ]);
+}
+
 1;

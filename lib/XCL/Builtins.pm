@@ -30,8 +30,14 @@ sub _load_ops () {
 
     'else' => [ -100, -1 ],
 
+    # gut feeling is that => should be higher precedence than everything
+    '=>' => [ 1, 0 ],
+
     '.' => [ 10, 0 ],
-    '=>' => [ 15, 0 ],
+
+    # EXPERIMENT
+    'where' => [ 15, 0 ],
+
     'in' => [ 20, 0 ],
   );
   \%ops;
@@ -85,6 +91,8 @@ sub _builtin_map () {
 
     foreach => '.foreach',
     forall => '.forall',
+
+    where => '.where',
   );
 }
 
@@ -174,10 +182,12 @@ sub _load_builtins () {
     my @bits = split /\./, $to;
     my $thing = do {
       if (@bits > 1) {
-        XCL::V::Builtin::Functions->c_fx_dot(
+        my $val;
+        XCL::Builtin::Functions->c_fx_dot(
           $scope,
           List [ map String($_), grep length, @bits ]
-        )->get->val;
+        )->then(sub { $val = shift })->wait;
+        $val;
       } else {
         $builtins->{$bits[0]}
       }
