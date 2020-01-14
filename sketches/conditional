@@ -1,0 +1,106 @@
+
+
+if [let x = foo()].thing() {
+  x.success()
+} else {
+  x.failure()
+}
+
+while [let x = foo()].thing() {
+  do_stuff_with x;
+} else {
+  handle_not_thing x;
+}
+
+if request.is_valid() {
+  send_response(process request);
+} else {
+  send_404(request);
+}
+
+send_response process(request) if request.is_valid() else send_404 request;
+
+if [ x.values.contains(y) ] {
+
+if [ y in x ] {
+
+for r in roles {
+}
+
+for (k, v) in some_dict { }
+
+for (idx, v) in some_list.pairs() { }
+
+for v in some_dict.values() { }
+
+# lst = [ x+1 for x in orig where x+3 ];
+
+let lst = orig . where x => x+3>0 . map x => x+1;
+
+#let lst = x+1 for x in orig if x+3>0;
+
+letf map (l, r) { r.map l }
+
+let lst = map x+1 x in orig where x+3>0;
+
+let lst = map x+1 x in orig where x+3>0;
+
+let lst = map x => x+1 orig where x+3>0;
+
+x() for x in func_list;
+
+let lst = x+1 for x in [orig.where x + 3 > 0];
+
+# let lst = orig.where(x => \[ x + 3 > 0 ]).map(x => \[ x + 1 ]);
+
+let all_lines = fs.path(file_name).lines;
+
+let relevant_lines = all_lines.where m'^THING';
+
+# my @relevant_lines = grep /^THING/, @all_lines;
+
+let relevant_lines = all_lines where m'^THING';
+
+let relevant_lines = .where all_lines m'^THING';
+
+letf grep (scope, block, list) {
+  scope.eval(list).where(_ => block);
+}
+
+let relevant_lines = .where m'^THING' <| all_lines;
+
+let result = a b c |> x y z;
+
+let result = x [ a b c ] y z;
+
+let result = a b c <| x y z;
+
+let result = a [ x y z ] b c;
+
+let ints = 0 .. 100;
+
+let evens = ints |> where x => \[ not x mod 2 ];
+
+let evens = ints |> where f (x) { not x mod 2 }
+
+let evens = ints |> where x => { not x mod 2 };
+
+let evens = ints |> where not _ mod 2;
+
+# this is going to return the booleans, not the values
+#
+# let evens = ints | x => { not x mod 2 };
+
+# I *think* dot can be tweaked to support this though it doesn't yet
+
+# yes, this requires making on a binop. I regret nothing.
+
+upgrade_packages on h forall h in hosts where .os.is(target_os)
+  or log "No hosts found for $(target_os)";
+
+let results = h.where(.os.is(target_os)).mapall h => on(h, upgrade_packages)
+  or log "No hosts found for $(target_os)";
+
+
+
+
