@@ -45,6 +45,21 @@ async sub c_fx_if {
   return ValF($bool);
 }
 
+async sub c_fx_unless {
+  my ($class, $scope, $lst) = @_;
+  my ($cond, $block) = @{$lst->data};
+  my $res = await $scope->eval($cond);
+  return $res unless $res->is_ok;
+  my $boolp = await $res->val->bool;
+  return $boolp unless $boolp->is_ok;
+  my $bool = $boolp->val;
+  unless ($bool->data) {
+    my $res = await $block->invoke($scope);
+    return $res unless $res->is_ok;
+  }
+  return ValF(Bool(0+!!$bool->data));
+}
+
 async sub c_fx_while {
   my ($class, $scope, $lst) = @_;
   my ($cond, $body, $dscope) = $lst->values;
