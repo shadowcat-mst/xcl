@@ -98,9 +98,12 @@ let evens = ints |> where not _ mod 2;
 upgrade_packages on h forall h in hosts where .os.is(target_os)
   or log "No hosts found for $(target_os)";
 
-let results = h.where(.os.is(target_os)).mapall h => on(h, upgrade_packages)
+let results = hosts.where(.os.is(target_os)).mapall h => on(h, upgrade_packages)
   or log "No hosts found for $(target_os)";
 
-
-
+let results = hosts.where(.os.is(target_os)).mapall h => on(h, upgrade_packages)
+  else {
+    log "No hosts found for os $(target_os)";
+    log "Valid os tags are: $(hosts.map(.os.to_string).uniq().join ', ')";
+  };
 
