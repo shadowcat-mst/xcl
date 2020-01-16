@@ -71,7 +71,7 @@ async sub c_fx_while {
     my $bool = await $res->val->bool;
     return $bool unless $bool->is_ok;
     if ($bool->val->data) {
-      $did++;
+      $did = 1;
       my $bscope = $dscope->derive;
       my $res = await $body->invoke($bscope);
       return $res unless $res->is_ok;
@@ -79,7 +79,7 @@ async sub c_fx_while {
       last WHILE;
     }
   }
-  return Val(Int($did));
+  return Val Bool $did;
 }
 
 async sub c_fx_else {

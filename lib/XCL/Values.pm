@@ -28,7 +28,7 @@ foreach my $type (@Types) {
     no strict 'refs';
     *{$type} = sub ($data, $metadata = {}) {
       require $file;
-      bless({ data => $data, metadata => $metadata }, $class);
+      $class->new(data => $data, metadata => $metadata);
     }
   }
 }
