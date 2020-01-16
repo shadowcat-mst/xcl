@@ -69,6 +69,7 @@ sub _builtin_map () {
 
     in => [ '.in', 20, 1 ],
   );
+  map [ @map[$_*2,$_*2+1] ], 0 .. int $#map/2;
 }
 
 sub ops ($class) {
@@ -76,7 +77,7 @@ sub ops ($class) {
 }
 
 sub builtins ($class) {
-  state $builtins = XCL::Builtin::Builder::_load_ops _builtin_map;
+  state $builtins = XCL::Builtin::Builder::_load_builtins _builtin_map;
 }
 
 1;
