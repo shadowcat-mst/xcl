@@ -48,11 +48,11 @@ sub display ($self, $depth) {
   return $self->SUPER::display(0) unless $depth;
   my $in_depth = $depth - 1;
   my @res;
-  foreach my $key ($self->keys) {
+  foreach my $key (sort CORE::keys %{$self->data}) {
     push @res, '('
       .$key->display($in_depth)
       .', '
-      .$self->data->{$key->data}->display($in_depth)
+      .$self->data->{$key}->display($in_depth)
       .')';
   }
   return '%('.join(', ', @res).')';

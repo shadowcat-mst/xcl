@@ -107,7 +107,7 @@ sub _load_builtins (@map) {
 
   foreach my $thing (grep defined $_->[1][0], @map) {
     my ($alias, $to) = @$thing;
-    $builtins->{alias} =  _assemble_value $builtins, $to;
+    $builtins->{$alias} =  _assemble_value $builtins, $to;
   }
 
   return $builtins;
@@ -118,6 +118,7 @@ sub _load_ops (@map) {
     map +($_->[0], [ @{$_->[1]}[1..$#{$_->[1]}] ]),
       grep @{$_->[1]} > 1,
         @map;
+  \%ops;
 }
 
 1;

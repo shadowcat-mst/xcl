@@ -1,5 +1,6 @@
 package XCL::Values;
 
+use Scalar::Util 'blessed';
 use Mojo::Promise; # async will break if this isn't loaded currently
 use Mojo::Base -strict, -signatures, -async;
 use Exporter 'import';

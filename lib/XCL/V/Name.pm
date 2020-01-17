@@ -3,7 +3,7 @@ package XCL::V::Name;
 use XCL::Values;
 use Mojo::Base 'XCL::V', -signatures;
 
-sub evaluate_against ($self, $scope) { $scope->get($self->data) }
+sub evaluate_against ($self, $scope) { ResultF $scope->get($self->data) }
 
 sub display ($self, @) { $self->data }
 

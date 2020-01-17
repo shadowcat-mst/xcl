@@ -9,7 +9,8 @@ has tokenizer => sub {
 
 sub extract_atomish ($self, $this, @rest) {
   my ($type, $tok) = @$this;
-  if ($type eq 'word' or $type eq 'symbol' or $type eq 'number') {
+  state %is_atomish = map +($_ => 1), qw(word symbol number string);
+  if ($is_atomish{$type}) {
     return (\@rest, $this);
   }
   if (my ($start) = $type =~ /^start_(.*)$/) {
@@ -64,7 +65,7 @@ sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {
       @toks = @$toks;
     }
     last unless @toks;
-    next if $combi_type eq 'block' and $ret[-1][-1][0] eq 'block';
+    next if $combi_type eq 'block' and @ret and $ret[-1][-1][0] eq 'block';
     my $type = $toks[0][0];
     shift @toks and last if $type eq $end;
     shift @toks and next if $type eq $mid;

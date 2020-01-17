@@ -58,6 +58,7 @@ sub _weave_apply ($self, $thing, @list) {
   return $thing->make([ map $self->weave($_), @list ]) unless @op_indices;
   my @min_idxes = min_by { $ops->{$list[$_]->data}[0] } @op_indices;
   my ($prec, $assoc, $reverse) = @{$ops->{$list[$min_idxes[0]]->data}};
+  $assoc //= 0;
   if ($prec > 0) {
     my $min_idx = $min_idxes[$assoc];
     splice(
