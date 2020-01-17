@@ -1,4 +1,4 @@
-package XCL::Builtin::Functions;
+package XCL::Builtins::Functions;
 
 use XCL::V::Scope;
 use XCL::Values;

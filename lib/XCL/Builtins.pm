@@ -2,8 +2,8 @@ package XCL::Builtins;
 
 use XCL::V::Scope;
 use XCL::Values;
-use XCL::Builtin::Functions;
-use XCL::Builtin::Builder;
+use XCL::Builtins::Functions;
+use XCL::Builtins::Builder;
 use Mojo::Base -base, -signatures, -async;
 
 sub _builtin_map () {
@@ -73,11 +73,11 @@ sub _builtin_map () {
 }
 
 sub ops ($class) {
-  state $ops = XCL::Builtin::Builder::_load_ops _builtin_map;
+  state $ops = XCL::Builtins::Builder::_load_ops _builtin_map;
 }
 
 sub builtins ($class) {
-  state $builtins = XCL::Builtin::Builder::_load_builtins _builtin_map;
+  state $builtins = XCL::Builtins::Builder::_load_builtins _builtin_map;
 }
 
 1;
