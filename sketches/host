@@ -1,0 +1,60 @@
+use shell;
+use remote 'on';
+use stdio 'stdout';
+
+let apt = shell.command 'apt';
+
+let packages = %{
+  let update (@args) { apt update @args }
+  let upgrade (@args) { apt upgrade @args }
+);
+
+#{{{
+
+  packages.update() on 'gravitas.trout.me.uk';
+
+  on 'gravitas.trout.me.uk' { packages.update() };
+
+}}}#
+
+let host (name) {
+  %{ let packages (@args) { \[ on name packages ] }
+}
+
+let gravitas = host 'gravitas.trout.me.uk';
+
+# on 'gravitas.trout.me.uk' packages.update | out;
+
+gravitas.packages.update() | stdout;
+
+gravitas.packages.upgrade --dry-run | stdout;
+
+if ask('Run upgrade? ').where(m'[yY]') {
+  gravitas.packages.upgrade -y;
+}
+
+let upgrade (hostname) {
+  on hostname {
+    packages.update() | stdout;
+    packages.upgrade --dry-run | stdout;
+    if ask('Run upgrade? ').where(m'[yY]') {
+      packages.upgrade -y;
+    }
+  }
+}
+
+upgrade 'gravitas.trout.me.uk';
+
+# without use-based imports
+
+remote.on h { shell.run apt update | stdio.stdout } foreach h in hosts;
+
+@map = (x => 1, y => 2);
+
+@desired = ([ x => 1 ], [ y => 2 ]);
+
+map [ @map[$_*2,$_*2+1] ], 0 .. int $#map/2;
+
+[ 0 .. [map.last_index()/2].int() ].flat_map i => { map(i, i+1) }
+
+[ map.keys() where x => x/2 ].flat_map i => \map(i, i+1);

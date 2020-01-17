@@ -1,0 +1,33 @@
+let x = cat file;
+
+let x = fs.path(file).content();
+
+let cat (file) { fs.path(file).content() }
+
+let xres = ? cat file;
+
+error xres.err() if xres.is_err();
+
+let x = ();
+
+foreach line in xres.split("\n") {
+  x = x ++ do_something_with line;
+}
+
+letf += (scope, l, r) {
+  scope.call set l l+r
+}
+
+let did = 0;
+
+foreach thing in list_source {
+  do_something_with thing;
+  did += 1;
+}
+
+### pending enough examples to justify it
+
+
+let did = foreach :count thing in list_source {
+  do_something_with thing;
+}
