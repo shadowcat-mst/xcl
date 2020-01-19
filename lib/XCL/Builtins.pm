@@ -1,10 +1,9 @@
 package XCL::Builtins;
 
 use XCL::V::Scope;
-use XCL::Values;
 use XCL::Builtins::Functions;
 use XCL::Builtins::Builder;
-use Mojo::Base -base, -signatures, -async;
+use XCL::Class;
 
 sub _builtin_map () {
   my @map = (
@@ -67,7 +66,7 @@ sub _builtin_map () {
     # EXPERIMENT
     where => [ '.where', 15, 0 ],
 
-    in => [ '.in', 20, 1 ],
+    in => [ '.has_value', 20, 1 ],
   );
   map [ @map[$_*2,$_*2+1] ], 0 .. int $#map/2;
 }

@@ -1,8 +1,7 @@
 package XCL::Builtins::Functions;
 
 use XCL::V::Scope;
-use XCL::Values;
-use Mojo::Base -strict, -signatures, -async;
+use XCL::Class -strict;
 
 async sub c_fx_set {
   my ($class, $scope, $lst) = @_;

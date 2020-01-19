@@ -1,7 +1,6 @@
 package XCL::V::Scope;
 
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub eval ($self, $thing) { $thing->evaluate_against($self) }
 

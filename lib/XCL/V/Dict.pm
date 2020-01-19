@@ -1,8 +1,7 @@
 package XCL::V::Dict;
 
 use curry;
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub get ($self, $key) {
   my $dict = $self->data;

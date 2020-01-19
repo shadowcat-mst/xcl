@@ -1,8 +1,7 @@
 package XCL::V::Call;
 
-use XCL::Values;
 use Role::Tiny::With;
-use Mojo::Base 'XCL::V', -async, -signatures;
+use XCL::Class 'XCL::V';
 
 with 'XCL::V::Role::Listish';
 

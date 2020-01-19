@@ -1,8 +1,7 @@
 package XCL::Builtins::Test;
 
-use Mojo::Base -strict, -signatures, -async;
-use XCL::Values;
-use Test::More;
+use Test2::V0;
+use XCL::Class -strict;
 
 async sub c_fx_ok ($class, $scope, $lst) {
   my ($check, $strp) = $lst->values;

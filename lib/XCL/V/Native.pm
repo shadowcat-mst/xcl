@@ -1,6 +1,6 @@
 package XCL::V::Native;
 
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub invoke ($self, $scope, $vals) {
   $self->data->($scope, @{$vals->data});

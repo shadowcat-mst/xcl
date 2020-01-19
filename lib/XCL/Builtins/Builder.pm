@@ -1,9 +1,8 @@
 package XCL::Builtins::Builder;
 
 use XCL::V::Scope;
-use XCL::Values;
 use XCL::Builtins::Functions;
-use Mojo::Base -base, -signatures, -async;
+use XCL::Class -strict;
 
 sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
   my ($is_class, $fexpr, $name) = $stash_name =~ /^((?:c_)?)_f(x?)_(.*)/;
@@ -84,12 +83,10 @@ sub _value_type_builtins ($vtype) {
 sub _assemble_value ($builtins, $to) {
   my @bits = split /\./, $to;
   if (@bits > 1) {
-    my $val;
-    XCL::Builtins::Functions->c_fx_dot(
+    return XCL::Builtins::Functions->c_fx_dot(
       Scope($builtins),
       List [ map String($_), grep length, @bits ]
-    )->then(sub { $val = shift })->wait;
-    return $val;
+    )->get;
   }
   return $builtins->{$bits[0]};
 }

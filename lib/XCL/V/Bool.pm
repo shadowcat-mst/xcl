@@ -1,7 +1,6 @@
 package XCL::V::Bool;
 
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures, -async;
+use XCL::Class 'XCL::V';
 
 sub bool ($self) { ValF($self) }
 

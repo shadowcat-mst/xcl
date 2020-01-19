@@ -1,6 +1,5 @@
-use Test2::V0;
-use Mojo::Base -strict, -signatures;
 use Mojo::File 'path';
+use XCL::Class -test;
 
 my @pm = path('lib')
   ->list_tree

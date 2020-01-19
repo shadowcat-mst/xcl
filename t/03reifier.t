@@ -1,7 +1,5 @@
-use Test2::V0;
-use Mojo::Base -strict, -signatures;
-use XCL::Values;
 use XCL::Reifier;
+use XCL::Class -test;
 
 sub xr ($str) { state $r = XCL::Reifier->new; $r->parse(stmt_list => $str) }
 

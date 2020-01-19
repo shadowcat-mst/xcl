@@ -1,6 +1,5 @@
-use Test2::V0;
-use Mojo::Base -strict, -signatures;
 use XCL::Tokenizer;
+use XCL::Class -test;
 
 sub tk ($str) { state $tk = XCL::Tokenizer->new; [ $tk->tokenize($str) ] }
 

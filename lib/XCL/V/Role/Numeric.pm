@@ -1,7 +1,6 @@
 package XCL::V::Role::Numeric;
 
-use XCL::Values;
-use Mojo::Base -role, -signatures;
+use XCL::Class -role;
 
 my $MAX_SAFE_INT = 2**53;
 

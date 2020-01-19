@@ -1,6 +1,6 @@
 package XCL::Parser;
 
-use Mojo::Base -base, -signatures;
+use XCL::Class;
 
 has tokenizer => sub {
   require XCL::Tokenizer;

@@ -1,8 +1,7 @@
 package XCL::V::Lambda;
 
-use XCL::Values;
 use Role::Tiny::With;
-use Mojo::Base 'XCL::V::Fexpr', -signatures, -async;
+use XCL::Class 'XCL::V::Fexpr';
 
 async sub invoke {
   my ($self, $scope, $vals) = @_;

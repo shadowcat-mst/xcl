@@ -1,8 +1,7 @@
 package XCL::Weaver;
 
-use XCL::Values;
 use List::UtilsBy qw(min_by);
-use Mojo::Base -base, -signatures;
+use XCL::Class;
 
 has reifier => sub {
   require XCL::Reifier;

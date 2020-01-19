@@ -1,7 +1,7 @@
 package XCL::V::Var;
 
 use curry;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub set_data ($self, $new) { $self->data($new); Val($new) }
 

@@ -1,7 +1,6 @@
 package XCL::V::Fexpr;
 
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures, -async;
+use XCL::Class 'XCL::V';
 
 sub invoke ($self, $outer_scope, $vals) {
   my ($argnames, $scope, $body) = @{$self->data}{qw(argnames scope body)};

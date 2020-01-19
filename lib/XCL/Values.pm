@@ -1,9 +1,13 @@
 package XCL::Values;
 
 use Scalar::Util 'blessed';
-use Mojo::Promise; # async will break if this isn't loaded currently
-use Mojo::Base -strict, -signatures, -async;
+use XCL::Strand::Future;
+use XCL::Class -strict;
 use Exporter 'import';
+
+# why?
+use experimental 'signatures';
+no warnings 'redefine';
 
 # string, bytes
 # float, int
@@ -41,11 +45,12 @@ sub Err ($err, $metadata = {}) {
 
 sub ResultF {
   if (blessed($_[0]) and $_[0]->isa('XCL::V::Result')) {
-    Mojo::Promise->new->resolve($_[0])
+    XCL::Strand::Future->done($_[0])
   } else {
-    Mojo::Promise->new->reject(Result(@_))
+    XCL::Strand::Future->fail(Result(@_))
   }
 }
+
 sub ValF { ResultF(Val(@_)) }
 sub ErrF { ResultF(Err(@_)) }
 

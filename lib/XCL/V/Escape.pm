@@ -1,7 +1,6 @@
 package XCL::V::Escape;
 
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub evaluate_against ($self, $scope) {
   Future->done(Val($self->data))

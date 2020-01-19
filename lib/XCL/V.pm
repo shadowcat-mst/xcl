@@ -1,9 +1,6 @@
 package XCL::V;
 
-use Future; # needs to be somewhere
-use XCL::Values;
-use Mojo::Base -base, -signatures, -async;
-use utf8 ();
+use XCL::Class;
 
 has [ qw(data metadata) ];
 

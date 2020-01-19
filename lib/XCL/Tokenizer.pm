@@ -1,6 +1,6 @@
 package XCL::Tokenizer;
 
-use Mojo::Base -base;
+use XCL::Class;
 
 our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\\^_|~';
 

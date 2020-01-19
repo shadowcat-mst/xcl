@@ -1,6 +1,6 @@
 package XCL::V::Compound;
 
-use Mojo::Base 'XCL::V', -async, -signatures;
+use XCL::Class 'XCL::V';
 
 async sub evaluate_against {
   my ($self, $scope) = @_;

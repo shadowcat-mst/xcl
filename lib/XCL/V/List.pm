@@ -1,9 +1,8 @@
 package XCL::V::List;
 
 use curry;
-use XCL::Values;
 use Role::Tiny::With;
-use Mojo::Base 'XCL::V', -signatures, -async;
+use XCL::Class 'XCL::V';
 
 with 'XCL::V::Role::Listish';
 

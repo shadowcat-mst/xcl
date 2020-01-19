@@ -1,7 +1,7 @@
 package XCL::V::Float;
 
 use Role::Tiny::With;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 with 'XCL::V::Role::Numeric';
 

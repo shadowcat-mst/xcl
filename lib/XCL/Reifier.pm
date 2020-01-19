@@ -1,9 +1,6 @@
 package XCL::Reifier;
 
-use strict;
-use warnings;
-use XCL::Values;
-use Mojo::Base -base, -signatures;
+use XCL::Class;
 
 has parser => sub {
   require XCL::Parser;

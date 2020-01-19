@@ -1,7 +1,6 @@
 package XCL::V::String;
 
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub bool ($self) { ValF(Bool(length($self->data) ? 1 : 0)) }
 

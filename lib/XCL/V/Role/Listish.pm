@@ -1,8 +1,7 @@
 package XCL::V::Role::Listish;
 
 use curry;
-use XCL::Values;
-use Mojo::Base -role, -signatures, -async;
+use XCL::Class -role;
 
 sub get ($self, $idx) {
   die "NOT YET" if $idx < 0;

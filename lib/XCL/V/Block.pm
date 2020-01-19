@@ -1,6 +1,6 @@
 package XCL::V::Block;
 
-use Mojo::Base 'XCL::V', -async;
+use XCL::Class 'XCL::V';
 
 async sub invoke {
   my ($self, $scope, undef) = @_;

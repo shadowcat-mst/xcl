@@ -1,7 +1,6 @@
 package XCL::V::Name;
 
-use XCL::Values;
-use Mojo::Base 'XCL::V', -signatures;
+use XCL::Class 'XCL::V';
 
 sub evaluate_against ($self, $scope) { ResultF $scope->get($self->data) }
 

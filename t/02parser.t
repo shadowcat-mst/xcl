@@ -1,6 +1,5 @@
-use Test2::V0;
-use Mojo::Base -strict, -signatures;
 use XCL::Parser;
+use XCL::Class -test;
 
 sub xp ($x) {
   state $p =  XCL::Parser->new;

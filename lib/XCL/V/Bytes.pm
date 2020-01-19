@@ -1,5 +1,5 @@
 package XCL::V::Bytes;
 
-use Mojo::Base 'XCL::V';
+use XCL::Class 'XCL::V';
 
 1;
