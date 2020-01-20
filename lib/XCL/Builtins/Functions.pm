@@ -122,9 +122,9 @@ async sub c_fx_dot {
       my $lres = await $scope->eval($lst);
       return $lres unless $lres->is_ok;
       my ($inv, @args) = $lres->val->values;
-      my $mres = $class->c_fx_dot($scope, List([ $inv, $name ]));
+      my $mres = await $class->c_fx_dot($scope, List([ $inv, $name ]));
       return $mres unless $mres->is_ok;
-      return $mres->invoke($scope, @args);
+      return await $mres->invoke($scope, @args);
     };
   }
   my $lr = await $scope->eval($lp);
@@ -166,6 +166,7 @@ async sub c_fx_dot {
       return $res unless $res->is_ok;
     }
   }
+  return Err [ Name 'NO_SUCH_VALUE' ] unless $res;
   return Val Call [ $res->val, $l ];
 }
 

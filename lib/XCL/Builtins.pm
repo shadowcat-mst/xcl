@@ -6,7 +6,7 @@ use XCL::Builtins::Builder;
 use XCL::Class;
 
 sub _builtin_map () {
-  my @map = (
+  state @map = (
 
     '$' => [ 'id' ],
     '?' => [ 'result_of' ],

@@ -5,7 +5,7 @@ use XCL::Builtins::Functions;
 use XCL::Class -strict;
 
 sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
-  my ($is_class, $fexpr, $name) = $stash_name =~ /^((?:c_)?)_f(x?)_(.*)/;
+  my ($is_class, $fexpr, $name) = $stash_name =~ /^((?:c_)?)f(x?)_(.*)/;
   my $sub = $namespace->can($stash_name);
   my $native = do {
     if ($is_class) {
@@ -52,14 +52,14 @@ sub _builtin_names_of ($namespace) {
   require $file;
   return
     grep $namespace->can($_),
-      grep /^(?:c_)?_fx?_./,
+      grep /^(?:c_)?fx?_./,
         sort do { no strict 'refs'; keys %{"${namespace}::"} };
 }
 
 sub _builtins_of ($namespace, $unwrap = 0) {
   return +{
     map +(
-      $_ =~ /^(?:c_)?_fx?_(.+)$/
+      $_ =~ /^(?:c_)?fx?_(.+)$/
        => _construct_builtin $namespace, $_, $unwrap
     ), _builtin_names_of $namespace
   };
@@ -104,7 +104,7 @@ sub _load_builtins (@map) {
 
   foreach my $thing (grep defined $_->[1][0], @map) {
     my ($alias, $to) = @$thing;
-    $builtins->{$alias} =  _assemble_value $builtins, $to;
+    $builtins->{$alias} = _assemble_value $builtins, $to->[0];
   }
 
   return $builtins;
