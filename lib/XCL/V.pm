@@ -78,7 +78,7 @@ async sub _fx_bool {
   my ($self, $scope, $lst, $check) = @_;
   my $bres = await $self->bool;
   return $bres unless $bres->is_ok;
-  return $self if $bres->val->data != $check;
+  return Val $self if $bres->val->data != $check;
   return await $scope->eval($lst->data->[0]);
 }
 

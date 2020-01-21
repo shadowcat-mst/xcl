@@ -2,7 +2,19 @@ package XCL::Builtins::Builder;
 
 use XCL::V::Scope;
 use XCL::Builtins::Functions;
-use XCL::Class -strict;
+use XCL::Class -exporter;
+
+our @EXPORT_OK = qw(
+  _construct_builtin
+  _explode_name
+  _builtin_names_of
+  _builtins_of
+  _value_builtins
+  _value_type_builtins
+  _assemble_value
+  _load_builtins
+  _load_ops
+);
 
 sub _construct_builtin (
   $namespace, $stash_name, $is_class, $is_fexpr, $f_name, $cls_unwrap = 0
@@ -17,7 +29,7 @@ sub _construct_builtin (
           my ($scope, $lst) = @_;
           my $res = await $scope->eval($lst);
           return $res unless $res->is_ok;
-          $sub->($res->val);
+          await $sub->($res->val);
         };
       }
     } else {
@@ -27,7 +39,7 @@ sub _construct_builtin (
           my ($obj, @args) = $lst->values;
           my $ores = await $scope->eval($obj);
           return $ores unless $ores->is_ok;
-          $sub->($scope, $ores->val, List \@args);
+          await $sub->($ores->val, $scope, List \@args);
         };
       } else {
         async sub {
@@ -35,7 +47,7 @@ sub _construct_builtin (
           my $res = await $scope->eval($lst);
           return $res unless $res->is_ok;
           my ($obj, @args) = $res->val->values;
-          $sub->($obj, List \@args);
+          await $sub->($obj, List \@args);
         };
       }
     }
@@ -67,7 +79,7 @@ sub _builtin_names_of ($namespace) {
 sub _builtins_of ($namespace, $unwrap = 0) {
   return +{
     map +(
-      $_->[2]
+      $_->[3]
        => _construct_builtin $namespace, @$_, $unwrap
     ), _builtin_names_of $namespace
   };
