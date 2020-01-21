@@ -4,29 +4,30 @@ use XCL::V::Scope;
 use XCL::Builtins::Functions;
 use XCL::Class -strict;
 
-sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
-  my ($is_class, $fexpr, $name) = $stash_name =~ /^((?:c_)?)f(x?)_(.*)/;
+sub _construct_builtin (
+  $namespace, $stash_name, $is_class, $is_fexpr, $f_name, $cls_unwrap = 0
+) {
   my $sub = $namespace->can($stash_name);
   my $native = do {
     if ($is_class) {
-      if ($fexpr) {
+      if ($is_fexpr) {
         $sub;
       } else {
         async sub {
           my ($scope, $lst) = @_;
           my $res = await $scope->eval($lst);
           return $res unless $res->is_ok;
-          $sub->($res->val->values);
+          $sub->($res->val);
         };
       }
     } else {
-      if ($fexpr) {
+      if ($is_fexpr) {
         async sub {
           my ($scope, $lst) = @_;
           my ($obj, @args) = $lst->values;
           my $ores = await $scope->eval($obj);
           return $ores unless $ores->is_ok;
-          $sub->($ores->val, @args);
+          $sub->($scope, $ores->val, List \@args);
         };
       } else {
         async sub {
@@ -34,7 +35,7 @@ sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
           my $res = await $scope->eval($lst);
           return $res unless $res->is_ok;
           my ($obj, @args) = $res->val->values;
-          $sub->($obj, @args);
+          $sub->($obj, List \@args);
         };
       }
     }
@@ -43,24 +44,31 @@ sub _construct_builtin ($namespace, $stash_name, $cls_unwrap = 0) {
   return Val Native sub ($scope, $lst) {
     # Possibly this should deref the name and include it in the scope?
     my (undef, @args) = $lst->values;
-    $native->($scope, @args);
+    $native->($scope, List \@args);
   };
+}
+
+sub _explode_name ($stash_name) {
+  if (my @explode = $stash_name =~ /^((?:c_)?)f(x?)_(.*)/) {
+    return [ $stash_name, @explode ];
+  }
+  return ();
 }
 
 sub _builtin_names_of ($namespace) {
   my $file = join('/', split '::', $namespace).'.pm';
   require $file;
   return
-    grep $namespace->can($_),
-      grep /^(?:c_)?fx?_./,
+    grep { $namespace->can($_->[0]) }
+      map +(_explode_name $_),
         sort do { no strict 'refs'; keys %{"${namespace}::"} };
 }
 
 sub _builtins_of ($namespace, $unwrap = 0) {
   return +{
     map +(
-      $_ =~ /^(?:c_)?fx?_(.+)$/
-       => _construct_builtin $namespace, $_, $unwrap
+      $_->[2]
+       => _construct_builtin $namespace, @$_, $unwrap
     ), _builtin_names_of $namespace
   };
 }

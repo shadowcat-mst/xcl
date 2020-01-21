@@ -85,7 +85,7 @@ async sub c_fx_else {
   my ($class, $scope, $lst) = @_;
   my ($lp, $rp) = $lst->values;
   my $dscope = $scope->snapshot;
-  my $lr = await $lp->invoke($scope, $dscope);
+  my $lr = await $lp->invoke($scope, List $dscope);
   return $lr unless $lr->is_ok;
   my $bres = await $lr->val->bool;
   return $bres unless $bres->is_ok;
@@ -99,7 +99,7 @@ sub c_fx_do ($class, $scope, $lst) {
   $scope->eval(Call([ $lst->values ]));
 }
 
-async sub _dot_rhs_to_name {
+async sub _dot_rhs_to_string {
   my ($class, $scope, $rp) = @_;
   if ($rp->is('Name')) {
     return Val String $rp->data;
@@ -114,7 +114,7 @@ async sub c_fx_dot {
   my ($class, $scope, $lst) = @_;
   my ($lp, $rp) = $lst->values;
   unless (defined $rp) {
-    my $name_r = await $class->_dot_rhs_to_name($scope, $lp);
+    my $name_r = await $class->_dot_rhs_to_string($scope, $lp);
     return $name_r unless $name_r->is_ok;
     my $name = $name_r->val;
     return Val Native async sub {
@@ -124,13 +124,13 @@ async sub c_fx_dot {
       my ($inv, @args) = $lres->val->values;
       my $mres = await $class->c_fx_dot($scope, List([ $inv, $name ]));
       return $mres unless $mres->is_ok;
-      return await $mres->invoke($scope, @args);
+      return await $mres->invoke($scope, List @args);
     };
   }
   my $lr = await $scope->eval($lp);
   return $lr unless $lr->is_ok;
   my $method_name = do {
-    my $res = await $class->_dot_rhs_to_name($scope, $rp);
+    my $res = await $class->_dot_rhs_to_string($scope, $rp);
     return $res unless $res->is_ok;
     $res->val;
   };
@@ -152,7 +152,7 @@ async sub c_fx_dot {
   #   }
   # }
   if (my $methods = $l->metadata->{dot_methods}) {
-    $res = await $methods->invoke($scope, $method_name);
+    $res = await $methods->invoke($scope, List $method_name);
     if (!$res->is_ok and $res->err->data->[0]->data ne 'NO_SUCH_VALUE') {
       return $res;
     }

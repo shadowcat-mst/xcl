@@ -1,9 +1,7 @@
 package XCL::Values;
 
-use Scalar::Util 'blessed';
 use XCL::Strand::Future;
-use XCL::Class -strict;
-use Exporter 'import';
+use XCL::Class -exporter;
 
 # why?
 use experimental 'signatures';
@@ -44,10 +42,10 @@ sub Err ($err, $metadata = {}) {
 }
 
 sub ResultF {
-  if (blessed($_[0]) and $_[0]->isa('XCL::V::Result')) {
-    XCL::Strand::Future->done($_[0])
+  if ($_[0]->$_isa('XCL::V::Result')) {
+    Future->done($_[0])
   } else {
-    XCL::Strand::Future->fail(Result(@_))
+    Future->fail(Result(@_))
   }
 }
 
