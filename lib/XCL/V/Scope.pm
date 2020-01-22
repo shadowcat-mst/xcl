@@ -4,12 +4,12 @@ use XCL::Class 'XCL::V';
 
 sub eval ($self, $thing) { $thing->evaluate_against($self) }
 
-sub get ($self, $key) {
+async sub get ($self, $key) {
   my $res = $self->data->get($key);
   return $res unless $res->is_ok;
   my $val = $res->val;
   return $val if $val->is('Result');
-  return $val->invoke($self, List []);
+  return await $val->invoke($self, List []);
 }
 
 sub set ($self, $key, $value) {
@@ -17,11 +17,11 @@ sub set ($self, $key, $value) {
 }
 
 sub invoke ($self, $, $vals) {
-  return Err([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
+  return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($string) = $vals->values) == 1;
-  return Err([ Name('NOT_A_STRING') => String($string->type) ])
+  return ErrF([ Name('NOT_A_STRING') => String($string->type) ])
     unless $string->is('String');
-  return $self->get($string->data);
+  return ResultF $self->get($string->data);
 }
 
 sub derive ($self, $merge) {
@@ -44,7 +44,7 @@ sub fx_var ($self, $, $lst) { $self->intro(\&Var, $lst); }
 
 sub intro ($self, $type, $lst) {
   my ($name) = @{$lst->data};
-  return Err([ Name('NOT_A_NAME') => String($name->type) ])
+  return ErrF([ Name('NOT_A_NAME') => String($name->type) ])
     unless $name->is('Name');
   my $_set = $self->curry::weak::set($name->data);
   return ResultF({

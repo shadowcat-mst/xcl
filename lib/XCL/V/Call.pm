@@ -17,7 +17,7 @@ async sub _invoke {
   my ($self, $scope, $command, @args) = @_;
   my $res = await $scope->eval($command);
   return $res unless $res->is_ok;
-  return $res->val->invoke($scope, List(\@args));
+  return await $res->val->invoke($scope, List(\@args));
 }
 
 sub display ($self, $depth) {

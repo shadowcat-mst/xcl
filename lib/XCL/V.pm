@@ -9,7 +9,7 @@ sub but ($self, @args) { ref($self)->new(%$self, @args) }
 sub evaluate_against ($self, $) { ValF($self) }
 
 sub invoke ($self, $, $) {
-  Err([ Name('CANT_INVOKE') => String($self->display) ])
+  ErrF([ Name('CANT_INVOKE') => String($self->display) ])
 }
 
 sub is ($self, $type) {

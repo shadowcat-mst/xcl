@@ -14,15 +14,15 @@ async sub evaluate_against {
     return $res unless $res->is_ok;
     push @ret, $res->val;
   }
-  return List(\@ret);
+  return Val List(\@ret);
 }
 
 sub invoke ($self, $, $vals) {
-  return Err([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
+  return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($idx) = $vals->values) == 1;
-  return Err([ Name('NOT_AN_INT') => String($idx->type) ])
+  return ErrF([ Name('NOT_AN_INT') => String($idx->type) ])
     unless $idx->is('Int');
-  $self->get($idx->data);
+  ResultF $self->get($idx->data);
 }
 
 sub display ($self, $depth) {

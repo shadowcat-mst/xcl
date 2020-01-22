@@ -19,11 +19,11 @@ sub set ($self, $key, $value) {
 }
 
 sub invoke ($self, $, $vals) {
-  return Err([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
+  return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($string) = $vals->values) == 1;
-  return Err([ Name('NOT_A_STRING') => String($string->type) ])
+  return ErrF([ Name('NOT_A_STRING') => String($string->type) ])
     unless $string->is('String');
-  $self->get($string->data);
+  ResultF $self->get($string->data);
 }
 
 sub has_key ($self, $key) {

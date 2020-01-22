@@ -8,11 +8,9 @@ sub val ($self) { $self->data->{val} }
 
 sub err ($self) { $self->data->{err} }
 
-sub can_set ($self) { exists $self->data->{set} }
+sub can_set_value ($self) { $self->data->{set} }
 
-sub set ($self, $value) {
-  $self->data->{set}->($value);
-}
+sub set_value ($self, $value) { $self->can_set_value->($value) }
 
 sub display ($self, $depth) {
   if ($self->is_ok) {

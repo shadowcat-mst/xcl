@@ -10,10 +10,10 @@ async sub c_fx_set {
   return $pres unless $pres->is_ok;
   my $place = $pres->val;
   return Err([ Name('NOT_SETTABLE') => String('FIXME') ])
-    unless $place->can_set;
+    unless $place->can_set_value;
   my $valres = await $scope->eval($valproto);
   return $valres unless $valres->is_ok;
-  return $place->set($valres->val);
+  return await $place->set_value($valres->val);
 }
 
 sub c_fx_id ($class, $scope, $lst) {

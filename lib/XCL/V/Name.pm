@@ -2,7 +2,7 @@ package XCL::V::Name;
 
 use XCL::Class 'XCL::V';
 
-sub evaluate_against ($self, $scope) { ResultF $scope->get($self->data) }
+sub evaluate_against ($self, $scope) { $scope->get($self->data) }
 
 sub display ($self, @) { $self->data }
 

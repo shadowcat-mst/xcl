@@ -11,7 +11,7 @@ is [ map $_->[3], _builtin_names_of 'XCL::V' ], [ qw(and or) ];
 
 my $v = Scope(Dict _builtins_of 'XCL::V');
 
-my $and = $v->get('and')->val;
+my $and = $v->get('and')->get->val;
 
 is $and->invoke(Scope({}), List[ Int(0), Int(3) ])->get->val, Int(3);
 
