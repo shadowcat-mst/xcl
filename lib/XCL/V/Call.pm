@@ -24,7 +24,7 @@ sub display ($self, $depth) {
   return $self->SUPER::display(0) unless $depth;
   my $in_depth = $depth - 1;
   my @res;
-  foreach my $val ($self->data->values) {
+  foreach my $val (@{$self->data}) {
     push @res, $val->display($in_depth);
   }
   return '[ '.join(' ', @res).' ]';

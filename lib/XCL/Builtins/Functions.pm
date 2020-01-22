@@ -113,18 +113,20 @@ async sub _dot_rhs_to_string {
 async sub c_fx_dot {
   my ($class, $scope, $lst) = @_;
   my ($lp, $rp) = $lst->values;
+  return Err([ Name('WRONG_ARG_COUNT') => Int(0) ]) unless $lp;
   unless (defined $rp) {
     my $name_r = await $class->_dot_rhs_to_string($scope, $lp);
     return $name_r unless $name_r->is_ok;
     my $name = $name_r->val;
     return Val Native async sub {
       my ($scope, $lst) = @_;
+      return Err([ Name('WRONG_ARG_COUNT') => Int(0) ]) unless $lst->values;
       my $lres = await $scope->eval($lst);
       return $lres unless $lres->is_ok;
       my ($inv, @args) = $lres->val->values;
       my $mres = await $class->c_fx_dot($scope, List([ $inv, $name ]));
       return $mres unless $mres->is_ok;
-      return await $mres->invoke($scope, List @args);
+      return await $mres->invoke($scope, List \@args);
     };
   }
   my $lr = await $scope->eval($lp);
