@@ -8,8 +8,13 @@ sub but ($self, @args) { ref($self)->new(%$self, @args) }
 
 sub evaluate_against ($self, $) { ValF($self) }
 
-sub invoke ($self, $, $) {
-  ErrF([ Name('CANT_INVOKE') => String($self->display) ])
+sub invoke ($self, $, $lst) {
+  return ValF $self unless my @vals = $lst->values;
+  ErrF([
+    Name('WRONG_ARG_COUNT')
+    => String($self->display)
+    => Int(scalar @vals)
+  ]);
 }
 
 sub is ($self, $type) {
