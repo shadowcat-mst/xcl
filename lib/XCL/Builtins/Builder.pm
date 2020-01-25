@@ -52,8 +52,8 @@ sub _construct_builtin (
       }
     }
   };
-  return Val Native $native unless $cls_unwrap;
-  return Val Native sub ($scope, $lst) {
+  return Native $native unless $cls_unwrap;
+  return Native sub ($scope, $lst) {
     # Possibly this should deref the name and include it in the scope?
     my (undef, @args) = $lst->values;
     $native->($scope, List \@args);
@@ -96,7 +96,7 @@ sub _value_builtins () {
 sub _value_type_builtins ($vtype) {
   my $vbuiltins = _builtins_of "XCL::V::${vtype}", 'unwrap';
   return Val Name(
-    $vtype, { dot_methods => Dict($vbuiltins) }
+    $vtype, { dot_methods => Dict $vbuiltins }
   );
 }
 
@@ -104,7 +104,7 @@ sub _assemble_value ($builtins, $to) {
   my @bits = split /\./, $to;
   if (@bits > 1) {
     return XCL::Builtins::Functions->c_fx_dot(
-      Scope($builtins),
+      Scope(Dict $builtins),
       List [ map String($_), grep length, @bits ]
     )->get;
   }
@@ -113,9 +113,14 @@ sub _assemble_value ($builtins, $to) {
 
 sub _load_builtins (@map) {
 
-  my $builtins = _builtins_of 'XCL::Builtins::Functions';
+  my $functions = _builtins_of 'XCL::Builtins::Functions';
+
+  my $builtins = { map +($_ => Val($functions->{$_})), keys %$functions };
 
   $builtins->{Value} = _value_builtins;
+
+  $builtins->{true} = Val Bool 1;
+  $builtins->{false} = Val Bool 0;
 
   foreach my $vtype (@XCL::Values::Types) {
     my $vbuiltins = _builtins_of "XCL::V::${vtype}", 'unwrap';
@@ -126,7 +131,6 @@ sub _load_builtins (@map) {
     my ($alias, $to) = @$thing;
     $builtins->{$alias} = _assemble_value $builtins, $to->[0];
   }
-
   return $builtins;
 }
 
