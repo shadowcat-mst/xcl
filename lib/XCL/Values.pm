@@ -22,7 +22,7 @@ our @Types = qw(
   Compound Lambda
 );
 
-our @EXPORT = (@Types, qw(ResultF Val ValF Err ErrF));
+our @EXPORT = (@Types, qw(ResultF Val ValF Err ErrF not_ok));
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
@@ -41,11 +41,16 @@ sub Err ($err, $metadata = {}) {
   Result({ err => Call($err) }, $metadata);
 }
 
-sub ResultF {
+sub not_ok (@things) {
+  @things = ($_) unless @things;
+  grep !$_->is_ok, @things;
+}
+
+async sub ResultF {
   if ($_[0]->$_isa('XCL::V::Result')) {
-    Future->done($_[0])
+    return $_[0];
   } else {
-    Future->fail(Result(@_))
+    die $_[0];
   }
 }
 
