@@ -18,14 +18,15 @@ async sub c_fx_set {
 
 sub c_fx_id ($class, $scope, $lst) {
   my @values = $lst->values;
-  return ResultF $scope->eval($values[0]) if @values == 1;
-  return ResultF $scope->eval(Call(\@values));
+  return $scope->eval($values[0]) if @values == 1;
+  return $scope->eval(Call(\@values));
 }
 
 sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
-sub c_fx_result_of ($class, $scope, $lst) {
-   ValF $class->c_fx_id($scope, $lst)->get;
+async sub c_fx_result_of {
+  my ($class, $scope, $lst) = @_;
+  Val $class->c_fx_id($scope, $lst);
 }
 
 async sub c_fx_if {
@@ -34,14 +35,13 @@ async sub c_fx_if {
   $dscope ||= $scope->snapshot;
   my $res = await $dscope->eval($cond);
   return $res unless $res->is_ok;
-  my $boolp = await $res->val->bool;
-  return $boolp unless $boolp->is_ok;
-  my $bool = $boolp->val;
-  if ($bool->data) {
+  my $bres = await $res->val->bool;
+  return $bres unless $bres->is_ok;
+  if ($bres->val->data) {
     my $res = await $block->invoke($dscope);
     return $res unless $res->is_ok;
   }
-  return ValF($bool);
+  return $bres;
 }
 
 async sub c_fx_unless {
@@ -49,14 +49,13 @@ async sub c_fx_unless {
   my ($cond, $block) = @{$lst->data};
   my $res = await $scope->eval($cond);
   return $res unless $res->is_ok;
-  my $boolp = await $res->val->bool;
-  return $boolp unless $boolp->is_ok;
-  my $bool = $boolp->val;
-  unless ($bool->data) {
+  my $bres = await $res->val->bool;
+  return $bres unless $bres->is_ok;
+  unless ($bres->val->data) {
     my $res = await $block->invoke($scope);
     return $res unless $res->is_ok;
   }
-  return ValF(Bool(0+!!$bool->data));
+  return $bres;
 }
 
 async sub c_fx_while {
@@ -67,9 +66,9 @@ async sub c_fx_while {
   WHILE: while (1) {
     my $res = await $dscope->eval($cond);
     return $res unless $res->is_ok;
-    my $bool = await $res->val->bool;
-    return $bool unless $bool->is_ok;
-    if ($bool->val->data) {
+    my $bres = await $res->val->bres;
+    return $bres unless $bres->is_ok;
+    if ($bres->val->data) {
       $did = 1;
       my $bscope = $dscope->derive;
       my $res = await $body->invoke($bscope);
@@ -90,6 +89,8 @@ async sub c_fx_else {
   my $bres = await $lr->val->bool;
   return $bres unless $bres->is_ok;
   return $bres if $bres->val->data;
+  # return $_ for not_ok my $else_res = await $rp->invoke($dscope);
+  # return $_ for grep !$_->is_ok, my $else_res = await $rp->invoke($dscope);
   my $else_res = await $rp->invoke($dscope);
   return $else_res unless $else_res->is_ok;
   return await $else_res->val->bool;
@@ -101,6 +102,9 @@ sub c_fx_do ($class, $scope, $lst) {
 
 async sub _dot_rhs_to_string {
   my ($class, $scope, $rp) = @_;
+  if ($rp->is('String')) {
+    return Val $rp;
+  }
   if ($rp->is('Name')) {
     return Val String $rp->data;
   }
@@ -124,9 +128,9 @@ async sub c_fx_dot {
       my $lres = await $scope->eval($lst);
       return $lres unless $lres->is_ok;
       my ($inv, @args) = $lres->val->values;
-      my $mres = await $class->c_fx_dot($scope, List([ $inv, $name ]));
+      my $mres = await $class->c_fx_dot($scope, List [ $inv, $name ]);
       return $mres unless $mres->is_ok;
-      return await $mres->invoke($scope, List \@args);
+      return await $mres->val->invoke($scope, List \@args);
     };
   }
   my $lr = await $scope->eval($lp);
@@ -154,17 +158,19 @@ async sub c_fx_dot {
   #   }
   # }
   if (my $methods = $l->metadata->{dot_methods}) {
-    $res = await $methods->invoke($scope, List $method_name);
+    $res = await $methods->invoke($scope, List [ $method_name ]);
     if (!$res->is_ok and $res->err->data->[0]->data ne 'NO_SUCH_VALUE') {
       return $res;
     }
   }
   unless ($res and $res->is_ok) {
     # only fall back to the object type by default in absence of dot_methods
-    if (my $dot_via = $l->metadata->{dot_via} || ($res and Name($l->type))) {
-      $res = await $scope->eval(Call([
-        Name('.'), $dot_via, $method_name
-      ]));
+    my $dot_via = $l->metadata->{dot_via}
+      || (!$res and Name($l->type));
+    if ($dot_via) {
+      $res = await $class->c_fx_dot(
+        $scope, List [ $dot_via, $method_name ]
+      );
       return $res unless $res->is_ok;
     }
   }
