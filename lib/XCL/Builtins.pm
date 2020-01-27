@@ -51,6 +51,7 @@ sub _builtin_map () {
 
     if => [ undef, -90, 0, 1 ],
     unless => [ undef, -90, 0, 1 ],
+    '?:' => [ 'wutcol' ], # binop precedence TBD
 
     and => [ '.and', -80 ],
     or => [ '.or', -85 ],

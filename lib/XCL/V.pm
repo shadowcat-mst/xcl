@@ -6,6 +6,8 @@ has [ qw(data metadata) ];
 
 sub but ($self, @args) { ref($self)->new(%$self, @args) }
 
+sub of_data ($self, $data) { $self->new(data => $data, metadata => {}) }
+
 sub evaluate_against ($self, $) { ValF($self) }
 
 sub invoke ($self, $, $lst) {

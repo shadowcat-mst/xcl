@@ -19,44 +19,13 @@ our @EXPORT_OK = qw(
 sub _construct_builtin (
   $namespace, $stash_name, $is_class, $is_fexpr, $f_name, $cls_unwrap = 0
 ) {
-  my $sub = $namespace->can($stash_name);
-  my $native = do {
-    if ($is_class) {
-      if ($is_fexpr) {
-        $sub;
-      } else {
-        async sub {
-          my ($scope, $lst) = @_;
-          my $res = await $scope->eval($lst);
-          return $res unless $res->is_ok;
-          await $sub->($res->val);
-        };
-      }
-    } else {
-      if ($is_fexpr) {
-        async sub {
-          my ($scope, $lst) = @_;
-          my ($obj, @args) = $lst->values;
-          my $ores = await $scope->eval($obj);
-          return $ores unless $ores->is_ok;
-          await $sub->($ores->val, $scope, List \@args);
-        };
-      } else {
-        async sub {
-          my ($scope, $lst) = @_;
-          my $res = await $scope->eval($lst);
-          return $res unless $res->is_ok;
-          my ($obj, @args) = $res->val->values;
-          await $sub->($obj, List \@args);
-        };
-      }
-    }
-  };
-  return Native $native unless $cls_unwrap;
-  return Native sub ($scope, $lst) {
-    # Possibly this should deref the name and include it in the scope?
-    my (undef, @args) = $lst->values;
-    $native->($scope, List \@args);
+
+  return Native {
+    apply => !$is_fexpr,
+    is_method => !$is_class,
+    unwrap => $cls_unwrap,
+    ns => $namespace,
+    native_name => $stash_name,
   };
 }
 

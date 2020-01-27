@@ -1,6 +1,7 @@
 package XCL::Values;
 
 use XCL::Strand::Future;
+use Mojo::Util qw(monkey_patch);
 use XCL::Class -exporter;
 
 # why?
@@ -22,17 +23,14 @@ our @Types = qw(
   Compound Lambda
 );
 
-our @EXPORT = (@Types, qw(ResultF Val ValF Err ErrF not_ok));
+our @EXPORT = (@Types, qw(ResultF Val ValF Err ErrF not_ok not_ok_except));
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
   my $file = "XCL/V/${type}.pm";
-  {
-    no strict 'refs';
-    *{$type} = sub ($data, $metadata = {}) {
-      require $file;
-      $class->new(data => $data, metadata => $metadata);
-    }
+  monkey_patch __PACKAGE__, $type, sub ($data, $metadata = {}) {
+    require $file;
+    $class->new(data => $data, metadata => $metadata);
   }
 }
 
@@ -41,9 +39,10 @@ sub Err ($err, $metadata = {}) {
   Result({ err => Call($err) }, $metadata);
 }
 
-sub not_ok (@things) {
-  @things = ($_) unless @things;
-  grep !$_->is_ok, @things;
+sub not_ok (@things) { grep !$_->is_ok, @things }
+
+sub not_ok_except ($or, @things) {
+  grep +(!$_->is_ok and !$_->err->data->[0]->data eq $or), @things
 }
 
 async sub ResultF {

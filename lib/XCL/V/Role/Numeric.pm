@@ -14,7 +14,7 @@ sub f_plus ($self, $lst) {
     }
     $acc += $val;
   }
-  ValF($self->new(data => $acc));
+  ValF($self->of_data($acc));
 }
 
 sub f_multiply ($self, $lst) {

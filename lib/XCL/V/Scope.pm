@@ -2,7 +2,15 @@ package XCL::V::Scope;
 
 use XCL::Class 'XCL::V';
 
-sub eval ($self, $thing) { $thing->evaluate_against($self) }
+async sub eval ($self, $thing) {
+  return await $thing->evaluate_against($self) if 0; # 0 to be replaced later
+  state $op_id = 'A001';
+  my $this_id = $op_id++;
+  ::Dwarn(EVAL_IN => $this_id, $thing);
+  my $res = await $thing->evaluate_against($self);
+  ::Dwarn(EVAL_OUT => $this_id, $res);
+  return $res;
+}
 
 async sub get ($self, $key) {
   my $res = $self->data->get($key);

@@ -57,4 +57,16 @@ sub to_perl ($self) {
   [ map $_->to_perl, @{$self->data} ]
 }
 
+sub head ($self) { $self->data->[0] }
+
+sub tail ($self) {
+  return () unless my (undef, @tail) = $self->values;
+  List \@tail;
+}
+
+sub ht ($self) {
+  return () unless my ($head, @tail) = $self->values;
+  ($head, List \@tail);
+}
+
 1;
