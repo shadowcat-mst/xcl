@@ -10,8 +10,13 @@ async sub evaluate_against {
   my ($self, $scope) = @_;
   my @ret;
   foreach my $el (@{$self->data}) {
-    my $res = await $scope->eval($el);
-    return $res unless $res->is_ok;
+    state %class_is_basic;
+    my $is_basic = $class_is_basic{ref($el)} //= 0+!!(
+      ref($el)->can('evaluate_against')
+        eq XCL::V->can('evaluate_against')
+    );
+    if ($is_basic) { push @ret, $el; next; }
+    return $_ for not_ok my $res = await $scope->eval($el);
     push @ret, $res->val;
   }
   return Val List(\@ret);
