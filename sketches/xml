@@ -1,0 +1,46 @@
+
+
+let xml = do {
+  let xml_escape = do {
+    let escape_table = %(
+      :'&' '&amp;',
+      :'>' '&gt;',
+      :'<' '&lt;',
+      :'"' '&quot;',
+      :"'" '&#39',
+      :'`' '&#96',
+      :'{' '&#123;',
+      :'}' '&#125',
+    );
+    let escapes = escape_table.keys().join '';
+    lambda (str) {
+      s :g "([$(escapes)])" x => [escape_table x] str;
+    }
+  }
+  letf stringer (scope, @args) {
+    String.make args.map x => {
+      ?: x.is('String') x xml_escape(scope.eval x);
+    }
+  }
+  fexpr (scope, raw) {
+    let xscope = scope.snapshot();
+    xscope.eval \$[ let String.make = $$stringer ];
+    xscope.eval raw;
+  }
+}
+
+let title = "The birds & the bees";
+let message = "XCL > *";
+
+let doc = xml ``<<<``
+  <html>
+    <head>
+      <title>$(title)</title>
+    </head>
+    <body>
+      <h1>$(message)</h1>
+    </body>
+  </html>
+>>>;
+
+

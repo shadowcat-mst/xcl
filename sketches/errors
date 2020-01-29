@@ -1,0 +1,82 @@
+#{{{
+  err   an error occurred but we are not surprised
+  die   an error occurred indicating external state is inexplicable
+  panic an error occurred indicating internal state is inexplicable
+}}}#
+
+### variables and values
+
+const config = %(
+  :dsn [
+    ?: exists(process.env 'DSN')
+       process.env('DSN')
+       'dbi:SQLite:dbname=:memory:'
+  ]
+);
+
+let value = 3;
+
+value = 7; # panic
+
+let dict = %;
+
+dict('foo') = 7; # ok
+
+dict('nosuch') # err
+
+dict = %(:foo 7); # panic
+
+var value = 3;
+
+value = 7; # ok
+
+### results
+
+err "Argh"
+
+### I/O
+
+let val = ask 'Guess a number?'; # prompt
+
+say 'Your guess is wrong!'; # STDOUT
+
+log 'Something went wrong'; # logs at default log level
+
+log fatal 'Something went REALLY wrong'; # logs at specific level
+
+die "Sorry, we're screwed"; # defaults to fatal + exit(255) unless overriden
+
+panic 'We basically just segfaulted'; # BOOM
+
+### logging
+
+log.default_level 'info';
+log.min_level 'info';
+
+log 'Something went wrong'; # emitted to STDERR and/or to syslog as [info]
+
+log debug 'Oh god oh god oh god'; # silenced by min_level
+
+log fatal 'AAAAAAAA'; # emitted to STDERR and/or to syslog as [fatal]
+
+log.active_targets log.targets.stderr; # default
+
+log.active_targets log.targets.syslog; # syslog only
+
+log.active_targets [ log.targets 'stderr' 'syslog' ]; # both
+
+## ???
+
+log.active_targets :stderr;
+
+log.active_targets :syslog;
+
+log.active_targets :stderr :syslog;
+
+log debug "VM stats: $(vm.stats())"; # vm.stats not executed
+
+log debug {
+  let raw = expensive_thing();
+  let cooked = mangle_expensive_thing raw;
+  "THING: $(cooked)";
+} # also not executed unless log level is debug or higher
