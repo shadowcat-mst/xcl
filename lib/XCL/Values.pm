@@ -23,7 +23,14 @@ our @Types = qw(
   Compound Lambda
 );
 
-our @EXPORT = (@Types, qw(ResultF Val ValF Err ErrF not_ok not_ok_except));
+our @EXPORT = (
+  @Types,
+  qw(ResultF Val ValF Err ErrF),
+  qw(not_ok not_ok_except),
+  qw(DEBUG),
+);
+
+sub DEBUG { 0 }
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
@@ -36,7 +43,14 @@ foreach my $type (@Types) {
 
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
 sub Err ($err, $metadata = {}) {
-  Result({ err => Call($err) }, $metadata);
+  my %meta = do {
+    my ($pkg, $file, $line) = caller;
+    (thrown_at => Dict({
+      native_file => String($file), native_line => Int($line),
+      map +($_ => $metadata->{$_}), grep $metadata->{$_}, 'caller',
+    }));
+  };
+  Result({ err => Call($err) }, { %$metadata, %meta });
 }
 
 sub not_ok (@things) { grep !$_->is_ok, @things }

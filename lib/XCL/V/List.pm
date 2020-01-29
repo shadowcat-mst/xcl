@@ -22,7 +22,7 @@ async sub evaluate_against {
   return Val List(\@ret);
 }
 
-sub invoke ($self, $, $vals) {
+sub _invoke ($self, $, $vals) {
   return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($idx) = $vals->values) == 1;
   return ErrF([ Name('NOT_AN_INT') => String($idx->type) ])

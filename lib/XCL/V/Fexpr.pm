@@ -2,7 +2,7 @@ package XCL::V::Fexpr;
 
 use XCL::Class 'XCL::V';
 
-sub invoke ($self, $outer_scope, $vals) {
+sub _invoke ($self, $outer_scope, $vals) {
   my ($argnames, $scope, $body) = @{$self->data}{qw(argnames scope body)};
   my %merge; @merge{@$argnames} = map Val($_), $outer_scope, $vals->values;
   $scope->derive(\%merge)->eval($body);

@@ -6,14 +6,14 @@ use XCL::Class 'XCL::V';
 with 'XCL::V::Role::Listish';
 
 sub evaluate_against ($self, $scope) {
-  $self->_invoke($scope, @{$self->data});
+  $self->_call($scope, @{$self->data});
 }
 
-sub invoke ($self, $scope, $lst) {
-  $self->_invoke($scope, @{$self->data}, $lst->values);
+sub _invoke ($self, $scope, $lst) {
+  $self->_call($scope, @{$self->data}, $lst->values);
 }
 
-async sub _invoke {
+async sub _call {
   my ($self, $scope, $command, @args) = @_;
   my $res = await $scope->eval($command);
   return $res unless $res->is_ok;

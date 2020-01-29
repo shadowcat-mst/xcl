@@ -27,17 +27,17 @@ sub f_multiply ($self, $lst) {
     }
     $acc *= $val;
   }
-  ValF($self->new(data => $acc));
+  ValF($self->of_data($acc));
 }
 
 sub f_minus ($self, $lst) {
   return $_ for $self->_same_types($lst);
-  ValF($self->new(data => $self->data - $lst->data->[0]->data));
+  ValF($self->of_data($self->data - $lst->data->[0]->data));
 }
 
 sub f_divide ($self, $lst) {
   return $_ for $self->_same_types($lst);
-  ValF(Float(data => $self->data / $lst->data->[0]->data));
+  ValF(Float($self->data / $lst->data->[0]->data));
 }
 
 sub f_to_int ($self, $) { return ValF Int($self->data) }

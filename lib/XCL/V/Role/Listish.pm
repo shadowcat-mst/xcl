@@ -33,7 +33,7 @@ sub values ($self) {
 sub f_concat ($self, $lst) {
   # Check for List even if we're Call
   return $_ for $self->_same_types($lst, 'List');
-  ValF($self->new(data => [ map $_->values, $self, $lst->values ]));
+  ValF($self->of_data([ map $_->values, $self, $lst->values ]));
 }
 
 sub f_keys ($self, $) { ValF List [ $self->keys ] }

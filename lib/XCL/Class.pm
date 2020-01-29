@@ -7,7 +7,10 @@ use Future::AsyncAwait ();
 use Safe::Isa ();
 
 sub import ($, $superclass = '-base') {
-  XCL::Values->import::into(1) unless caller eq 'XCL::Values';
+  unless (caller eq 'XCL::Values') {
+    XCL::Values->import::into(1);
+    Devel::DDCWarn->import::into(1) if XCL::Values::DEBUG();
+  }
   Safe::Isa->import::into(1);
   if ($superclass eq '-test') {
     Test2::V0->import::into(1);

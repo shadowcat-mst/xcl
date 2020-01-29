@@ -10,7 +10,27 @@ sub of_data ($self, $data) { $self->new(data => $data, metadata => {}) }
 
 sub evaluate_against ($self, $) { ValF($self) }
 
-sub invoke ($self, $, $lst) {
+async sub invoke ($self, $scope, $lst) {
+  state $op_id = '000';
+  ++$op_id;
+  return await $self->_invoke($scope, $lst) unless DEBUG;
+  my $is_basic = do {
+    state %is_basic;
+    $is_basic{ref($self)} //= 0+!!(
+      ref($self)->can('_invoke')
+        eq XCL::V->can('_invoke')
+    )
+  };
+
+  return Val $self if $is_basic && !$lst->values;
+
+  DwarnT("C_${op_id}_E", $self, $lst);
+  my $res = await $self->_invoke($scope, $lst);
+  DwarnT("C_${op_id}_R", $self, $res);
+  return $res;
+}
+
+sub _invoke ($self, $scope, $lst) {
   return ValF $self unless my @vals = $lst->values;
   ErrF([
     Name('WRONG_ARG_COUNT')

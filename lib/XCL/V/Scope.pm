@@ -3,12 +3,20 @@ package XCL::V::Scope;
 use XCL::Class 'XCL::V';
 
 async sub eval ($self, $thing) {
-  return await $thing->evaluate_against($self) if 0; # 0 to be replaced later
-  state $op_id = 'A001';
-  my $this_id = $op_id++;
-  ::Dwarn(EVAL_IN => $this_id, $thing);
+  state $op_id = '000';
+  ++$op_id;
+  return await $thing->evaluate_against($self) unless DEBUG;
+  my $is_basic = do {
+    state %is_basic;
+    $is_basic{ref($thing)} //= 0+!!(
+      ref($thing)->can('evaluate_against')
+        eq XCL::V->can('evaluate_against')
+    );
+  };
+  return Val $thing if $is_basic;
+  DwarnT("E_${op_id}_E", $thing);
   my $res = await $thing->evaluate_against($self);
-  ::Dwarn(EVAL_OUT => $this_id, $res);
+  DwarnT("E_${op_id}_R", $res);
   return $res;
 }
 
@@ -24,7 +32,7 @@ sub set ($self, $key, $value) {
   Val($self->data->data->{$key} = $value);
 }
 
-sub invoke ($self, $, $vals) {
+sub _invoke ($self, $, $vals) {
   return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($string) = $vals->values) == 1;
   return ErrF([ Name('NOT_A_STRING') => String($string->type) ])

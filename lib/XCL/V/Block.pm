@@ -2,7 +2,7 @@ package XCL::V::Block;
 
 use XCL::Class 'XCL::V';
 
-async sub invoke {
+async sub _invoke {
   my ($self, $scope, undef) = @_;
   my $iscope = $scope->snapshot;
   my $res;

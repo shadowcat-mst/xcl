@@ -18,7 +18,7 @@ sub set ($self, $key, $value) {
   return Val($self->data->{$key} = $value);
 }
 
-sub invoke ($self, $, $vals) {
+sub _invoke ($self, $, $vals) {
   return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($string) = $vals->values) == 1;
   return ErrF([ Name('NOT_A_STRING') => String($string->type) ])

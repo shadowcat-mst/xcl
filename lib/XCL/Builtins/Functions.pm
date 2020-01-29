@@ -63,7 +63,7 @@ async sub c_fx_unless {
 async sub c_fx_wutcol {
   my ($class, $scope, $lst) = @_;
   my ($cond, @ans) = @{$lst->data};
-  my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans) ]
+  my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans));
   return $_ for not_ok my $res = await $scope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
   if ($bres->val->data) {
@@ -115,7 +115,7 @@ async sub _dot_rhs_to_string {
 async sub dot_name {
   my ($class, $scope, $lst) = @_;
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
-  my ($name, $inv, @args) = $lst->val->values;
+  my ($name, $inv, @args) = $lst->values;
   return $_ for not_ok
     my $mres = await $class->c_fx_dot($scope, List [ $inv, $name ]);
   return await $mres->val->invoke($scope, List \@args);
@@ -147,17 +147,18 @@ async sub c_fx_dot {
   if ($dot_methods) {
     return $_ for not_ok_except NO_SUCH_VALUE =>
       my $res = await $dot_methods->invoke($scope, List [ $name ]);
-    return Call [ $res->val, $l ] if $res->is_ok;
+    return Val Call [ Escape($res->val), $l ] if $res->is_ok;
   }
 
   return Err [ Name('NO_SUCH_VALUE'), $name ]
-    unless my $try = $l->metadata->{dot_via} || ($fallthrough && $l->type);
-
+    unless my $try =
+      $l->metadata->{dot_via}
+        || ($fallthrough && Name($l->type));
   return $_ for not_ok my $res = await $class->c_fx_dot(
     $scope, List [ $try, $name ]
   );
 
-  return Call [ $res->val, $l ];
+  return Val Call [ Escape($res->val), $l ];
 }
 
   # let meta = metadata(l);
