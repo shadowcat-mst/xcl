@@ -3,8 +3,6 @@ package XCL::Class;
 use Import::Into;
 use Mojo::Base -strict, -signatures;
 use XCL::Strand::Future;
-use Future::AsyncAwait ();
-use Safe::Isa ();
 
 sub import ($, $superclass = '-base') {
   unless (caller eq 'XCL::Values') {
@@ -21,6 +19,7 @@ sub import ($, $superclass = '-base') {
   }
   Mojo::Base->import::into(1, 'Mojo::Base', $superclass, -signatures);
   Future::AsyncAwait->import::into(1, future_class => 'XCL::Strand::Future');
+  Syntax::Keyword::Dynamically->import::into(1);
   constant->import::into(1, Future => 'XCL::Strand::Future');
 }
 

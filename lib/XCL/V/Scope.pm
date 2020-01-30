@@ -14,9 +14,14 @@ async sub eval ($self, $thing) {
     );
   };
   return Val $thing if $is_basic;
-  print STDERR "E_${op_id}_E: ".$thing->display(-1)."\n";
+
+  my $this_depth = $Eval_Depth + 1;
+  dynamically $Eval_Depth = $this_depth;
+
+  my $prefix = ('  ' x $Eval_Depth)."E_${op_id}_";
+  print STDERR "${prefix}E: ".$thing->display(-1)."\n";
   my $res = await $thing->evaluate_against($self);
-  print STDERR "E_${op_id}_R: ".$res->display(-1)."\n";
+  print STDERR "${prefix}R: ".$res->display(-1)."\n";
   return $res;
 }
 

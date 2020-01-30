@@ -24,9 +24,15 @@ async sub invoke ($self, $scope, $lst) {
 
   return Val $self if $is_basic && !$lst->values;
 
-  print STDERR "C_${op_id}_E: ".$self->display(-1).': '.$lst->display(-1)."\n";
+  my $this_depth = $Eval_Depth + 1;
+  dynamically $Eval_Depth = $this_depth;
+
+  my $prefix = ('  ' x $Eval_Depth)."C_${op_id}_";
+
+
+  print STDERR "${prefix}E: ".$self->display(-1).': '.$lst->display(-1)."\n";
   my $res = await $self->_invoke($scope, $lst);
-  print STDERR "C_${op_id}_R: ".$self->display(-1).': '.$res->display(-1)."\n";
+  print STDERR "${prefix}R: ".$self->display(-1).': '.$res->display(-1)."\n";
   return $res;
 }
 
