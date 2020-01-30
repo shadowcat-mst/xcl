@@ -18,10 +18,20 @@ async sub eval ($self, $thing) {
   my $this_depth = $Eval_Depth + 1;
   dynamically $Eval_Depth = $this_depth;
 
-  my $prefix = ('  ' x $Eval_Depth)."E_${op_id}_";
-  print STDERR "${prefix}E: ".$thing->display(-1)."\n";
-  my $res = await $thing->evaluate_against($self);
-  print STDERR "${prefix}R: ".$res->display(-1)."\n";
+  my $indent = '  ' x $Eval_Depth;
+  my $prefix = "${indent}eval "; # $op_id ";
+  if ($Eval_Depth and not $Did_Thing) {
+    print STDERR " {\n";
+    $Did_Thing++;
+  }
+  print STDERR $prefix.$thing->display(-1);
+  my $res = do {
+    dynamically $Did_Thing = 0;
+    my $tmp = await $thing->evaluate_against($self);
+    print STDERR "${indent}\}" if $Did_Thing;
+    $tmp;
+  };
+  print STDERR " ->\n${indent}  ".$res->display(-1).";\n";
   return $res;
 }
 

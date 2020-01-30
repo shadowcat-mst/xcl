@@ -27,10 +27,11 @@ our @EXPORT = (
   @Types,
   qw(ResultF Val ValF Err ErrF),
   qw(not_ok not_ok_except),
-  qw(DEBUG $Eval_Depth),
+  qw(DEBUG $Eval_Depth $Did_Thing),
 );
 
 our $Eval_Depth = -1;
+our $Did_Thing;
 
 use constant DEBUG => 0+!!$ENV{XCL_DEBUG};
 

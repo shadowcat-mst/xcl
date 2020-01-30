@@ -27,12 +27,21 @@ async sub invoke ($self, $scope, $lst) {
   my $this_depth = $Eval_Depth + 1;
   dynamically $Eval_Depth = $this_depth;
 
-  my $prefix = ('  ' x $Eval_Depth)."C_${op_id}_";
+  my $indent = '  ' x $Eval_Depth;
+  my $prefix = "${indent}call "; # $op_id ";
+  if ($Eval_Depth and not $Did_Thing) {
+    print STDERR " {\n";
+    $Did_Thing++;
+  }
 
-
-  print STDERR "${prefix}E: ".$self->display(-1).': '.$lst->display(-1)."\n";
-  my $res = await $self->_invoke($scope, $lst);
-  print STDERR "${prefix}R: ".$self->display(-1).': '.$res->display(-1)."\n";
+  print STDERR $prefix.$self->display(-1).' '.$lst->display(-1);
+  my $res = do {
+    dynamically $Did_Thing = 0;
+    my $tmp = await $self->_invoke($scope, $lst);
+    print STDERR "${indent}\}" if $Did_Thing;
+    $tmp;
+  };
+  print STDERR " ->\n${indent}  ".$res->display(-1).";\n";
   return $res;
 }
 
