@@ -11,8 +11,8 @@ sub of_data ($self, $data) { $self->new(data => $data, metadata => {}) }
 sub evaluate_against ($self, $) { ValF($self) }
 
 async sub invoke ($self, $scope, $lst) {
-  state $op_id = '000';
-  ++$op_id;
+  state $state_id = '000';
+  my $op_id = ++$state_id;
   return await $self->_invoke($scope, $lst) unless DEBUG;
   my $is_basic = do {
     state %is_basic;
@@ -24,9 +24,9 @@ async sub invoke ($self, $scope, $lst) {
 
   return Val $self if $is_basic && !$lst->values;
 
-  DwarnT("C_${op_id}_E", $self, $lst);
+  print STDERR "C_${op_id}_E: ".$self->display(-1).': '.$lst->display(-1)."\n";
   my $res = await $self->_invoke($scope, $lst);
-  DwarnT("C_${op_id}_R", $self, $res);
+  print STDERR "C_${op_id}_R: ".$self->display(-1).': '.$res->display(-1)."\n";
   return $res;
 }
 
@@ -81,12 +81,16 @@ sub to_perl ($self) { $self }
 sub from_perl ($class, $value) {
   my $ref = ref($value);
   if ($ref eq 'HASH') {
-    return Dict({ map +($_ => $class->from_perl($value->{$_})), @$value });
+    return Dict({
+      map +($_ => $class->from_perl($value->{$_})),
+        keys %$value
+    });
   }
   if ($ref eq 'ARRAY') {
     return List([ map $class->from_perl($_), @$value ]);
   }
   return $value if $ref;
+  no warnings 'numeric';
   if (
     !utf8::is_utf8($value)
     && length((my $dummy = '') & $value)

@@ -9,7 +9,6 @@ use Safe::Isa ();
 sub import ($, $superclass = '-base') {
   unless (caller eq 'XCL::Values') {
     XCL::Values->import::into(1);
-    Devel::DDCWarn->import::into(1) if XCL::Values::DEBUG();
   }
   Safe::Isa->import::into(1);
   if ($superclass eq '-test') {

@@ -48,11 +48,14 @@ sub display ($self, $depth) {
   my $in_depth = $depth - 1;
   my @res;
   foreach my $key (sort CORE::keys %{$self->data}) {
-    push @res, '('
-      .$key->display($in_depth)
-      .', '
-      .$self->data->{$key}->display($in_depth)
-      .')';
+    my $display_value = $self->data->{$key}->display($in_depth);
+    push @res, do {
+      if ($key =~ /^[a-zA-Z_]\w*$/) {
+        ":${key} ${display_value}";
+      } else {
+        '('.String($key)->display($in_depth).', '.$display_value.')';
+      }
+    };
   }
   return '%('.join(', ', @res).')';
 }

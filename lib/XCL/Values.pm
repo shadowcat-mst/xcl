@@ -30,7 +30,7 @@ our @EXPORT = (
   qw(DEBUG),
 );
 
-sub DEBUG { 0 }
+use constant DEBUG => 0+!!$ENV{XCL_DEBUG};
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";

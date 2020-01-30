@@ -3,8 +3,8 @@ package XCL::V::Scope;
 use XCL::Class 'XCL::V';
 
 async sub eval ($self, $thing) {
-  state $op_id = '000';
-  ++$op_id;
+  state $state_id = '000';
+  my $op_id = ++$state_id;
   return await $thing->evaluate_against($self) unless DEBUG;
   my $is_basic = do {
     state %is_basic;
@@ -14,9 +14,9 @@ async sub eval ($self, $thing) {
     );
   };
   return Val $thing if $is_basic;
-  DwarnT("E_${op_id}_E", $thing);
+  print STDERR "E_${op_id}_E: ".$thing->display(-1)."\n";
   my $res = await $thing->evaluate_against($self);
-  DwarnT("E_${op_id}_R", $res);
+  print STDERR "E_${op_id}_R: ".$res->display(-1)."\n";
   return $res;
 }
 
