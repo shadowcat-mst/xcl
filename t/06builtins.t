@@ -1,8 +1,10 @@
 use XCL::Builtins;
 use XCL::Class -test;
 
+my $raw;
+
 bail_out unless try_ok { XCL::Builtins->ops };
-bail_out unless try_ok { XCL::Builtins->builtins };
+bail_out unless try_ok { $raw = XCL::Builtins->builtins };
 
 use XCL::Builtins::Builder qw(
   _builtin_names_of _builtins_of
@@ -12,14 +14,12 @@ use XCL::V;
 
 is [ map $_->[3], _builtin_names_of 'XCL::V' ], [ qw(and or) ];
 
+my $builtins = Scope Dict $raw;
+
+my $plus = $builtins->get('+')->get->val;
+
+is $plus->invoke($builtins, List [ Int(3), Int(4) ])->get, Val(Int 7);
+
+is $plus->invoke($builtins, List [ Float(3), Float(4) ])->get, Val(Float 7);
+
 done_testing;
-
-__END__
-
-my $v = Scope(Dict _builtins_of 'XCL::V');
-
-my $and = $v->get('and')->get->val;
-
-is $and->invoke(Scope({}), List[ Int(0), Int(3) ])->get->val, Int(3);
-
-is $and->invoke(Scope({}), List[ Int(1), Int(3) ])->get->val, Int(1);
