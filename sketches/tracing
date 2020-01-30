@@ -1,0 +1,43 @@
+sherlock$ su - xclappuser
+sherlock$ xcl connect /var/run/xclapp/socket
+$ debug everything
+# RIP your terminal
+
+$ debug everything >'every.log';
+[...]
+^C
+$
+$ let elog = ? debug everything >'every.log';
+$ 
+$ debug everything | stdout;
+[SPEW]
+^C
+$ 
+$ elog.stop();
+
+$ letf teebug (type, out) {
+>   let file = ? debug $type >out;
+>   let display = ? debug $type | stdout;
+>   .and file display;
+> }
+$
+$ teebug everything 'every.log';
+[...]
+^C
+
+
+
+sherlock$ xcl connect /tmp/xcl/live/$pid/socket
+
+$ .merge stdout stderr >'both.log'
+[...]
+^C
+$ .merge stdout stderr | .tee me >'both.log';
+
+
+
+sherlock$ xcl connect /var/run/xclapp/socket -e 'debug everything' | tee -a ohgods.log
+[...]
+^C
+
+
