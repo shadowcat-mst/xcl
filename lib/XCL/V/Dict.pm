@@ -48,8 +48,11 @@ sub display ($self, $depth) {
   my $in_depth = $depth - 1;
   my @res;
   foreach my $key (sort CORE::keys %{$self->data}) {
-    my $display_value = $self->data->{$key}->display($in_depth);
-    push @res, do {
+    my $value = $self->data->{$key};
+    my $display_value = defined($value)
+      ? $self->data->{$key}->display($in_depth)
+      : 'MISSING';
+    push @res, map s/^/  /mgr, do {
       if ($key =~ /^[a-zA-Z_]\w*$/) {
         ":${key} ${display_value}";
       } else {
@@ -57,7 +60,7 @@ sub display ($self, $depth) {
       }
     };
   }
-  return '%('.join(', ', @res).')';
+  return "%(\n".join(",\n", @res)."\n)";
 }
 
 sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
