@@ -75,7 +75,7 @@ sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {
 }
 
 sub extract_stmt_list ($self, @toks) {
-  $self->_extract_combi(';', '', 'stmt', 'block', @toks);
+  $self->_extract_combi('semicolon', '', 'stmt', 'block', @toks);
 }
 
 sub extract_call ($self, @toks) {
