@@ -1,0 +1,13 @@
+redo ifchange [SELECT MAX(ts) FROM commands WHERE target = 'users'].one_value();
+
+let user_fields = \(name, pwhash, uid, gid, gecos, home, shell);
+
+let passwd_sel = user_fields.map x => { ?: [x == 'pwhash'] 'x' \$[u . $$x] }
+let shadow_sel = user_fields.map x => { \$[u . $$x] }
+
+# xcl: SELECT u.name 'x' u.uid u.gid u.gecos u.home u.shell FROM ...
+# commas: SELECT @(u.name, 'x', u.uid, u.gid, u.gecos, u.home, u.shell) FROM
+# sql: SELECT u.name, 'x', u.uid, u.gid, u.gecos, u.home, u.shell FROM ...
+SELECT @passwd_sel FROM users u WHERE active | .join ':' >'/etc/passwd';
+
+SELECT @shadow_sel FROM users u WHERE active | .join ':' >'/etc/shadow';
