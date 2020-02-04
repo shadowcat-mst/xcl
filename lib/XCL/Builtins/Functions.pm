@@ -7,8 +7,7 @@ use XCL::Class -strict;
 async sub c_fx_set {
   my ($class, $scope, $lst) = @_;
   my ($set, $valproto) = $lst->values;
-  return $_ for not_ok my $pres = await $scope->eval($set);
-  my $place = $pres->val;
+  my $place = await $scope->eval($set);
   return Err [ Name('NOT_SETTABLE') => String('FIXME') ]
     unless $place->can_set_value;
   return $_ for not_ok my $valres = await $scope->eval($valproto);

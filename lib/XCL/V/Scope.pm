@@ -44,7 +44,7 @@ async sub get ($self, $key) {
 }
 
 sub set ($self, $key, $value) {
-  Val($self->data->data->{$key} = $value);
+  ValF($self->data->data->{$key} = $value);
 }
 
 sub _invoke ($self, $, $vals) {
@@ -78,7 +78,7 @@ sub intro ($self, $type, $lst) {
   return ErrF([ Name('NOT_A_NAME') => String($name->type) ])
     unless $name->is('Name');
   my $_set = $self->curry::weak::set($name->data);
-  return ResultF({
+  return ResultF( Result {
     err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
     set => sub { $_set->($type->($_[0])) },
   });
