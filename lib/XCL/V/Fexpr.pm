@@ -8,7 +8,7 @@ sub _invoke ($self, $outer_scope, $vals) {
   $scope->derive(\%merge)->eval($body);
 }
 
-sub display ($self, @) {
+sub display_data ($self, $) {
   return 'fexpr ('.join(', ', @{$self->data->{argnames}}).') { ... }';
 }
 

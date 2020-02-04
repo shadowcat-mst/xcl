@@ -7,7 +7,7 @@ with 'XCL::V::Role::Numeric';
 
 sub bool ($self) { ValF(Bool($self->data == 0 ? 1 : 0)) }
 
-sub display ($self, @) {
+sub display_data ($self, $) {
   my $str = ''.$self->data;
   return $str =~ /^-?[0-9]+$/ ? "${str}.0" : $str;
 }

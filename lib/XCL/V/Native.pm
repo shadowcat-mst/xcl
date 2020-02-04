@@ -19,8 +19,8 @@ async sub _invoke {
   return await $ns->$method_name($scope, $vals);
 }
 
-sub display ($self, $depth) {
-  return $self->SUPER::display(0) unless $depth;
+sub display_data ($self, $depth) {
+  return $self->SUPER::display_data(0) unless $depth;
   my $in_depth = $depth - 1;
   return 'Native('.XCL::V->from_perl($self->data)->display($in_depth).')';
 }

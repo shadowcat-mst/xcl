@@ -13,6 +13,6 @@ async sub _invoke {
   return $res;
 }
 
-sub display { '{...}' }
+sub display_data { '{...}' }
 
 1;

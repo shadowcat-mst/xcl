@@ -12,7 +12,7 @@ sub _invoke ($self, $, $) {
   });
 }
 
-sub display ($self, $depth) {
+sub display_data ($self, $depth) {
   'Var('.$self->data->display($depth).')'
 }
 

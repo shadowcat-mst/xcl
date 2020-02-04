@@ -10,7 +10,7 @@ async sub _invoke {
   return await $self->SUPER::_invoke($scope, $res->val);
 }
 
-sub display ($self, @) {
+sub display_data ($self, $) {
   return 'lambda ('.join(', ', @{$self->data->{argnames}}).') { ... }';
 }
 

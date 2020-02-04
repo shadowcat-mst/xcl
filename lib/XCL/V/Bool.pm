@@ -4,7 +4,7 @@ use XCL::Class 'XCL::V';
 
 sub bool ($self) { ValF($self) }
 
-sub display ($self, @) {
+sub display_data ($self, $) {
   $self->data ? 'true' : 'false'
 }
 

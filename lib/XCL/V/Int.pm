@@ -7,7 +7,7 @@ with 'XCL::V::Role::Numeric';
 
 sub bool ($self) { ValF(Bool($self->data == 0 ? 1 : 0)) }
 
-sub display ($self, @) { ''.$self->data }
+sub display_data ($self, $) { ''.$self->data }
 
 sub c_f_range ($self, $lst) {
   return $_ for $self->_same_types($lst);

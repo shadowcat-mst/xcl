@@ -6,7 +6,7 @@ sub bool ($self) { ValF(Bool(length($self->data) ? 1 : 0)) }
 
 # This is naive/wrong
 
-sub display ($self, @) { q{'}.$self->data.q{'} }
+sub display_data ($self, $) { q{'}.$self->data.q{'} }
 
 sub c_f_make ($class, $lst) {
   return ValF String join '', map {

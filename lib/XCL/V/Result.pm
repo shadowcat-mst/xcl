@@ -12,7 +12,7 @@ sub can_set_value ($self) { $self->data->{set} }
 
 sub set_value ($self, $value) { $self->can_set_value->($value) }
 
-sub display ($self, $depth) {
+sub display_data ($self, $depth) {
   if ($self->is_ok) {
     return 'Val('.$self->val->display($depth).')';
   }

@@ -43,8 +43,8 @@ sub pairs ($self) {
   return map List([ String($_), $d->{$_} ]), sort CORE::keys %$d;
 }
 
-sub display ($self, $depth) {
-  return $self->SUPER::display(0) unless $depth;
+sub display_data ($self, $depth) {
+  return $self->SUPER::display_data(0) unless $depth;
   my $in_depth = $depth - 1;
   my @res;
   foreach my $key (sort CORE::keys %{$self->data}) {

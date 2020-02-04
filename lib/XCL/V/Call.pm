@@ -20,8 +20,8 @@ async sub _call {
   return await $res->val->invoke($scope, List(\@args));
 }
 
-sub display ($self, $depth) {
-  return $self->SUPER::display(0) unless $depth;
+sub display_data ($self, $depth) {
+  return $self->SUPER::display_data(0) unless $depth;
   my $in_depth = $depth - 1;
   my @res;
   foreach my $val (@{$self->data}) {

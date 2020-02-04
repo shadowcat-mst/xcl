@@ -63,7 +63,7 @@ sub snapshot ($self) {
   Scope(Dict({ %{$self->data->data} }));
 }
 
-sub display ($self, $depth) {
+sub display_data ($self, $depth) {
   'Scope('.$self->data->display($depth).')'
 }
 

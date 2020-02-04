@@ -62,7 +62,14 @@ sub type ($self) {
   (split '::', ref($self))[-1];
 }
 
-sub display ($self, @) { $self->type.'()' }
+sub display ($self, $depth) {
+  my $data = $self->display_data($depth);
+  return $data unless keys %{$self->metadata};
+  return $data if $depth >= 0 and $depth <= 2;
+  return $data.' with_meta '.(Dict $self->metadata)->display($depth);
+}
+
+sub display_data ($self, $) { $self->type.'()' }
 
 sub bool ($self) { ErrF([ Name('CANT_BOOLEAN') => String($self->type) ]) }
 
