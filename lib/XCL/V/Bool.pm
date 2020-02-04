@@ -8,9 +8,10 @@ sub display_data ($self, $) {
   $self->data ? 'true' : 'false'
 }
 
-async sub f_not ($self) {
-  return ValF(Bool(0+!$self->data)) if ref($self) eq '__PACKAGE__';
-  my $res = await $self->bool;
+async sub c_f_not ($self, $lst) {
+  my ($val) = $lst->values;
+  return ValF(Bool(0+!$val->data)) if ref($val) eq '__PACKAGE__';
+  my $res = await $val->bool;
   return $res unless $res->is_ok;
   ValF(Bool(0+!$res->val->data));
 }

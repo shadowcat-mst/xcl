@@ -74,7 +74,7 @@ sub _assemble_value ($builtins, $to) {
   if (@bits > 1) {
     return XCL::Builtins::Functions->c_fx_dot(
       Scope(Dict $builtins),
-      List [ map String($_), grep length, @bits ]
+      List [ map Name($_), grep length, @bits ]
     )->get;
   }
   return $builtins->{$bits[0]};

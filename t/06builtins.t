@@ -22,4 +22,8 @@ is $plus->invoke($builtins, List [ Int(3), Int(4) ])->get, Val(Int 7);
 
 is $plus->invoke($builtins, List [ Float(3), Float(4) ])->get, Val(Float 7);
 
+my $not = Call [ Name('.'), Name('Bool'), Name('not') ];
+
+is $builtins->eval($not)->get->val, $builtins->get('not')->get->val;
+
 done_testing;
