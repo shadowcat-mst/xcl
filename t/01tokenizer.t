@@ -12,4 +12,6 @@ is tk('x(1)'), [
   [ end_list => ')' ],
 ];
 
+is tk("'foo'"), [[ string => 'foo' ]];
+
 done_testing;

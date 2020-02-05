@@ -25,10 +25,10 @@ our %LOOKUP = (
 );
 
 our %TOKEN_REGEXPS = (
-  ws => '\s+',
-  word => '\w+',
-  number => '[0-9]+(?:\\.[0-9]+)?',
-  symbol => "[\Q${SYMBOL_CHARS}\E]+",
+  ws => '(\s+)',
+  word => '(\w+)',
+  number => '([0-9]+(?:\\.[0-9]+)?)',
+  symbol => "([\Q${SYMBOL_CHARS}\E]+)",
   string => q{'((?:[^'\\\\]+|\\\\.)*)'},
   comment => q{#(.*?)\n},
   # this regexp is bollocks because \1 needed to be }}}
@@ -41,8 +41,8 @@ sub extract_next {
   return () unless defined($src) and length($src);
   my $type = $LOOKUP{substr($src,0,1)};
   die "no idea wtf happened here, blame mst" unless $type;
-  my $re = $TOKEN_REGEXPS{$type}||'.';
-  if ($src =~ s/^(${re})//s) {
+  my $re = $TOKEN_REGEXPS{$type}||'(.)';
+  if ($src =~ s/^${re}//s) {
     return ($type, $1, $src);
   }
   # need to complain loudly with lots of information
