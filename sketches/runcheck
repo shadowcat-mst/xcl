@@ -1,0 +1,22 @@
+use lib 'lib';
+use Devel::DDCWarn;
+use Mojo::Base -strict, -signatures;
+use XCL::Values;
+use XCL::Builtins;
+use XCL::Weaver;
+
+my $w = XCL::Weaver->new(ops => XCL::Builtins->ops);
+
+my $builtins = XCL::Builtins->builtins;
+
+my $scope = Scope Dict $builtins;
+
+my $t = $w->parse(stmt_list => $ARGV[0]);
+
+my $res_f = $t->invoke($scope, List[]);
+
+# Comment the next line to enable/disable the DDCWarn output
+::Dwarn R =>
+  my $res = $res_f->get;
+
+say $res->display(10);
