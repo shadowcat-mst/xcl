@@ -15,7 +15,6 @@ sub _builtin_map () {
     lambda => [ 'Lambda.make' ],
     string => [ 'String.make' ],
     dict => [ 'Dict.make' ],
-    escape => [ 'Escape.make' ],
 
     'not' => [ 'Bool.not' ],
     '!' => [ 'Bool.not' ],

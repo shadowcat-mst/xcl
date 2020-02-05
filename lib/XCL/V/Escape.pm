@@ -6,7 +6,7 @@ sub evaluate_against ($self, $scope) {
   ValF $self->data;
 }
 
-sub c_fx_make ($class, $lst) {
+sub c_fx_make ($class, $scope, $lst) {
   ValF $class->of_data($lst->data->[0]);
 }
 

@@ -49,7 +49,7 @@ sub _invoke ($self, $scope, $lst) {
   return ValF $self unless my @vals = $lst->values;
   ErrF([
     Name('WRONG_ARG_COUNT')
-    => String($self->display)
+    => String($self->display(0))
     => Int(scalar @vals)
   ]);
 }
