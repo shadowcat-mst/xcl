@@ -8,12 +8,16 @@ sub bool ($self) { ValF(Bool(length($self->data) ? 1 : 0)) }
 
 sub display_data ($self, $) { q{'}.$self->data.q{'} }
 
-sub c_f_make ($class, $lst) {
-  return ValF String join '', map {
-    my $res = $_->string;
-    return ResultF($res) unless $res->is_ok;
-    $res->val->data;
-  } $lst->values;
+sub string ($self) { ValF($self) }
+
+async sub c_f_make ($class, $lst) {
+  my @res;
+  foreach my $v ($lst->values) {
+    my $res = await $v->string;
+    return $res unless $res->is_ok;
+    push @res, $res->val->data;
+  }
+  return Val String join '', @res;
 }
 
 foreach my $op (qw(eq ne gt lt ge le)) {

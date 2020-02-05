@@ -76,7 +76,7 @@ sub display_data ($self, $) { $self->type.'()' }
 
 sub bool ($self) { ErrF([ Name('CANT_BOOLEAN') => String($self->type) ]) }
 
-sub string ($self) { Err([ Name('CANT_STRINGIFY') => String($self->type) ]) }
+sub string ($self) { ErrF([ Name('CANT_STRINGIFY') => String($self->type) ]) }
 
 # maybe doesn't belong here but in a role but shrug
 
