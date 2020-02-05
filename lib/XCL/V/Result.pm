@@ -14,9 +14,9 @@ sub set_value ($self, $value) { $self->can_set_value->($value) }
 
 sub display_data ($self, $depth) {
   if ($self->is_ok) {
-    return 'Val('.$self->val->display($depth).')';
+    return '? '.$self->val->display($depth);
   }
-  return 'Err('.$self->err->display($depth).')';
+  return 'err '.$self->err->display($depth);
 }
 
 sub f_get ($self) { ResultF $self }
