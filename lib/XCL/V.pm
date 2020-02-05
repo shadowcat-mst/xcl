@@ -46,6 +46,9 @@ async sub invoke ($self, $scope, $lst) {
 }
 
 sub _invoke ($self, $scope, $lst) {
+  # Was seriously wondering if this should always just be an error.
+  return ErrF([ Name('CANT_INVOKE'), String($self->type) ]);
+  # Try letting this code run again if we find a reason
   return ValF $self unless my @vals = $lst->values;
   ErrF([
     Name('WRONG_ARG_COUNT')
