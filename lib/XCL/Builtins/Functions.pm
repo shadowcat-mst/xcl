@@ -42,7 +42,7 @@ async sub c_fx_if {
   return $_ for not_ok my $res = await $dscope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
   if ($bres->val->data) {
-    return $_ for not_ok await $block->invoke($dscope);
+    return $_ for not_ok await $block->invoke($dscope, List []);
   }
   return $bres;
 }
