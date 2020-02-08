@@ -2,7 +2,7 @@ package XCL::Tokenizer;
 
 use XCL::Class;
 
-our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\\^_|~';
+our $SYMBOL_CHARS = '.!$%&*+-/:<=>@\\^_|~?';
 
 our %LOOKUP = (
   ' ' => 'ws',
