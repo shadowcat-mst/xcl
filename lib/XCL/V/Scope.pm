@@ -82,7 +82,7 @@ sub intro ($self, $type, $lst) {
   my $_set = $self->curry::weak::set($name->data);
   return ResultF( Result {
     err => List([ Name('INTRO_REQUIRES_SET') => String($name->data) ]),
-    set => async sub { await $_set->($type->($_[0])) },
+    set => sub { $_set->($type->($_[0])) },
   });
 }
 
