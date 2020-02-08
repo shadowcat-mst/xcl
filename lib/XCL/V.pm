@@ -34,14 +34,14 @@ async sub invoke ($self, $scope, $lst) {
     $Did_Thing++;
   }
 
-  print STDERR $prefix.$self->display(-1).' '.$lst->display(-1);
+  print STDERR $prefix.$self->display(DEBUG).' '.$lst->display(DEBUG);
   my $res = do {
     dynamically $Did_Thing = 0;
     my $tmp = await $self->_invoke($scope, $lst);
     print STDERR "${indent}\}" if $Did_Thing;
     $tmp;
   };
-  print STDERR " ->\n${indent}  ".$res->display(-1).";\n";
+  print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n";
   return $res;
 }
 

@@ -33,7 +33,7 @@ our @EXPORT = (
 our $Eval_Depth = -1;
 our $Did_Thing;
 
-use constant DEBUG => 0+!!$ENV{XCL_DEBUG};
+use constant DEBUG => $ENV{XCL_DEBUG} || 0;
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
