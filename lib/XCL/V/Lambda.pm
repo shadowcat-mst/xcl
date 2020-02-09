@@ -14,4 +14,7 @@ sub display_data ($self, $) {
   return 'lambda ('.join(', ', @{$self->data->{argnames}}).') { ... }';
 }
 
+# Only necessary because builtin code doesn't walk isa yet
+sub c_fx_make { shift->SUPER::c_fx_make(@_) }
+
 1;

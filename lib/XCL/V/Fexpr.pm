@@ -18,11 +18,11 @@ async sub c_fx_make {
   my $res = await $body_proto->evaluate_against($scope);
   return $res unless $res->is_ok;
   my @argnames = map $_->data, $argspec->values;
-  Val($class->new(
+  Val($class->new(data => {
     argnames => \@argnames,
     scope => $scope,
     body => $res->val,
-  ));
+  }, metadata => {}));
 }
 
 sub f_concat ($self, $lst) {
