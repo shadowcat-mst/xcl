@@ -11,12 +11,14 @@ my $builtins = XCL::Builtins->builtins;
 
 my $scope = Scope Dict $builtins;
 
+warn "------------------------------------------------------\n";
+
 my $t = $w->parse(stmt_list => $ARGV[0]);
 
 my $res_f = $t->invoke($scope, List[]);
 
-# Comment the next line to enable/disable the DDCWarn output
-::Dwarn R =>
+# (un)comment the next line to enable/disable the DDCWarn output
+#::Dwarn R =>
   my $res = $res_f->get;
 
 say $res->display(10);
