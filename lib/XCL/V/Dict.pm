@@ -47,12 +47,14 @@ sub display_data ($self, $depth) {
   return $self->SUPER::display_data(0) unless $depth;
   my $in_depth = $depth - 1;
   my @res;
+  my $indent = '  ' x (my $e = $Eval_Depth + 1);
+  dynamically $Eval_Depth = $e;
   foreach my $key (sort CORE::keys %{$self->data}) {
     my $value = $self->data->{$key};
     my $display_value = defined($value)
       ? $self->data->{$key}->display($in_depth)
       : 'MISSING';
-    push @res, map s/^/  /mgr, do {
+    push @res, map s/^/${indent}/mgr, do {
       if ($key =~ /^[a-zA-Z_]\w*$/) {
         ":${key} ${display_value}";
       } else {
