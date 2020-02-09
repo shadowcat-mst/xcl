@@ -37,7 +37,7 @@ async sub eval ($self, $thing) {
 
 async sub get ($self, $key) {
   my $res = $self->data->get($key);
-  return $res unless $res->is_ok;
+  return Err($res->data->{err}) unless $res->is_ok;
   my $val = $res->val;
   return $val if $val->is('Result');
   return await $val->invoke($self, List []);

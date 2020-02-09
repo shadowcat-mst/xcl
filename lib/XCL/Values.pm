@@ -53,7 +53,10 @@ sub Err ($err, $metadata = {}) {
       map +($_ => $metadata->{$_}), grep $metadata->{$_}, 'caller',
     }));
   };
-  Result({ err => Call($err) }, { %$metadata, %meta });
+  Result(
+    { err => ref($err) eq 'ARRAY' ? Call($err) : $err },
+    { %$metadata, %meta },
+  );
 }
 
 sub not_ok (@things) { grep !$_->is_ok, @things }
@@ -66,7 +69,7 @@ async sub ResultF {
   if ($_[0]->$_isa('XCL::V::Result')) {
     return $_[0];
   } else {
-    die $_[0];
+    die "ResultF called on non-result: $_[0]";
   }
 }
 

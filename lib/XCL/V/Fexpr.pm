@@ -5,7 +5,7 @@ use XCL::Class 'XCL::V';
 sub _invoke ($self, $outer_scope, $vals) {
   my ($argnames, $scope, $body) = @{$self->data}{qw(argnames scope body)};
   my %merge; @merge{@$argnames} = map Val($_), $outer_scope, $vals->values;
-  $scope->derive(\%merge)->eval($body);
+  $body->invoke($scope->derive(\%merge), List []);
 }
 
 sub display_data ($self, $) {
@@ -27,7 +27,7 @@ async sub c_fx_make {
 
 sub f_concat ($self, $lst) {
   return $_ for $self->_same_types($lst, 'List');
-  ValF Call(data => [ $self, map $_->values, $lst->values ]);
+  ValF Call([ $self, map $_->values, $lst->values ]);
 }
 
 1;
