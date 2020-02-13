@@ -14,4 +14,21 @@ is tk('x(1)'), [
 
 is tk("'foo'"), [[ string => 'foo' ]];
 
+is tk('{ 3 }'), [
+  [ 'start_block', '{' ],
+    [ 'ws', ' ' ],
+    [ 'number', 3 ],
+    [ 'ws', ' ' ],
+  [ 'end_block', '}' ],
+];
+
+is tk('{ 3 };'), [
+  [ 'start_block', '{' ],
+    [ 'ws', ' ' ],
+    [ 'number', 3 ],
+    [ 'ws', ' ' ],
+  [ 'end_block', '}' ],
+  [ 'semicolon', ';' ],
+];
+
 done_testing;
