@@ -35,4 +35,7 @@ is xp('+ [ x y ] z'), [
 is xp('x()'),
   [ 'block', [ 'stmt', [ 'compound', [ 'word', 'x' ], [ 'list' ] ] ] ];
 
+is xp('{ 3 }'),
+  [ 'block', [ 'stmt', [ 'block', [ 'stmt', [ 'number', 3 ] ] ] ] ];
+
 done_testing;
