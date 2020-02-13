@@ -38,4 +38,7 @@ is xp('x()'),
 is xp('{ 3 }'),
   [ 'block', [ 'stmt', [ 'block', [ 'stmt', [ 'number', 3 ] ] ] ] ];
 
+is xp('{ 3 };'),
+  [ 'block', [ 'stmt', [ 'block', [ 'stmt', [ 'number', 3 ] ] ] ] ];
+
 done_testing;

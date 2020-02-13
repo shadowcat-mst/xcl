@@ -44,7 +44,10 @@ sub _extract_spacecall ($self, $call_type, @toks) {
     my $type = $toks[0][0];
     if ($type eq 'ws' or $type eq 'comment') {
       my $t = shift @toks;
-      last if @spc and $spc[-1][0] eq 'block' and $t->[1] =~ /\n/;
+      if (@spc and $spc[-1][0] eq 'block' and $t->[1] =~ /\n/) {
+        unshift @toks, [ semicolon => ';' ];
+        last;
+      }
       next;
     }
     if (my ($toks, $val) = $self->extract_compoundish(@toks)) {
@@ -65,7 +68,13 @@ sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {
       @toks = @$toks;
     }
     last unless @toks;
-    next if $combi_type eq 'block' and @ret and $ret[-1][-1][0] eq 'block';
+    if ($combi_type eq 'block'
+      and @ret
+      and $ret[-1][-1][0] eq 'block'
+    ) {
+      shift @toks;
+      next;
+    }
     my $type = $toks[0][0];
     shift @toks and last if $type eq $end;
     shift @toks and next if $type eq $mid;
