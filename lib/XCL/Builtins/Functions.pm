@@ -149,7 +149,7 @@ async sub c_fx_dot {
     return Val Call [ Escape($res->val), $l ] if $res->is_ok;
   }
 
-  return Err [ Name('NO_SUCH_VALUE'), $name ]
+  return Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ]
     unless my $try =
       $l->metadata->{dot_via}
         || ($fallthrough && Name($l->type));
