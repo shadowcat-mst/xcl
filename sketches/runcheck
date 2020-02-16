@@ -15,9 +15,13 @@ warn "------------------------------------------------------\n";
 
 my $t = $w->parse(stmt_list => $ARGV[0]);
 
+warn "HERE";
+
 my $res_f = $t->invoke($scope, List[]);
 
-# (un)comment the next line to enable/disable the DDCWarn output
+warn "INVOKED";
+
+# Comment the next line to enable/disable the DDCWarn output
 #::Dwarn R =>
   my $res = $res_f->get;
 

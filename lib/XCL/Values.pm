@@ -45,9 +45,9 @@ foreach my $type (@Types) {
 }
 
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
-sub Err ($err, $metadata = {}) {
+sub Err ($err, $metadata = {}, $l = 0) {
   my %meta = do {
-    my ($pkg, $file, $line) = caller;
+    my ($pkg, $file, $line) = caller($l);
     (thrown_at => Dict({
       native_file => String($file), native_line => Int($line),
       map +($_ => $metadata->{$_}), grep $metadata->{$_}, 'caller',
@@ -74,6 +74,6 @@ async sub ResultF {
 }
 
 sub ValF { ResultF(Val(@_)) }
-sub ErrF { ResultF(Err(@_)) }
+sub ErrF ($err, $meta = {}) { ResultF(Err($err, $meta, 1)) }
 
 1;

@@ -2,10 +2,16 @@ package XCL::V::Fexpr;
 
 use XCL::Class 'XCL::V';
 
-sub _invoke ($self, $outer_scope, $vals) {
+async sub _invoke ($self, $outer_scope, $vals) {
   my ($argnames, $scope, $body) = @{$self->data}{qw(argnames scope body)};
-  my %merge; @merge{@$argnames} = map Val($_), $outer_scope, $vals->values;
-  $body->invoke($scope->derive(\%merge), List []);
+  my $val_res = await $self->_invoke_values($outer_scope, $vals);
+  return for not_ok $val_res;
+  my %merge; @merge{@$argnames} = $val_res->val->values;
+  await $body->invoke($scope->derive(\%merge), List []);
+}
+
+sub _invoke_values ($self, $outer_scope, $vals) {
+  ValF(List[$outer_scope, $vals->values]);
 }
 
 sub display_data ($self, $) {
