@@ -5,7 +5,8 @@ use XCL::Class 'XCL::V';
 async sub eval ($self, $thing) {
   state $state_id = '000';
   my $op_id = ++$state_id;
-  return await $thing->evaluate_against($self) unless DEBUG;
+  # theoretically harmless but complicated life before, await more tests
+  #return await $thing->evaluate_against($self) unless DEBUG;
   my $is_basic = do {
     state %is_basic;
     $is_basic{ref($thing)} //= 0+!!(
@@ -21,17 +22,17 @@ async sub eval ($self, $thing) {
   my $indent = '  ' x $Eval_Depth;
   my $prefix = "${indent}eval "; # $op_id ";
   if ($Eval_Depth and not $Did_Thing) {
-    print STDERR " {\n";
+    print STDERR " {\n" if DEBUG;
     $Did_Thing++;
   }
-  print STDERR $prefix.$thing->display(-1);
+  print STDERR $prefix.$thing->display(-1) if DEBUG;
   my $res = do {
     dynamically $Did_Thing = 0;
     my $tmp = await $thing->evaluate_against($self);
-    print STDERR "${indent}\}" if $Did_Thing;
+    print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
-  print STDERR " ->\n${indent}  ".$res->display(-1).";\n";
+  print STDERR " ->\n${indent}  ".$res->display(-1).";\n" if DEBUG;
   return $res;
 }
 
