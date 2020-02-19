@@ -1,0 +1,224 @@
+( E_001_E => bless( {
+    data => [
+      bless( { data => '+', metadata => {} }, "XCL::V::Name" ),
+      bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+      bless( { data => 4, metadata => {} }, "XCL::V::Int" ),
+    ],
+    metadata => {},
+}, "XCL::V::Call" ) )
+( E_002_E => bless( { data => '+', metadata => {} }, "XCL::V::Name" ) )
+( E_002_R => bless( {
+    data => { val => bless( {
+        data => { apply => 1, is_method => 1, native_name => 'f_plus' },
+        metadata => {},
+    }, "XCL::V::Native" ) },
+    metadata => {},
+}, "XCL::V::Result" ) )
+( C_001_E => (
+    bless( {
+      data => { apply => 1, is_method => 1, native_name => 'f_plus' },
+      metadata => {},
+    }, "XCL::V::Native" ), bless( {
+      data => [
+        bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+        bless( { data => 4, metadata => {} }, "XCL::V::Int" ),
+      ],
+      metadata => {},
+    }, "XCL::V::List" ),
+) )
+( E_003_E => bless( {
+    data => [
+      bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+      bless( { data => 4, metadata => {} }, "XCL::V::Int" ),
+    ],
+    metadata => {},
+}, "XCL::V::List" ) )
+( E_003_R => bless( {
+    data => { val => bless( {
+        data => [
+          bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+          bless( { data => 4, metadata => {} }, "XCL::V::Int" ),
+        ],
+        metadata => {},
+    }, "XCL::V::List" ) },
+    metadata => {},
+}, "XCL::V::Result" ) )
+( C_001_R => (
+    bless( {
+      data => { apply => 1, is_method => 1, native_name => 'f_plus' },
+      metadata => {},
+    }, "XCL::V::Native" ), bless( {
+      data => { val => bless( { data => 7, metadata => {} }, "XCL::V::Int" ) },
+      metadata => {},
+    }, "XCL::V::Result" ),
+) )
+( E_001_R => bless( {
+    data => { val => bless( { data => 7, metadata => {} }, "XCL::V::Int" ) },
+    metadata => {},
+}, "XCL::V::Result" ) )
+# Seeded srand with seed '20200128' from local date.
+ok 1
+( E_004_E => bless( {
+    data => [
+      bless( { data => '.', metadata => {} }, "XCL::V::Name" ),
+      bless( { data => 'Int', metadata => {} }, "XCL::V::Name" ),
+      bless( { data => 'plus', metadata => {} }, "XCL::V::Name" ),
+    ],
+    metadata => {},
+}, "XCL::V::Call" ) )
+( E_005_E => bless( { data => '.', metadata => {} }, "XCL::V::Name" ) )
+( E_005_R => bless( {
+    data => { val => bless( {
+        data =>
+          { native_name => 'c_fx_dot', ns => 'XCL::Builtins::Functions' },
+        metadata => {},
+    }, "XCL::V::Native" ) },
+    metadata => {},
+}, "XCL::V::Result" ) )
+( C_002_E => (
+    bless( {
+      data => { native_name => 'c_fx_dot', ns => 'XCL::Builtins::Functions' },
+      metadata => {},
+    }, "XCL::V::Native" ), bless( {
+      data => [
+        bless( { data => 'Int', metadata => {} }, "XCL::V::Name" ),
+        bless( { data => 'plus', metadata => {} }, "XCL::V::Name" ),
+      ],
+      metadata => {},
+    }, "XCL::V::List" ),
+) )
+( E_006_E => bless( { data => 'Int', metadata => {} }, "XCL::V::Name" ) )
+( E_006_R => bless( {
+    data => { val => bless( {
+        data => 'Int',
+        metadata => { dot_methods => bless( {
+            data => { plus => bless( {
+                data => {
+                  apply => 1,
+                  is_method => 1,
+                  native_name => 'f_plus',
+                  unwrap => 1,
+                },
+                metadata => {},
+            }, "XCL::V::Native" ) },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+}, "XCL::V::Result" ) )
+( C_003_E => (
+    bless( {
+      data => { plus => bless( {
+          data =>
+            {
+              apply => 1,
+              is_method => 1,
+              native_name => 'f_plus',
+              unwrap => 1,
+            },
+          metadata => {},
+      }, "XCL::V::Native" ) },
+      metadata => {},
+    }, "XCL::V::Dict" ),
+    bless( {
+      data =>
+        [ bless( { data => 'plus', metadata => {} }, "XCL::V::String" ) ],
+      metadata => {},
+    }, "XCL::V::List" ),
+) )
+( C_003_R => (
+    bless( {
+      data => { plus => bless( {
+          data =>
+            {
+              apply => 1,
+              is_method => 1,
+              native_name => 'f_plus',
+              unwrap => 1,
+            },
+          metadata => {},
+      }, "XCL::V::Native" ) },
+      metadata => {},
+    }, "XCL::V::Dict" ),     },
+    bless( {
+      data => {
+        set => sub {
+          package curry::weak;
+          return unless $invocant;
+          $invocant->$method(@args, @_);
+        val => bless( {
+          data =>
+            {
+              apply => 1,
+              is_method => 1,
+              native_name => 'f_plus',
+              unwrap => 1,
+            },
+          metadata => {},
+        }, "XCL::V::Native" ),
+      },
+      metadata => {},
+    }, "XCL::V::Result" ),
+) )
+( C_002_R => (
+    bless( {
+      data => { native_name => 'c_fx_dot', ns => 'XCL::Builtins::Functions' },
+      metadata => {},
+    }, "XCL::V::Native" ), bless( {
+      data => [
+        bless( {
+          data =>
+            {
+              apply => 1,
+              is_method => 1,
+              native_name => 'f_plus',
+              unwrap => 1,
+            },
+          metadata => {},
+        }, "XCL::V::Native" ),
+        bless( {
+          data => 'Int',
+          metadata => { dot_methods => bless( {
+              data => { plus => bless( {
+                  data => {
+                    apply => 1,
+                    is_method => 1,
+                    native_name => 'f_plus',
+                    unwrap => 1,
+                  },
+                  metadata => {},
+              }, "XCL::V::Native" ) },
+              metadata => {},
+          }, "XCL::V::Dict" ) },
+        }, "XCL::V::Name" ),
+      ],
+      metadata => {},
+    }, "XCL::V::Call" ),
+) )
+( E_004_R => bless( {
+    data => [
+      bless( {
+        data =>
+          { apply => 1, is_method => 1, native_name => 'f_plus', unwrap => 1 },
+        metadata => {},
+      }, "XCL::V::Native" ), bless( {
+        data => 'Int',
+        metadata => { dot_methods => bless( {
+            data => { plus => bless( {
+                data => {
+                  apply => 1,
+                  is_method => 1,
+                  native_name => 'f_plus',
+                  unwrap => 1,
+                },
+                metadata => {},
+            }, "XCL::V::Native" ) },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+      }, "XCL::V::Name" ),
+    ],
+    metadata => {},
+}, "XCL::V::Call" ) )
+Can't locate object method "val" via package "XCL::V::Call" at t/05basics.t line 27.
+# Tests were run but no plan was declared and done_testing() was not seen.
+# Looks like your test exited with 255 after test #1.

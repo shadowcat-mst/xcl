@@ -1,0 +1,26 @@
+let of (l, r) {
+  let f = (r) => { r().$(l) }
+  ?: [exists r] f(r) f;
+}
+
+let shell = struct {
+  let whichcommand (self, cmd) {
+#    \[ self.run [self.which cmd] ];
+    self.command [ self.which cmd ];
+  }
+  let run (self, cmd, @args) {
+    [ self.command cmd ] @args;
+  }
+  let exit_code_of (self, @args) {
+    .^exit_code self.run(@args);
+  }
+}
+
+let thing = shell.whichcommand 'thing';
+
+# let exit_code = metadata(stdout)('exit_code');
+
+let thing_ret = thing :exit_ok(1,3,7) -p -q 'argh';
+
+say thing_ret;
+say thing_ret.^exit_code();

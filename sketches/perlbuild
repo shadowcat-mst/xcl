@@ -1,0 +1,13 @@
+
+let build_package (dist) {
+  fs.with_tempdir {
+    unpack dist;
+    install_configure_requires;
+    configure;
+    install_build_requires;
+    build;
+    # todo: get rid of -dev packages
+    test;
+    install;
+  }
+}

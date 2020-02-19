@@ -1,0 +1,41 @@
+use xcl 1;
+use shell;
+use command;
+
+let incdirs = ('lib');
+
+let run_ll (@args) {
+  err "run_ll must have args" unless args.count();
+  let ll_args = ?: args(0).is('Pair') {
+    args.map(((k, v)) => { ('--' ++ sg'_''-' k, v).join '=' }).join ','
+  } {
+    err "run_ll must have pairs or single value" if args.count() > 1;
+    args(0).to_string();
+  }
+  shell.run 'perl'
+    # @(:I(dir) for dir in incdirs)
+    # :I <| incdirs
+    # @(incdirs.map :I)
+    # @(incdirs.map x => :I(x))
+    @(incdirs.map x => "-I$(x)")
+    "-Mlocal::lib=$(ll_args)";
+}
+
+command.main_command (self, @args) {
+  let (args, opts) = command.parse_args args :shelltype(String);
+  let run_ll = run_ll ++ opts;
+  command.dispatch_subcommand args {
+    let create (path) {
+      run_ll path;
+    }
+    let activate (path) {
+      say [run_ll path];
+    }
+    let deactivate (path) {
+      say [run_ll :deactivate(path)];
+    }
+    let deactivate_all (path) {
+      say [run_ll :deactivate_all(path)];
+    }
+  }
+}

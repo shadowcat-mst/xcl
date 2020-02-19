@@ -1,0 +1,1066 @@
+(
+  'EVAL_IN', 'A001',
+  bless( { data => 'Fexpr', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A001', bless( {
+    data =>
+      {
+        val => bless( { data => 'Fexpr', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A002',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A002', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              eq => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              ge => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              gt => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              le => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              lt => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              make => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              ne => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A003',
+  bless( { data => 'Lambda', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A003', bless( {
+    data =>
+      {
+        val => bless( { data => 'Lambda', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A004',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A004', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A005',
+  bless( { data => 'String', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A005', bless( {
+    data =>
+      {
+        val => bless( { data => 'String', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A006',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A006', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A007',
+  bless( { data => 'Dict', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A007', bless( {
+    data =>
+      { val => bless( { data => 'Dict', metadata => {} }, "XCL::V::String" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A008',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A008', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A009',
+  bless( { data => 'Escape', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A009', bless( {
+    data =>
+      {
+        val => bless( { data => 'Escape', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A010',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A010', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A011',
+  bless( { data => 'Bool', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A011', bless( {
+    data =>
+      { val => bless( { data => 'Bool', metadata => {} }, "XCL::V::String" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A012',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A012', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A013',
+  bless( { data => 'Bool', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A013', bless( {
+    data =>
+      { val => bless( { data => 'Bool', metadata => {} }, "XCL::V::String" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A014',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A014', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A015',
+  bless( { data => 'Scope', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A015', bless( {
+    data =>
+      {
+        val => bless( { data => 'Scope', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A016',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A016', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A017',
+  bless( { data => 'Scope', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A017', bless( {
+    data =>
+      {
+        val => bless( { data => 'Scope', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A018',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A018', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A019',
+  bless( { data => 'Scope', metadata => {} }, "XCL::V::String" ),
+)
+(
+  'EVAL_OUT', 'A019', bless( {
+    data =>
+      {
+        val => bless( { data => 'Scope', metadata => {} }, "XCL::V::String" )
+      },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A020',
+  bless( { data => 'String', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A020', bless( {
+    data => { val => bless( {
+        data => 'String',
+        metadata => { dot_methods => bless( {
+            data => {
+              concat =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              make =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A021', bless( {
+    data => [
+      bless( { data => '+', metadata => {} }, "XCL::V::Name" ),
+      bless( { data => 1, metadata => {} }, "XCL::V::Int" ),
+      bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+    ],
+    metadata => {},
+  }, "XCL::V::Call" ),
+)
+(
+  'EVAL_IN', 'A022',
+  bless( { data => '+', metadata => {} }, "XCL::V::Name" ),
+)
+unexpected OP_PUSHMARK at /home/matthewt/perl5/perlbrew/perls/perl-5.28.0/lib/5.28.0/B/Deparse.pm line 1644.
+unexpected OP_CUSTOM (await) at /home/matthewt/perl5/perlbrew/perls/perl-5.28.0/lib/5.28.0/B/Deparse.pm line 1644.
+unexpected OP_CUSTOM (await) at /home/matthewt/perl5/perlbrew/perls/perl-5.28.0/lib/5.28.0/B/Deparse.pm line 1644.
+unexpected OP_CUSTOM (await) at /home/matthewt/perl5/perlbrew/perls/perl-5.28.0/lib/5.28.0/B/Deparse.pm line 1644.
+unexpected OP_CUSTOM (leaveasync) at /home/matthewt/perl5/perlbrew/perls/perl-5.28.0/lib/5.28.0/B/Deparse.pm line 1644.
+(
+  'EVAL_OUT', 'A022', bless( {
+    data => { val => bless( {
+        data => sub {
+          package XCL::Builtins::Functions;
+          BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+          use strict;
+          use feature 'say', 'signatures', 'state', 'switch';
+          BEGIN {
+            $^H{'Future::AsyncAwait/async'} = '1';
+            $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+          }
+          XXX;
+          eval {
+            do {
+              my($scope, $lst) = @_;
+              return Err([Name('WRONG_ARG_COUNT'), Int(0)]) unless $lst->values;
+              my $lres = XXX;
+              return $lres unless $lres->is_ok;
+              my($inv, @args) = $lres->val->values;
+              my $mres = XXX;
+              return $mres unless $mres->is_ok;
+              return XXX
+            }
+          };
+          XXX;
+        },
+        metadata => {},
+    }, "XCL::V::Native" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'NATIVE', $VAR1, bless( {
+    data => [
+      bless( { data => 1, metadata => {} }, "XCL::V::Int" ),
+      bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+    ],
+    metadata => {},
+  }, "XCL::V::List" ),
+)
+(
+  'EVAL_IN', 'A023', bless( {
+    data => [
+      bless( { data => 1, metadata => {} }, "XCL::V::Int" ),
+      bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+    ],
+    metadata => {},
+  }, "XCL::V::List" ),
+)
+( 'EVAL_IN', 'A024', bless( { data => 1, metadata => {} }, "XCL::V::Int" ) )
+(
+  'EVAL_OUT', 'A024', bless( {
+    data => { val => bless( { data => 1, metadata => {} }, "XCL::V::Int" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+( 'EVAL_IN', 'A025', bless( { data => 3, metadata => {} }, "XCL::V::Int" ) )
+(
+  'EVAL_OUT', 'A025', bless( {
+    data => { val => bless( { data => 3, metadata => {} }, "XCL::V::Int" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_OUT', 'A023', bless( {
+    data => { val => bless( {
+        data => [
+          bless( { data => 1, metadata => {} }, "XCL::V::Int" ),
+          bless( { data => 3, metadata => {} }, "XCL::V::Int" ),
+        ],
+        metadata => {},
+    }, "XCL::V::List" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+( 'EVAL_IN', 'A026', bless( { data => 1, metadata => {} }, "XCL::V::Int" ) )
+(
+  'EVAL_OUT', 'A026', bless( {
+    data => { val => bless( { data => 1, metadata => {} }, "XCL::V::Int" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A027',
+  bless( { data => 'Int', metadata => {} }, "XCL::V::Name" ),
+)
+(
+  'EVAL_OUT', 'A027', bless( {
+    data => { val => bless( {
+        data => 'Int',
+        metadata => { dot_methods => bless( {
+            data => {
+              divide => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              eq => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              ge => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              gt => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              le => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              lt => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              minus => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              multiply => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              ne => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              plus => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              range => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              to_float => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+              to_int => bless( {
+                data => sub {
+                  package XCL::Builtins::Builder;
+                  BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+                  use strict;
+                  use feature 'say', 'signatures', 'state', 'switch';
+                  BEGIN {
+                    $^H{'Future::AsyncAwait/async'} = '1';
+                    $^H{'Future::AsyncAwait/future'} = 'XCL::Strand::Future';
+                  }
+                  die sprintf("Too many arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ <= 2;
+                  die sprintf("Too few arguments for subroutine at %s line %d.\n", (caller)[1, 2]) unless @_ >= 2;
+                  my $scope = $_[0];
+                  my $lst = $_[1];
+                  my(undef, @args) = $lst->values;
+                  &$native($scope, List(\@args));
+                },
+                metadata => {},
+              }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'EVAL_IN', 'A028', bless( {
+    data => [
+      bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ), bless( {
+        data => 'Int',
+        metadata => { dot_methods => bless( {
+            data => {
+              divide =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              minus =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              multiply =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              plus =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              range =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              to_float =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              to_int =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+      }, "XCL::V::Name" ),
+    ],
+    metadata => {},
+  }, "XCL::V::Call" ),
+)
+(
+  'EVAL_IN', 'A029',
+  bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+)
+(
+  'EVAL_OUT', 'A029', bless( {
+    data =>
+      { val => bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+(
+  'NATIVE', $VAR1, bless( {
+    data => [ bless( {
+        data => 'Int',
+        metadata => { dot_methods => bless( {
+            data => {
+              divide =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              eq =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ge =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              gt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              le =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              lt =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              minus =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              multiply =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              ne =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              plus =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              range =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              to_float =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+              to_int =>
+                bless( { data => $VAR1, metadata => {} }, "XCL::V::Native" ),
+            },
+            metadata => {},
+        }, "XCL::V::Dict" ) },
+    }, "XCL::V::Name" ) ],
+    metadata => {},
+  }, "XCL::V::List" ),
+)
+here at lib/XCL/Builtins/Builder.pm line 46.
+( 'EVAL_IN', 'A030', bless( { data => [], metadata => {} }, "XCL::V::List" ) )
+(
+  'EVAL_OUT', 'A030', bless( {
+    data => { val => bless( { data => [], metadata => {} }, "XCL::V::List" ) },
+    metadata => {},
+  }, "XCL::V::Result" ),
+)
+[ undef, bless( { data => [], metadata => {} }, "XCL::V::List" ) ]
+bless( {
+  callbacks => [],
+  failure =>
+    [ "Can't call method \"_same_types\" on an undefined value at lib/XCL/V/"
+      ."Role/Numeric.pm line 9.\n"
+    ],
+  ready => 1,
+}, "XCL::Strand::Future" )
+bah at runcheck line 32.
+Can't call method "_same_types" on an undefined value at lib/XCL/V/Role/Numeric.pm line 9.
