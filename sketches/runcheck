@@ -7,9 +7,7 @@ use XCL::Weaver;
 
 my $w = XCL::Weaver->new(ops => XCL::Builtins->ops);
 
-my $builtins = XCL::Builtins->builtins;
-
-my $scope = Scope Dict $builtins;
+my $scope = XCL::Builtins->builtins;
 
 warn "------------------------------------------------------\n";
 

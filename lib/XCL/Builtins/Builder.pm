@@ -100,7 +100,7 @@ sub _load_builtins (@map) {
     my ($alias, $to) = @$thing;
     $builtins->{$alias} = _assemble_value $builtins, $to->[0];
   }
-  return $builtins;
+  return Scope Dict $builtins;
 }
 
 sub _load_ops (@map) {

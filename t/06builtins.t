@@ -1,10 +1,10 @@
 use XCL::Builtins;
 use XCL::Class -test;
 
-my $raw;
+my $builtins;
 
 bail_out unless try_ok { XCL::Builtins->ops };
-bail_out unless try_ok { $raw = XCL::Builtins->builtins };
+bail_out unless try_ok { $builtins = XCL::Builtins->builtins };
 
 use XCL::Builtins::Builder qw(
   _builtin_names_of _builtins_of
@@ -13,8 +13,6 @@ use XCL::Builtins::Builder qw(
 use XCL::V;
 
 is [ map $_->[3], _builtin_names_of 'XCL::V' ], [ qw(and or) ];
-
-my $builtins = Scope Dict $raw;
 
 my $plus = $builtins->get('+')->get->val;
 
