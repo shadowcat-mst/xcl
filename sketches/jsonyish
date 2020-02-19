@@ -1,0 +1,48 @@
+
+
+let hostp = (h) => %{
+  name = h;
+  port = 443;
+  ssl_only = true;
+}
+
+let hosts = ('www.foobar.com', 'foobar.com', 'api.foobar.com');
+
+host h hostp(h) foreach h in hosts;
+
+###############################
+
+# { users: { matthewt: { ssh_keys: [ ... ] } } }
+
+out.users = {
+  matthewt = {
+    ssh_keys = ($key1, $key2, $key3);
+  }
+}
+
+say out.to_json();
+
+###############################
+
+
+users {
+  matthewt {
+    #ssh_keys (...);
+    #&@(ssh_keys, $$(config.users.matthewt.ssh_keys));
+    ssh_keys config.users.matthewt.ssh_keys;
+    $$(config.cmd) @@(config.args);
+  }
+}
+
+{
+  let outer = ...;
+  let wrap (self, name, scope, args) {
+    $self.($name).invoke(outer.eval(args));
+  }
+}
+
+###############################
+
+data('users')('matthewt')('ssh_keys').ensure_line key;
+
+
