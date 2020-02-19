@@ -7,7 +7,7 @@ my $w = XCL::Weaver->new(ops => XCL::Builtins->ops);
 
 my $scope = XCL::Builtins->builtins;
 
-sub xcl_is ($xcl, $expect, $name = "xcl: $xcl = $expect") {
+sub xcl_is ($xcl, $expect, $name = "xcl: $xcl -> $expect") {
   my $t = $w->parse(stmt_list => $xcl);
   my $val = (my $res = $t->invoke($scope, List[])->get)->val;
   die $res->err->display(-1) unless $res->is_ok;
