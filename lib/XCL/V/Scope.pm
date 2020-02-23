@@ -16,8 +16,7 @@ async sub eval ($self, $thing) {
   };
   return Val $thing if $is_basic;
 
-  my $this_depth = $Eval_Depth + 1;
-  dynamically $Eval_Depth = $this_depth;
+  dynamically $Eval_Depth = $Eval_Depth + 1;
 
   my $indent = '  ' x $Eval_Depth;
   my $prefix = "${indent}eval "; # $op_id ";
