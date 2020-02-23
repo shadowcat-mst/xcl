@@ -46,6 +46,14 @@ xcl_is '2 * 3', '6';
 
 xcl_is 'let double = * ++ (2); double(3)', '6';
 
-# need: concat, var, wutcol, arrowfunc
+xcl_is 'var x = 3; x = 5; $x', '5';
+
+xcl_is '?: 1 0', '1';
+
+xcl_is '?: 0 3', '3';
+
+xcl_is '?: 1 2 3', '2';
+
+xcl_is '?: 0 2 3', '3';
 
 done_testing;
