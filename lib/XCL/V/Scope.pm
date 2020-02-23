@@ -25,14 +25,14 @@ async sub eval ($self, $thing) {
     print STDERR " {\n" if DEBUG;
     $Did_Thing++;
   }
-  print STDERR $prefix.$thing->display(-1) if DEBUG;
+  print STDERR $prefix.$thing->display(DEBUG) if DEBUG;
   my $res = do {
     dynamically $Did_Thing = 0;
     my $tmp = await $thing->evaluate_against($self);
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
-  print STDERR " ->\n${indent}  ".$res->display(-1).";\n" if DEBUG;
+  print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n" if DEBUG;
   return $res;
 }
 
