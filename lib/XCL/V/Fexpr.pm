@@ -22,7 +22,9 @@ async sub c_fx_make ($class, $scope, $lst) {
   my ($argspec, $body_proto) = $lst->values;
   my $res = await $body_proto->evaluate_against($scope);
   return $res unless $res->is_ok;
-  my @argnames = map $_->data, $argspec->values;
+  my @argnames = $argspec->is('List')
+                   ? map $_->data, $argspec->values
+                   : $argspec->is('Name') ? $argspec->data : die;
   Val($class->new(data => {
     argnames => \@argnames,
     scope => $scope,
