@@ -22,7 +22,7 @@ sub f_multiply ($self, $lst) {
   my $type = $self->type;
   my $acc = $self->data;
   foreach my $val (map $_->data, $lst->values) {
-    if ($type =~ /Int$/ and $MAX_SAFE_INT / $acc > $val) {
+    if ($type =~ /Int$/ and $MAX_SAFE_INT / $acc < $val) {
       return ErrF([ Name('INT_OVERFLOW') ]);
     }
     $acc *= $val;
