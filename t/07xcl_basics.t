@@ -34,6 +34,10 @@ xcl_is 'let x = lambda (x) { + x 3 }; x 4', '7';
 
 xcl_is '(1, 2, 3) ++ (4, 5, 6)', '(1, 2, 3, 4, 5, 6)';
 
+xcl_is '.concat (1, 2) (3, 4)', '(1, 2, 3, 4)';
+
+xcl_is 'let x = \[ + 3 ]; let y = x ++ (4); y 5', '12';
+
 # need: concat, var, wutcol, arrowfunc
 
 done_testing;

@@ -134,7 +134,7 @@ async sub c_fx_dot {
 
   unless (@p > 1) {
     return Val Call [
-      Native({ ns => $class, native_name => 'dot_name', apply => 1 }),
+      Native({ ns => $class, native_name => 'dot_name' }),
       $name
     ];
   }
@@ -146,7 +146,7 @@ async sub c_fx_dot {
   if ($dot_methods) {
     return $_ for not_ok_except NO_SUCH_VALUE =>
       my $res = await $dot_methods->invoke($scope, List [ $name ]);
-    return Val Call [ Escape($res->val), $l ] if $res->is_ok;
+    return Val Call [ Escape($res->val), Escape($l) ] if $res->is_ok;
   }
 
   return Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ]
@@ -157,7 +157,7 @@ async sub c_fx_dot {
     $scope, List [ $try, $name ]
   );
 
-  return Val Call [ Escape($res->val), $l ];
+  return Val Call [ Escape($res->val), Escape($l) ];
 }
 
   # let meta = metadata(l);
