@@ -6,8 +6,7 @@ use XCL::Class 'XCL::V';
 
 with 'XCL::V::Role::Listish';
 
-async sub evaluate_against {
-  my ($self, $scope) = @_;
+async sub evaluate_against ($self, $scope) {
   my @ret;
   foreach my $el (@{$self->data}) {
     state %class_is_basic;
@@ -46,8 +45,7 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-async sub f_map {
-  my ($self, $lst) = @_;
+async sub f_map ($self, $lst) {
   my ($f) = $lst->values;
   my @val;
   foreach my $el ($self->values) {

@@ -2,8 +2,7 @@ package XCL::V::Compound;
 
 use XCL::Class 'XCL::V';
 
-async sub evaluate_against {
-  my ($self, $scope) = @_;
+async sub evaluate_against ($self, $scope) {
   my ($val, @rest) = @{$self->data};
   my $res = await $scope->eval($val);
   return $res unless $res->is_ok;

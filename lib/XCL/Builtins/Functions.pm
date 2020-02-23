@@ -4,8 +4,7 @@ use XCL::V::Scope;
 use XCL::Class -strict;
 
 # set / =
-async sub c_fx_set {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_set ($class, $scope, $lst) {
   my ($set, $valproto) = $lst->values;
   my $place = await $scope->eval($set);
   return Err [ Name('NOT_SETTABLE') => String('FIXME') ]
@@ -30,13 +29,11 @@ sub c_fx_do ($class, $scope, $lst) {
 sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
 # result_of / ?
-async sub c_fx_result_of {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_result_of ($class, $scope, $lst) {
   Val $class->c_fx_id($scope, $lst);
 }
 
-async sub c_fx_if {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_if ($class, $scope, $lst) {
   my ($cond, $block, $dscope) = @{$lst->data};
   $dscope ||= $scope->snapshot;
   return $_ for not_ok my $res = await $dscope->eval($cond);
@@ -47,8 +44,7 @@ async sub c_fx_if {
   return $bres;
 }
 
-async sub c_fx_unless {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_unless ($class, $scope, $lst) {
   my ($cond, $block) = @{$lst->data};
   return $_ for not_ok my $res = await $scope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
@@ -59,8 +55,7 @@ async sub c_fx_unless {
 }
 
 # wutcol / ?:
-async sub c_fx_wutcol {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_wutcol ($class, $scope, $lst) {
   my ($cond, @ans) = @{$lst->data};
   my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans));
   return $_ for not_ok my $res = await $scope->eval($cond);
@@ -72,8 +67,7 @@ async sub c_fx_wutcol {
   return await $scope->eval($else);
 }
 
-async sub c_fx_while {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_while ($class, $scope, $lst) {
   my ($cond, $body, $dscope) = $lst->values;
   $dscope ||= $scope->snapshot;
   my $did = 0;
@@ -91,8 +85,7 @@ async sub c_fx_while {
   return Val Bool $did;
 }
 
-async sub c_fx_else {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_else ($class, $scope, $lst) {
   my ($lp, $rp) = $lst->values;
   my $dscope = $scope->snapshot;
   return $_ for not_ok my $lr = await $lp->invoke($scope, List $dscope);
@@ -102,8 +95,7 @@ async sub c_fx_else {
   return await $else_res->val->bool;
 }
 
-async sub _dot_rhs_to_string {
-  my ($class, $scope, $rp) = @_;
+async sub _dot_rhs_to_string ($class, $scope, $rp) {
   return Val $rp if $rp->is('String');
   return Val String $rp->data if $rp->is('Name');
   return $_ for not_ok my $res = await $scope->eval($rp);
@@ -111,8 +103,7 @@ async sub _dot_rhs_to_string {
   return $res;
 }
 
-async sub dot_name {
-  my ($class, $scope, $lst) = @_;
+async sub dot_name ($class, $scope, $lst) {
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
   my ($name, $inv, @args) = $lst->values;
   return $_ for not_ok
@@ -121,8 +112,7 @@ async sub dot_name {
 }
 
 # dot / .
-async sub c_fx_dot {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_dot ($class, $scope, $lst) {
 
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ]
     unless my @p = $lst->values;

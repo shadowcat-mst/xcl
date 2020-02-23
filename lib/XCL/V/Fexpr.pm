@@ -18,8 +18,7 @@ sub display_data ($self, $) {
   return 'fexpr ('.join(', ', @{$self->data->{argnames}}).') { ... }';
 }
 
-async sub c_fx_make {
-  my ($class, $scope, $lst) = @_;
+async sub c_fx_make ($class, $scope, $lst) {
   my ($argspec, $body_proto) = $lst->values;
   my $res = await $body_proto->evaluate_against($scope);
   return $res unless $res->is_ok;

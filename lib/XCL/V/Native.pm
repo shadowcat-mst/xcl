@@ -2,8 +2,7 @@ package XCL::V::Native;
 
 use XCL::Class 'XCL::V';
 
-async sub _invoke {
-  my ($self, $scope, $valp) = @_;
+async sub _invoke ($self, $scope, $valp) {
   my ($ns, $method_name, $apply, $is_method, $unwrap, $res)
     = @{$self->data}{qw(ns native_name apply is_method unwrap)};
   require join('/', split '::', $ns).".pm" if $ns;

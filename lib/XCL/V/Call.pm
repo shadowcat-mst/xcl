@@ -13,8 +13,7 @@ sub _invoke ($self, $scope, $lst) {
   $self->_call($scope, @{$self->data}, $lst->values);
 }
 
-async sub _call {
-  my ($self, $scope, $command, @args) = @_;
+async sub _call ($self, $scope, $command, @args) {
   my $res = await $scope->eval($command);
   return $res unless $res->is_ok;
   return await $res->val->invoke($scope, List(\@args));

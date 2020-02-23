@@ -36,8 +36,7 @@ our %TOKEN_REGEXPS = (
   # blockstring => q{`(.*?)`(.*?)\1)},
 );
 
-sub extract_next {
-  my ($self, $src) = @_;
+sub extract_next ($self, $src) {
   return () unless defined($src) and length($src);
   my $type = $LOOKUP{substr($src,0,1)};
   die "no idea wtf happened here, blame mst" unless $type;
@@ -49,8 +48,7 @@ sub extract_next {
   die "READ THE COMMENTS";
 }
 
-sub tokenize {
-  my ($self, $src) = @_;
+sub tokenize ($self, $src) {
   my @tok;
   while ((my ($type, $tok), $src) = $self->extract_next($src)) {
     push @tok, [ $type, $tok ];

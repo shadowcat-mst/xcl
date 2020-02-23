@@ -2,8 +2,7 @@ package XCL::V::Block;
 
 use XCL::Class 'XCL::V';
 
-async sub _invoke {
-  my ($self, $scope, undef) = @_;
+async sub _invoke ($self, $scope, $) {
   my $iscope = $scope->snapshot;
   my $res;
   foreach my $stmt (@{$self->data}) {

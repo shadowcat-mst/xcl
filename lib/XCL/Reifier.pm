@@ -12,8 +12,7 @@ sub parse ($self, $type, $str) {
   $self->reify_ast(@$parse);
 }
 
-sub reify_ast {
-  my ($self, $type, @args) = @_;
+sub reify_ast ($self, $type, @args) {
   return $self->${\"_reify_${type}"}(@args);
 }
 

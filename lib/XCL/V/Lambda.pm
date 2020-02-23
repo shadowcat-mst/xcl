@@ -3,9 +3,8 @@ package XCL::V::Lambda;
 use Role::Tiny::With;
 use XCL::Class 'XCL::V::Fexpr';
 
-async sub _invoke_values {
-  my ($self, $scope, $vals) = @_;
-  return await $scope->eval($vals);
+sub _invoke_values ($self, $scope, $vals) {
+  return $scope->eval($vals);
 }
 
 sub display_data ($self, $) {

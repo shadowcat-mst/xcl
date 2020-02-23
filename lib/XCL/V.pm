@@ -89,8 +89,7 @@ sub _same_types ($self, $lst, $type = $self->type) {
   return ();
 }
 
-sub DESTROY {
-  my ($self) = @_;
+sub DESTROY ($self) {
   return if ${^GLOBAL_PHASE} eq 'DESTRUCT';
   return unless my $drop = $self->metadata->{drop};
   $drop->invoke(Scope({}), List $self);
@@ -130,8 +129,7 @@ sub from_perl ($class, $value) {
 sub fx_or ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 0) }
 sub fx_and ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 1) }
 
-async sub _fx_bool {
-  my ($self, $scope, $lst, $check) = @_;
+async sub _fx_bool ($self, $scope, $lst, $check) {
   my $bres = await $self->bool;
   return $bres unless $bres->is_ok;
   return Val $self if $bres->val->data != $check;
