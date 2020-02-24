@@ -45,12 +45,12 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-async sub f_map ($self, $lst) {
-  my ($f) = $lst->values;
+async sub fx_map ($self, $scope, $lst) {
+  return $_ for not_ok my $lres = await $scope->eval($lst);
+  my ($f) = $lres->val->values;
   my @val;
   foreach my $el ($self->values) {
-    my $res = await Scope({})->eval(Call([ $f, $el ]));
-    return $res unless $res->is_ok;
+    return $_ for not_ok my $res = await $f->invoke($scope, List[$el]);
     push @val, $res->val;
   }
   return Val List \@val;

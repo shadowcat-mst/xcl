@@ -36,6 +36,7 @@ async sub eval ($self, $thing) {
 }
 
 async sub get ($self, $key) {
+::Dwarn($self->data) unless Scalar::Util::blessed($self->data);
   my $res = $self->data->get($key);
   return Err($res->data->{err}) unless $res->is_ok;
   my $val = $res->val;
