@@ -46,17 +46,16 @@ foreach my $type (@Types) {
 
 sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
 sub Err ($err, $metadata = {}, $l = 0) {
-  my %meta = do {
+  my %meta = (%$metadata, do {
     my ($pkg, $file, $line) = caller($l);
     (thrown_at => Dict({
       native_file => String($file), native_line => Int($line),
       map +($_ => $metadata->{$_}), grep $metadata->{$_}, 'caller',
     }));
-  };
-  Result(
-    { err => ref($err) eq 'ARRAY' ? Call($err) : $err },
-    { %$metadata, %meta },
-  );
+  });
+  Result({ err =>
+    ref($err) eq 'ARRAY' ? Call($err, \%meta) : $err
+  });
 }
 
 sub not_ok (@things) { grep !$_->is_ok, @things }
