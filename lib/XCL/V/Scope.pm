@@ -17,6 +17,7 @@ async sub eval ($self, $thing) {
   return Val $thing if $is_basic;
 
   dynamically $Eval_Depth = $Eval_Depth + 1;
+  dynamically $Am_Running = [ Name('eval') => $thing ];
 
   my $indent = '  ' x $Eval_Depth;
   my $prefix = "${indent}eval "; # $op_id ";
@@ -31,6 +32,14 @@ async sub eval ($self, $thing) {
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
+  unless ($res->is_ok) {
+    my ($prop) = map $_ ? $_->data : [], $res->metadata->{propagated_through};
+    $res = $res->new(%$res, metadata => {
+      %{$res->metadata},
+      propagated_through =>
+        List[ String($thing->display(4)), @$prop ],
+    });
+  }
   print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n" if DEBUG;
   return $res;
 }

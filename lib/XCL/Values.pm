@@ -27,11 +27,12 @@ our @EXPORT = (
   @Types,
   qw(ResultF Val ValF Err ErrF),
   qw(not_ok not_ok_except),
-  qw(DEBUG $Eval_Depth $Did_Thing),
+  qw(DEBUG $Eval_Depth $Did_Thing $Am_Running),
 );
 
 our $Eval_Depth = -1;
 our $Did_Thing;
+our $Am_Running;
 
 use constant DEBUG => $ENV{XCL_DEBUG} || 0;
 
@@ -48,10 +49,13 @@ sub Val ($val, $metadata = {}) { Result({ val => $val }, $metadata) }
 sub Err ($err, $metadata = {}, $l = 0) {
   my %meta = (%$metadata, do {
     my ($pkg, $file, $line) = caller($l);
-    (thrown_at => Dict({
-      native_file => String($file), native_line => Int($line),
-      map +($_ => $metadata->{$_}), grep $metadata->{$_}, 'caller',
-    }));
+    (
+      thrown_at => Dict({
+        native_file => String($file), native_line => Int($line),
+        map +($_ => $metadata->{$_}), grep $metadata->{$_}, 'caller',
+      }),
+      err_at => List($Am_Running),
+    );
   });
   Result({ err =>
     ref($err) eq 'ARRAY' ? Call($err, \%meta) : $err

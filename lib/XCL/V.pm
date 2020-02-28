@@ -26,6 +26,7 @@ async sub invoke ($self, $scope, $lst) {
   return Val $self if $is_basic && !$lst->values;
 
   dynamically $Eval_Depth = $Eval_Depth + 1;
+  dynamically $Am_Running = [ Name('invoke') => $self, $lst ];
 
   my $indent = '  ' x $Eval_Depth;
   my $prefix = "${indent}call "; # $op_id ";
