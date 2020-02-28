@@ -21,7 +21,9 @@ async sub _invoke ($self, $scope, $valp) {
 sub display_data ($self, $depth) {
   return $self->SUPER::display_data(0) unless $depth;
   my $in_depth = $depth - 1;
-  return 'Native('.XCL::V->from_perl($self->data)->display($in_depth).')';
+  my $dproto = $self->data;
+  my $data = { %{$dproto}{grep $dproto->{$_}, keys %$dproto} };
+  return 'Native('.XCL::V->from_perl($data)->display($in_depth).')';
 }
 
 1;
