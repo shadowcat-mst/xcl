@@ -10,7 +10,7 @@ my $scope = XCL::Builtins->builtins;
 sub xcl_is ($xcl, $expect, $name = "xcl: $xcl -> $expect") {
   my $t = $w->parse(stmt_list => $xcl);
   my $val = (my $res = $t->invoke($scope, List[])->get)->val;
-  die $res->err->display(-1) unless $res->is_ok;
+  die $res->err->display(4) unless $res->is_ok;
   is($val->display(-1), $expect, $name);
 }
 
@@ -63,5 +63,11 @@ xcl_is '?: 0 2 3', '3';
 xcl_is '(1, 2, 3).map x => { x + 1 }', '(2, 3, 4)';
 
 xcl_is '(1, 2, 3).map \[ + 1 ]', '(2, 3, 4)';
+
+xcl_is q!
+  let identity = fexpr (s, v) { s.eval v }
+  let x = 'foo';
+  identity x
+!, "'foo'";
 
 done_testing;

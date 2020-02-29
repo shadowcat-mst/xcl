@@ -97,12 +97,12 @@ sub intro ($self, $type, $lst) {
 
 sub c_fx_current ($class, $scope, $lst) { ValF($scope) }
 
-sub f_eval ($self, $, $lst) {
-  $self->eval($lst->data->[0]);
+sub f_eval ($self, $lst) {
+  $self->eval($lst->head);
 }
 
-sub f_call ($self, $, $lst) {
-  $self->eval(Call [ @{$lst->data} ]);
+sub f_call ($self, $lst) {
+  $self->eval(Call [ lst->values ]);
 }
 
 1;
