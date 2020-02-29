@@ -6,8 +6,11 @@ async sub _invoke ($self, $scope, $valp) {
   my ($ns, $method_name, $apply, $is_method, $unwrap, $res)
     = @{$self->data}{qw(ns native_name apply is_method unwrap)};
   require join('/', split '::', $ns).".pm" if $ns;
-  my ($vals) = map +($unwrap ? $_->tail : $_), !$apply ? $valp
-    : not_ok($res = await $scope->eval($valp)) ? return $res : $res->val;
+  my ($vals) = map (
+    $apply
+      ? (not_ok($res = await $scope->eval($_)) ? return $res : $res->val)
+      : $_
+  ), map +($unwrap ? $_->tail : $_), $valp;
   if ($is_method) {
     return Err[ Name('WRONG_ARG_COUNT') => Int(0) ]
       unless my ($first, $rest) = $vals->ht;
