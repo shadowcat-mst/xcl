@@ -25,9 +25,21 @@ async sub _invoke ($self, $scope, $valp) {
 sub display_data ($self, $depth) {
   return $self->SUPER::display_data(0) unless $depth;
   my $in_depth = $depth - 1;
-  my $dproto = $self->data;
-  my $data = { %{$dproto}{grep $dproto->{$_}, keys %$dproto} };
-  return 'Native('.XCL::V->from_perl($data)->display($in_depth).')';
+  my $dproto = { %{$self->data} };
+  my ($is_class, $is_fexpr) =
+    $dproto->{native_name} =~ /^((?:c_)?)f(x?)_(.*)/;
+  my %data;
+  $data{apply} = Bool(0+!!$dproto->{apply})
+    if !!$dproto->{apply} eq $is_fexpr;
+  $data{is_method} = Bool(0+!!$dproto->{is_method})
+    if !!$dproto->{is_method} eq $is_class;
+  $data{unwrap} = Bool(0) unless $dproto->{unwrap};
+  my $guts = (
+    keys %data
+      ? Dict{ %data, map +($_ => String($dproto->{$_})), qw(ns native_name) }
+      : String(join('::', @{$dproto}{qw(ns native_name)}))
+  );
+  return 'Native('.$guts->display($in_depth).')';
 }
 
 1;

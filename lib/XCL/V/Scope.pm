@@ -75,7 +75,8 @@ sub snapshot ($self) {
 }
 
 sub display_data ($self, $depth) {
-  'Scope('.$self->data->display($depth).')'
+  'Scope(...)',
+  #'Scope('.$self->data->display($depth).')'
 }
 
 sub c_fx_val_in_current ($class, $self, $lst) { $self->intro(\&Val, $lst); }
