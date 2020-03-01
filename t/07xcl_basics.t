@@ -62,6 +62,10 @@ xcl_is '?: 0 2 3', '3';
 
 xcl_is '(1, 2, 3).map x => { x + 1 }', '(2, 3, 4)';
 
+xcl_is 'let l = (1, 2, 3); l.map x => { x + 1 }', '(2, 3, 4)';
+
+xcl_is 'let b = { x + 1 }; let l = (1, 2, 3); l.map x => b', '(2, 3, 4)';
+
 xcl_is '(1, 2, 3).map \[ + 1 ]', '(2, 3, 4)';
 
 xcl_is q!
@@ -69,5 +73,21 @@ xcl_is q!
   let x = 'foo';
   identity x
 !, "'foo'";
+
+xcl_is '
+  let map = (b, l) => { l.map _ => b }
+  map { $(_) + 1 } (1, 2, 3)
+', '(2, 3, 4)';
+
+xcl_is '[ 0 ]', '0'; # should this even work?
+
+xcl_is '
+  let map = (b, l) => {
+    let f = (_, $_) => b;
+    let r = l.map x => { f(x, x) }
+    $r
+  }
+  map { $_ + 1 } (1, 2, 3)
+', '(2, 3, 4)';
 
 done_testing;
