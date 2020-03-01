@@ -15,4 +15,8 @@ async sub evaluate_against ($self, $scope) {
   return $res;
 }
 
+sub display_data ($self, $depth) {
+  join '', map $_->display($depth), @{$self->data};
+}
+
 1;
