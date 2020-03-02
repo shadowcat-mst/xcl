@@ -83,8 +83,8 @@ xcl_is '[ 0 ]', '0'; # should this even work?
 
 xcl_is '
   let map = (b, l) => {
-    let f = (_, $_) => b;
-    l.map x => { f(x, x) }
+    let f = (_) => b;
+    l.map x => { f(x) }
   }
   map { $_ + 1 } (1, 2, 3)
 ', '(2, 3, 4)';
