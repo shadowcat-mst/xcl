@@ -68,13 +68,6 @@ sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {
       @toks = @$toks;
     }
     last unless @toks;
-    if ($combi_type eq 'block'
-      and @ret
-      and $ret[-1][-1][0] eq 'block'
-    ) {
-      shift @toks;
-      next;
-    }
     my $type = $toks[0][0];
     shift @toks and last if $type eq $end;
     shift @toks and next if $type eq $mid;

@@ -31,4 +31,14 @@ is tk('{ 3 };'), [
   [ 'semicolon', ';' ],
 ];
 
+# this test is theoretically pointless but is the exact same xcl source
+# as a 02parser test for a subtle bug
+
+is tk('{ { 3 } }; 7'), [
+  [ 'start_block', '{' ], [ 'ws', ' ' ], [ 'start_block', '{' ],
+  [ 'ws', ' ' ], [ 'number', 3 ], [ 'ws', ' ' ], [ 'end_block', '}' ],
+  [ 'ws', ' ' ], [ 'end_block', '}' ], [ 'semicolon', ';' ], [ 'ws', ' ' ],
+  [ 'number', 7 ],
+];
+
 done_testing;

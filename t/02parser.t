@@ -41,4 +41,31 @@ is xp('{ 3 }'),
 is xp('{ 3 };'),
   [ 'block', [ 'stmt', [ 'block', [ 'stmt', [ 'number', 3 ] ] ] ] ];
 
+# < mst> ffft
+# < mst> given a nested block like { { 3 } } the parser is somehow only 
+#        jumping out one level to begin with when it hits the } } so the 
+#        next token is interpreted as being *inside* the outer block
+# < mst> as if you'd written { { 3 }; 7 } not { { 3 } }; 7
+
+# Bad output looks like: [
+#   'block', [
+#     'stmt', [
+#       'block', [ 'stmt', [ 'block', [ 'stmt', [ 'number', 3 ] ] ] ],
+#       [ 'stmt', [ 'number', 7 ] ],
+#     ],
+#   ],
+# ]
+
+is xp('
+  { { 3 } }
+  7
+'), [
+  'block', [
+    'stmt', [
+      'block', [ 'stmt', [ 'block', [ 'stmt', [ 'number', 3 ] ] ] ],
+    ],
+  ],
+  [ 'stmt', [ 'number', 7 ] ],
+];
+
 done_testing;
