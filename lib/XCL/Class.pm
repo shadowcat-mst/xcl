@@ -1,8 +1,9 @@
 package XCL::Class;
 
 use Import::Into;
-use Mojo::Base -strict, -signatures;
 use XCL::Strand::Future;
+use curry;
+use Mojo::Base -strict, -signatures;
 
 sub import ($, $superclass = '-base') {
   unless (caller eq 'XCL::Values') {
@@ -17,6 +18,7 @@ sub import ($, $superclass = '-base') {
     Exporter->import::into(1, 'import');
     $superclass = '-strict';
   }
+  Object::Tap->import::into(1);
   Mojo::Base->import::into(1, 'Mojo::Base', $superclass, -signatures);
   Future::AsyncAwait->import::into(1, future_class => 'XCL::Strand::Future');
   Syntax::Keyword::Dynamically->import::into(1);
