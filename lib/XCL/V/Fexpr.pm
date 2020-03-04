@@ -7,7 +7,7 @@ async sub _invoke ($self, $outer_scope, $vals) {
   my $val_res = await $self->_invoke_values($outer_scope, $vals);
   return for not_ok $val_res;
   my %merge; @merge{@$argnames} = map Val($_), $val_res->val->values;
-  await $body->invoke($scope->derive(\%merge), List []);
+  await $body->invoke($scope->derive(\%merge));
 }
 
 sub _invoke_values ($self, $outer_scope, $vals) {

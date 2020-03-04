@@ -10,7 +10,8 @@ sub of_data ($self, $data) { $self->new(data => $data, metadata => {}) }
 
 sub evaluate_against ($self, $) { ValF($self) }
 
-async sub invoke ($self, $scope, $lst) {
+async sub invoke ($self, $scope, @lst) {
+  my $lst = $lst[0]//List[];
   state $state_id = '000';
   my $op_id = ++$state_id;
   # theoretically harmless but complicated life before, await more tests

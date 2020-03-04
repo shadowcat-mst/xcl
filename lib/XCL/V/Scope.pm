@@ -49,13 +49,13 @@ async sub get ($self, $key) {
   return Err($res->data->{err}) unless $res->is_ok;
   my $val = $res->val;
   return $val if $val->is('Result');
-  return await $val->invoke($self, List []);
+  return await $val->invoke($self);
 }
 
 async sub set ($self, $key, $val) {
   $self->data->data->{$key} = $val;
   return $val if $val->is('Result');
-  return await $val->invoke($self, List []);
+  return await $val->invoke($self);
 }
 
 sub _invoke ($self, $, $vals) {
