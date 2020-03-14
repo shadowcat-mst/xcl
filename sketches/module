@@ -1,0 +1,37 @@
+module thing {
+  public let x = 3;
+  public var y = 4;
+  static foo = (z) => {
+    "Module $(Module) with values :x($(x)), :y($(y)), :z($(z))";
+  }
+}
+
+say thing.foo(5);
+
+class Rectangle {
+  ro width;
+  ro height;
+  method area () { width * height }
+}
+
+let r = Rectangle.new :width(20) :height(50);
+
+say "Area: $[r.area]";
+
+class Counter {
+  rw count = 0;
+  method inc () { count = count + 1 }
+}
+
+let c = Counter.new();
+
+c.inc();
+c.inc();
+
+say c.count(); # 2
+
+c.count() = 6;
+
+say c.count(); # 6
+
+say c.count(12).count(); # 12, returned self

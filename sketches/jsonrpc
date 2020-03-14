@@ -1,0 +1,309 @@
+#let io::Stream.jsonlines = (Class, self) => { self.lines().format('json') }
+
+let Stream.lines_of = method (type) {
+  self.lines().decode type;
+}
+
+let pingpong (in, out) {
+  let reply = out.lines_of(JSON).write;
+
+  out . lines_of(JSON)
+      . [ .catch e => { log error e } ]
+      . each obj => {
+          if [exists let ping = obj::ping] {
+            reply %(:pong ping);
+          } else {
+            reply $(:error 'WHAT');
+          }
+        }
+}
+
+fh.lines_of(JSON).map_errors(
+  .map(e => { log error e; () }).flatten().
+);
+
+## script using stdin/stdout
+
+pingpong(io::stdin, io::stdout);
+
+## script listening to unix socket
+
+let me = fs.path('...').listen();
+
+foreach :concurrent(10) connection in me {
+  pingpong(connection, connection);
+}
+
+on 'ssh://user@host' start 'pingpong' {
+  let listener = net.localhost().port('1645').listen();
+  foreach :concurrent(10) c in listener {
+    pingpong(c, c);
+  }
+}
+
+
+
+#############################################
+
+let check_json = val => {
+  let res = ? JSON.decode val;
+  ?:
+    res.is_ok()
+    (res.val())
+    do { log error res.err(); () }
+}
+
+# send { foo => 3 }
+
+infh.lines_of(id) | check_json | x => { $"X: $(x('foo'))" };
+
+
+io::stdin . lines()
+          # lines_of(JSON)
+          # split nl (default?)
+          # . map x => { ? JSON.decode x }
+          . map_res(JSON.decode)
+          . map_err(@[log error])
+          . map_val
+          . map(x => { $"X: $(x('foo'))" })
+          . each io::stdout.say;
+
+infh.lines_of(JSON) |? @(.map_err log error) | x => { $"X: $(x('foo'))" };
+
+io::stdin.lines() | .decode(JSON) except log
+  | x => \("X: $(x::foo)") | io::stdout.say;
+
+io::stdin.lines() | .decode(JSON) except log
+  | x => \(++ 'X: ' x::foo) | io::stdout.say;
+
+
+
+let pingpong (in, out) {
+  let reply = out.encode(JSON).say;
+
+  in.lines()
+    | .decode(JSON) except [e => { reply %(:error e) }]
+    | obj => {
+        if [exists let ping = obj::ping] {
+          reply %(:pong ping);
+        } else {
+          reply $(:error 'WHAT');
+        }
+      }
+}
+
+let pingpong (in, out) {
+  let reply = out.encode(JSON).say;
+
+  in.lines()
+    | .decode(JSON) except [e => { reply %(:error e) }]
+    | ::ping except reply %(:error 'WHAT')
+    | ping => { reply %(:pong ping) }
+}
+
+#    | .decode(JSON) except [e => { reply %(:error e) }]
+
+let decode_or_log = line => {
+  let res = ? line.decode JSON;
+  ?: res.is_ok() (res.val()) [{ log res.err(); $ () }];
+}
+
+#{{{
+
+  sub fx_pipe ($self, $scope, $lst) {
+    return $_ for not_ok my $lres = $scope->eval($lst);
+    my ($func) = $lres->values;
+    return ValF $self->new_source->tap(sub ($s) {
+      $self->on(item => retain_f async sub ($item) {
+        my $res = await $func->invoke($scope, List[$item]);
+        # unsure of error propagation here
+        my $val = $res->val;
+        $s->push($val->is('List') ? $val : List[$val]);
+      });
+    });
+  }
+
+}}}#
+
+
+interface PipeMember {
+  method push (m);
+  method done ();
+  method fail (err):
+}
+
+class PipedPlainFunction {
+  has f;
+  method push (m) { f(m) }
+  method done () {}
+  method fail (err) { Err err }
+}
+
+class PipedResFunction {
+  has f;
+  method push (m) { f(Val m) }
+  method done () { f(Err \[NO_MORE_VALUES]) }
+  method fail (err) { f(Err err) }
+}
+
+# implicit last 10 -> PipedResFunction.new :f last(10)
+let last = n => {
+  let last_n = ();
+  ?x => {
+    if x.is_ok() {
+      last_n.push x.val();
+      last_n.shift() if last_n.count() > n;
+    }
+    ?: x.is_err() last_n ();
+  }
+}
+
+# classy
+let last = n => {
+  object implementing PipeMember {
+    let last_n = ();
+
+    method push (m) {
+      last_n.push m;
+      last_n.shift() if last_n.count() > n;
+      $  ();
+    }
+
+    method done () { $  (last_n, Val true) }
+    method fail (err) { $  (last_n, Err err) }
+  }
+}
+
+# use
+some_stream | last 10 | say;
+
+# also
+
+let where (f) { x => { ?: f(x) (x) () } }
+
+let map (f) { x => { (f(x)) } }
+
+let die () { Err(\[ DIED ]).get() }
+
+method _pipify (to) {
+  die unless to.is Fexpr;
+  die unless to.args().count() == 1;
+  let arg = to.args().first();
+  if [arg.is(Compound) and arg.list()(0) == ?] {
+    PipedResFunction.new :f(arg);
+  } else {
+    PipedPlainFunction.new :f(arg);
+  }
+}
+
+method pipe (to) {
+  let pipe_to = ?: [ to.implements PipeMember ] to self._pipify(to);
+  self.stream(item).subscribe pipe_to;
+}
+
+let | = .pipe();
+
+let |> = (l, r) => { r(l) }
+
+let comments = io.path(file).lines() | .where m'^#' |> .join("\n");
+
+# imperative version
+
+let comments = do {
+  let c = ();
+  io.path(file).lines() | .where m'^#' | c.push;
+  c.join("\n");
+}
+
+# pipeless version
+
+let comments = io . path(file)
+                  . lines()
+                  . pipe(.where(m'^#'))
+                  . join("\n");
+
+let add (x) { y => { y + x } }
+let sub (x) { y => { y - x } }
+
+let five = 0 |> add(7) |> sub(2);
+
+let five = 0 |> \[ + 7 ] |> \[ + -2 ];
+
+####################
+
+use crappy::stats :as(cs);
+
+io::stdin.lines() | .to_Int() |> cs::mean | say;
+
+io::stdin.lines() | .to_Int() |> .cs::mean() | say;
+
+io::stdin.lines() | .to_Int() |> .cs::smooth(:shark) | say;
+
+########################
+
+# mercury is dangerous y'all
+
+let raw_block = {
+  let world1 = foo ... world0;
+  let world2 = bar ... world1;
+}
+
+# but nah
+
+let block = {
+  foo ...;
+  bar ...;
+}
+
+let fixed_block = |> @(block.list());
+
+stream | pipe_member;
+stream |> transformer;
+
+pipe_member = pfunc(2); # pfunc called with arg 2 returning callable func(x)
+pipe_member = \[ pfunc 2 ]; # pfunc to be called as pfunc(2, x)
+pipe_member = .pfunc(2); # pfunc called as x.pfunc(2)
+
+
+
+let pipable (%opts) {
+
+  let _push = opts::push;
+  let _done = opts::done;
+  let _fail = opts::fail;
+
+  object implementing PipeMember {
+    method push = _push;
+    method done = _done;
+    method fail = _fail;
+  }
+}
+
+let last = n => {
+  let last_n = ();
+  pipable(
+    :push x => { last_n.push x; last_n.shift() if last_n.count() > x; $  () },
+    :push x => {
+      last_n.tap(.push(x)).tap l => { l.shift() if l.count() > n };
+      $  ()
+    },
+    :push x => {
+      last_n.(() => { $.push x; $.shift() if $.count() > n; $  () }
+    },
+    :done () => { $  (last_n, Val true) },
+    :fail (err) => { $  (last_n, Err err) },
+  }
+}
+
+let last = n => {
+  let last_n = ();
+  let last_n.push = method (x) {
+    List.push last_n;
+    List.shift last_n if List.count last_n > n;
+  }
+  pipable(
+    :push last_n.push,
+    :done () => { $  (last_n, Val true) },
+    :fail (err) => { $  (last_n, Err err) },
+  );
+}

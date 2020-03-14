@@ -1,0 +1,30 @@
+### pseudotrunk
+
+let listener = socket.listen config::listener;
+
+let handshake = c => {
+  c.write \[protocol offer v1];
+  Err "Protocol negotiation error"
+    unless c.read() eqv \[protocol offer accept];
+}
+
+let names = %;
+let connections = %;
+
+let register = (conn, id, @args) {
+  names(@args) = conn;
+  connections(conn) = args;
+  conn.write [ ++ \[] (id) (done) ];
+}
+
+listener.connections() | .encoding(xcl_line) | c => {
+  handshake c;
+  let runscope = Scope.new %{
+    let register = \[ register c ];
+    let subscriptions = \[ subscriptions c ];
+    let commands = \[ commands c ];
+  };
+  c.read_stream().each m => {
+    runscope.eval m;
+  }
+}

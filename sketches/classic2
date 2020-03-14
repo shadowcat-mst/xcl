@@ -1,0 +1,51 @@
+
+
+module fs {
+  class Path { ... }
+  static path (path) { Path.new %(path) }
+  public separator = '/'
+}
+
+class Point {
+  has x = 0;
+  has y = 0;
+  method area_under () { x * y }
+}
+
+class Logger {
+  let levels = %(
+    :fatal 0,
+    :error 1,
+    :warn 2,
+    :info 3,
+    :debug 4,
+    :trace 5,
+  );
+  public var default_level = levels::info;
+  has var level = default_level;
+  has dest;
+  method log (this_level, string) {
+    if [this_level >= levels(level) ] {
+      dest "[$(this_level.name_to_string())] $(string)";
+    }
+    $true;
+  }
+  static log_to (dest, this_level, string) {
+    if [this_level >= levels(default_level) ] {
+      dest "[$(this_level.name_to_string())] $(string)";
+    }
+    $true;
+  }
+}
+
+let logger = Logger.new :dest(stderr.queue_writeline);
+
+logger.level :debug;
+
+let log = logger.log;
+
+log info "Here is an informative message";
+
+Logger::default_level = 'warn';
+
+Logger.log_to stderr.write fatal "Immediately written fatal message";

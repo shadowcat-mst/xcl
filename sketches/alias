@@ -1,0 +1,8 @@
+xcl_is '
+  let alias = fexpr (s, l, r) {
+    s.intro(l, fexpr (s) { s.eval r });
+  }
+  alias $_ _;
+  let map = (b, l) => { l.map _ => b }
+  map { $_ + 1 } (1, 2, 3)
+', '(2, 3, 4)';

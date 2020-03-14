@@ -1,0 +1,4 @@
+
+stdin.read(); # reads a chunk from stdin, whatever length
+stdin.read(1024); # reads up to 1024 bytes from stdin
+stdin.readline(); # reads one line
