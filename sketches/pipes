@@ -1,0 +1,14 @@
+namespace XCL::Pipe;
+
+interface Source {
+  method pipe (to);
+}
+
+interface Dest {
+  method push (el);
+}
+
+interface Stream wth Source with Dest {
+  method done () { $true }
+  method fail (err) { Err err }
+}

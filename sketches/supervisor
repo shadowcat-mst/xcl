@@ -1,0 +1,35 @@
+
+letf supervisor (scope, $:backoff = 5, thing) {
+  while true {
+    let res = ? scope.call thing;
+    log error res.err() unless res.is_ok();
+    sleep backoff;
+  }
+}
+
+supervise :backoff(30), () => {
+  let services = load_services();
+  let supervisors = %;
+  foreach (name, plan) in services {
+    supervisors(name) = supervisor(plan);
+  }
+  needs_all supervisors.values();
+}
+
+## MUHAHAHAHAHAHAHAHAHAHA
+
+var supervisors = %;
+
+let main_process = strand supervise :backoff(30) {
+  let services = load_services();
+  supervisors = %;
+  foreach (name, plan) in services {
+    supervisors(name) = supervisor(plan);
+  }
+  needs_all supervisors.values();
+}
+
+let hup (name) { supervisors(name).hup() }
+
+
+

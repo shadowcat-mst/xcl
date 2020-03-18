@@ -14,15 +14,15 @@ let connections = %;
 let register = (conn, id, @args) {
   names(@args) = conn;
   connections(conn) = args;
-  conn.write [ ++ \[] (id) (done) ];
+  conn.write (id, \done);
 }
 
 listener.connections() | .encoding(xcl_line) | c => {
   handshake c;
   let runscope = Scope.new %{
     let register = \[ register c ];
-    let subscriptions = \[ subscriptions c ];
-    let commands = \[ commands c ];
+    let subscriptions = \[ set_subscriptions c ];
+    let commands = \[ set_commands c ];
   };
   c.read_stream().each m => {
     runscope.eval m;

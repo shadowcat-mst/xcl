@@ -1,0 +1,56 @@
+let | = .pipe();
+
+let |> = (l, r) => { r(l) }
+
+interface PipeMember {
+  method push (m);
+  method done () { $true }
+  method fail (err) { Err err }
+}
+
+let pipeable (%opts) {
+
+  object implementing PipeMember {
+    method push = opts::push;
+    method done = opts::done if exists opts::done;
+    method fail = opts::fail if exists opts::fail;
+  }
+}
+
+let pipe_of_plain_f = f => { pipeable :push(f) }
+
+let pipe_of_res_f = f => {
+  pipeable(
+    :push (m) => { f(Val m) },
+    :done () => { f(Err \[NO_MORE_VALUES]) },
+    :fail (err) => { f(Err err) },
+  );
+}
+
+let pipify = (to) => {
+  ?: to.is(PipeMember)
+    to
+    do({
+      to.assert(.is Fexpr).assert(.args().count() == 1);
+      let arg = to.args().first();
+      if [arg.is(Compound) and arg.list()(0) == ?] {
+        pipe_of_res_f arg;
+      } else {
+        pipe_of_plain_f arg;
+    });
+}
+
+method pipe (mayb) {
+  self.stream(item).subscribe pipify(to);
+}
+
+let last = n => {
+  let last_n ();
+  pipeable(
+    :push x => { last_n.push x; last_n.shift if last_n > n },
+    :done () => { $  (last_n, Val true) },
+    :fail (err) => { $  (last_n, Err err) },
+  )
+}
+
+
