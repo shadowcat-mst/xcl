@@ -20,8 +20,14 @@ sub import ($, $superclass = '-base') {
   }
   Object::Tap->import::into(1);
   Mojo::Base->import::into(1, 'Mojo::Base', $superclass, -signatures);
+  my $is_class = ($superclass eq '-base') || ($superclass !~ /^-/);
+  if ($is_class) {
+    Role::Tiny::With->import::into(1);
+    Class::Method::Modifiers->import::into(1);
+  }
   Future::AsyncAwait->import::into(1, future_class => 'XCL::Strand::Future');
   Syntax::Keyword::Dynamically->import::into(1);
+  Syntax::Keyword::Try->import::into(1);
   constant->import::into(1, Future => 'XCL::Strand::Future');
 }
 
