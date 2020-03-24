@@ -12,6 +12,9 @@ async sub _invoke ($self, $scope, $valp) {
       ? (not_ok($res = await $scope->eval($valp_u)) ? return $res : $res->val)
       : $valp_u
   );
+  if (my $cb = $self->data->{code}) {
+    return await $cb->($scope, $vals);
+  }
   if ($is_method) {
     return Err[ Name('WRONG_ARG_COUNT') => Int(0) ]
       unless my ($first, $rest) = $vals->ht;
