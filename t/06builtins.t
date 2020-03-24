@@ -12,7 +12,11 @@ use XCL::Builtins::Builder qw(
 );
 use XCL::V;
 
-is [ map $_->[3], _builtin_names_of 'XCL::V' ], [ qw(and or) ];
+&is(
+  map { my %n; @n{@$_} = (1) x scalar @$_; \%n }
+    [ map $_->[3], _builtin_names_of 'XCL::V' ],
+    [ qw(and or) ]
+);;
 
 my $plus = $builtins->get('+')->get->val;
 
