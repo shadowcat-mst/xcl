@@ -1,0 +1,121 @@
+use Mojo::JSON qw(encode_json);
+
+use xcl::script;
+
+let csvparse = line => { line.split(',') } with_metadata :flatten(0);
+
+let columns = csvparse io::stdin.readline();
+
+while [ exists let row = csvparse io::stdin.readline() ] {
+  let out = %;
+  out(columns) = row;
+  say encode_json out;
+}
+
+###############################
+
+let columns = ();
+
+io::stdin.lines().map(csvparse).each row => {
+  if (!columns) {
+    columns = row;
+  } else {
+    say encode_json [% @(zip colums row)];
+  }
+};
+
+###############################
+
+let columns = csvparse io::stdin.readline();
+
+io::stdin.lines() | csvparse |> .each row => {
+  say encode_json [% @(zip colums row)];
+}
+
+###############################
+
+let list2dict = columns => { row => { % @ zip columns row } }
+
+let columns = csvparse io::stdin.readline();
+
+io::stdin.lines() | csvparse | list2dict(columns) | encode_json | say;
+
+###############################
+
+let lines = io::stdin.lines().map(csvparse);
+
+let columns = lines.next();
+
+lines | list2dict(columns) | encode_json | say;
+
+
+###############################
+
+let lines = io::stdin.lines().map(csvparse);
+
+let columns = lines.next();
+
+lines.map(.pairs(columns)) | % | encode_json | say;
+
+###############################
+
+let lines = io::stdin.lines().map(csvparse);
+
+let columns = lines.next();
+
+foreach row in lines {
+  say encode_json [list2dict columns row];
+}
+
+###############################
+
+let lines = io::stdin.lines().map csvparse;
+
+let columns = lines.next();
+
+lines |> .map .pairs columns | % | encode_json | say;
+
+
+lines.map .pairs columns | % | encode_json | say;
+
+#{{{
+
+sub _wrap_foreign ($self, $sub) {
+  sub { XCL::V->from_perl($sub->(map $_->to_perl, @_)) }
+}
+
+sub _wrap_foreign_scalar ($self, $sub) {
+  my $inner = $self->_wrap_foreign($sub);
+  sub { ValF $inner->(@_) };
+}
+
+sub _wrap_foreign_list ($self, $sub) {
+  my $inner = $self->_wrap_foreign($sub);
+  sub { ValF List [ $inner->(@_) ] };
+}
+
+###############
+
+sub _wrap_foreign_scalar ($self, $sub) {
+  sub { ValF XCL::V->from_perl($sub->(map $_->to_perl, @_)) }
+}
+
+sub _wrap_foreign_list ($self, $sub) {
+  sub { ValF List [ XCL::V->from_perl($sub->(map $_->to_perl, @_)) ] }
+}
+
+#################
+
+sub _wrap_foreign ($self, $sub, $list = 0) {
+  my sub resv {
+    XCL::V->from_perl($sub->(map $_->to_perl, @_))
+  };
+  ValF Native { native_name =>
+    ($list
+      ? sub { List [ resv(@_) ] }
+      : sub { resv(@_) }
+    )
+  };
+}
+
+}}}}#

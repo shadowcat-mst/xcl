@@ -1,0 +1,43 @@
+#{{{
+
+sub pipeline;
+
+sub pipeline {
+  my @methods = @_;
+  my $last = pop(@methods);
+  if (@methods) {
+    \sub {
+      my ($obj, @args) = @_;
+      $obj->${pipeline @methods}(
+        $obj->$last(@args)
+      );
+    };
+  } else {
+    \sub {
+      shift->$last(@_);
+    };
+  }
+}
+
+sub resolve_path {
+  my ($class, $path) = @_;
+
+  $path = $class->${pipeline qw(
+    resolve_relative_path
+    resolve_home_path
+    resolve_empty_path
+  )}($path);
+
+  $path;
+}
+
+}}}#
+
+module local_lib {
+  static resolve_path (path) {
+    path
+      |> ^.resolve_relative_path
+      |> ^.resolve_home_path
+      |> ^.resolve_empty_path;
+  }
+}
