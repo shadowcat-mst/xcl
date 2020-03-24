@@ -28,6 +28,7 @@ our @EXPORT = (
   qw(ResultF Val ValF Err ErrF),
   qw(not_ok not_ok_except),
   qw(DEBUG $Eval_Depth $Did_Thing $Am_Running),
+  qw(True False),
 );
 
 our $Eval_Depth = -1;
@@ -78,5 +79,8 @@ async sub ResultF {
 
 sub ValF { ResultF(Val(@_)) }
 sub ErrF ($err, $meta = {}) { ResultF(Err($err, $meta, 1)) }
+
+sub True { Bool(1) }
+sub False { Bool(0) }
 
 1;
