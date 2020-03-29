@@ -1,0 +1,14 @@
+use strict;
+use warnings;
+use feature 'say';
+use JSON::MaybeXS qw(encode_json);
+
+sub say { CORE::say @_ }
+
+use xcl::script;
+
+say 'Hello world';
+
+let : = k => { v => { $ (k, v) } }
+
+say [ encode_json %(:'x' 1, :'y' 2) ];
