@@ -70,7 +70,7 @@ sub _extract_combi ($self, $mid, $end, $call_type, $combi_type, @toks) {
     last unless @toks;
     my $type = $toks[0][0];
     shift @toks and last if $type eq $end;
-    shift @toks and next if $type eq $mid;
+    shift @toks and next if $type eq $mid or $type eq 'ws';
     die "Invalid token type ${type} in ${combi_type}";
   }
   return (\@toks, [ $combi_type => @ret ]);

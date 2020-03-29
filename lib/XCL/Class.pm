@@ -27,7 +27,8 @@ sub import ($, $superclass = '-base') {
   }
   Future::AsyncAwait->import::into(1, future_class => 'XCL::Strand::Future');
   Syntax::Keyword::Dynamically->import::into(1);
-  Syntax::Keyword::Try->import::into(1);
+  Syntax::Keyword::Try->import::into(1, qw(try try_value));
+  warnings->unimport('experimental');
   constant->import::into(1, Future => 'XCL::Strand::Future');
 }
 
