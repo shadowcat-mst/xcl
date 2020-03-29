@@ -91,6 +91,8 @@ sub f_le ($self, $lst) {
   return ValF Bool $self->_isnt_negative($lst->data->[0]->data - $self->data);
 }
 
+sub string ($self) { ValF String(''.$self->data) }
+
 sub to_perl ($self) { $self->data }
 
 1;
