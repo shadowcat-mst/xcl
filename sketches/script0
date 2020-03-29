@@ -9,6 +9,9 @@ use xcl::script;
 
 say 'Hello world';
 
-let : = k => { v => { $ (k, v) } }
+let : = fexpr (s, n) {
+  let k = n.name_to_string();
+  v => { $ (k, v) }
+}
 
-say [ encode_json %(:'x' 1, :'y' 2) ];
+say [ encode_json %(:x 1, :y 2) ];
