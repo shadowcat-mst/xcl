@@ -1,7 +1,10 @@
 use strict;
 use warnings;
 use feature 'say';
-use JSON::MaybeXS qw(encode_json);
+use XCL::Values;
+use JSON::MaybeXS ();
+
+sub encode_json { Bytes(JSON::MaybeXS::encode_json($_[0])) }
 
 sub say { CORE::say @_ }
 

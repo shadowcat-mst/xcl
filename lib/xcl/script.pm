@@ -20,30 +20,10 @@ sub import ($class) {
   });
 }
 
-sub _invoke_foreign ($class, $code, $scope, $vals) {
-  my $args = try do {
-    $vals->to_perl;
-  } catch {
-    return ErrF [ Name('FOREIGN') => String('VALUES') => String($@) ];
-  };
-  my $ret = try do {
-    $code->(@$args);
-  } catch {
-    return ErrF [ Name('FOREIGN') => String('INVOKE') => String($@) ];
-  };
-  return try do {
-    ValF(XCL::V->from_perl($ret));
-  } catch {
-    return ErrF [ Name('FOREIGN') => String('RETURN') => String($@) ];
-  };
-}
-
 sub _coopt ($class, $targ, $scope) {
   my $subs = Package::Stash->new($targ)->get_all_symbols('CODE');
   foreach my $name (grep /^[a-z]/, sort keys %$subs) {
-    my $code = $subs->{$name};
-    my $wrapped = sub { $class->_invoke_foreign($code, @_) };
-    my $native = Native({ apply => 1, code => $wrapped });
+    my $native = XCL::V::Native->from_foreign($subs->{$name});
     $scope->set($name => Val($native));
   }
 }

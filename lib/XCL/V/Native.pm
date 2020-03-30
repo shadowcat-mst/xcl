@@ -45,4 +45,27 @@ sub display_data ($self, $depth) {
   return 'Native('.$guts->display($in_depth).')';
 }
 
+sub from_foreign ($class, $code) {
+  my $wrapped = sub { $class->_invoke_foreign($code, @_) };
+  $class->new(data => { apply => 1, code => $wrapped });
+}
+
+sub _invoke_foreign ($class, $code, $scope, $vals) {
+  my $args = try do {
+    $vals->to_perl;
+  } catch {
+    return ErrF [ Name('FOREIGN') => String('VALUES') => String($@) ];
+  };
+  my $ret = try do {
+    $code->(@$args);
+  } catch {
+    return ErrF [ Name('FOREIGN') => String('INVOKE') => String($@) ];
+  };
+  return try do {
+    ValF(XCL::V->from_perl($ret));
+  } catch {
+    return ErrF [ Name('FOREIGN') => String('RETURN') => String($@) ];
+  };
+}
+
 1;
