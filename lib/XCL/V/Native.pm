@@ -46,26 +46,33 @@ sub display_data ($self, $depth) {
 }
 
 sub from_foreign ($class, $code) {
-  my $wrapped = sub { $class->_invoke_foreign($code, @_) };
+  my $wrapped = sub { $class->_call_foreign($code, @_) };
   $class->new(data => { apply => 1, code => $wrapped }, metadata => {});
 }
 
-sub _invoke_foreign ($class, $code, $scope, $vals) {
+async sub _call_foreign ($class, $code, $scope, $vals) {
   my $args = try do {
     $vals->to_perl;
   } catch {
-    return ErrF [ Name('FOREIGN') => String('VALUES') => String($@) ];
+    return Err [ Name('FOREIGN') => String('VALUES') => String($@) ];
   };
   my $ret = try do {
     $code->(@$args);
   } catch {
-    return ErrF [ Name('FOREIGN') => String('INVOKE') => String($@) ];
+    return Err [ Name('FOREIGN') => String('INVOKE') => String($@) ];
   };
-  return ErrF([ Name('NO_SUCH_VALUE') ]) unless defined($ret);
+  if ($ret->$_can('AWAIT_IS_READY')) {
+    try {
+      $ret = await $ret;
+    } catch {
+      return Err [ Name('FOREIGN') => String('FUTURE') => String($@) ];
+    }
+  }
+  return Err([ Name('NO_SUCH_VALUE') ]) unless defined($ret);
   return try do {
-    ValF(XCL::V->from_perl($ret));
+    Val(XCL::V->from_perl($ret));
   } catch {
-    return ErrF [ Name('FOREIGN') => String('RETURN') => String($@) ];
+    return Err [ Name('FOREIGN') => String('RETURN') => String($@) ];
   };
 }
 

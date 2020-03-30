@@ -33,7 +33,11 @@ sub run ($class, $targ, $text) {
   my $scope = XCL::Builtins->builtins;
   $class->_coopt($targ, $scope);
   my $t = $w->parse(stmt_list => $text);
-  my $val = (my $res = $t->invoke($scope, List[])->get)->val;
+  my $res_f = $t->invoke($scope, List[]);
+  if ($res_f->isa('Mojo::Promise')) {
+    $res_f = $res_f->with_roles('+Futurify')->futurify;
+  }
+  my $val = (my $res = $res_f->get)->val;
   die $res->err->display(4) unless $res->is_ok;
   return;
 }

@@ -1,10 +1,9 @@
 use strict;
 use warnings;
-use XCL::Values;
 use JSON::MaybeXS ();
 use Text::xSV;
 
-sub encode_json { Bytes(JSON::MaybeXS::encode_json($_[0])) }
+sub encode_json { JSON::MaybeXS::encode_json($_[0]) }
 
 sub say { STDOUT->say(@_) }
 

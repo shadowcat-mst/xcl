@@ -1,5 +1,6 @@
 package XCL::V;
 
+use utf8 ();
 use Scalar::Util qw(blessed);
 use XCL::Class;
 
@@ -122,15 +123,16 @@ sub from_perl ($class, $value) {
   }
   die "Can't inflate reftype ${ref} to perl" if $ref;
   no warnings 'numeric';
+  my $is_utf8 = utf8::is_utf8($value);
   if (
-    !utf8::is_utf8($value)
+    !$is_utf8
     && length((my $dummy = '') & $value)
     && 0 + $value eq $value
     && $value * 0 == 0
   ) {
     return $value =~ /\./ ? Float($value) : Int($value);
   }
-  return String($value);
+  return ($is_utf8 ? String($value) : Bytes($value));
 }
 
 sub fx_or ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 0) }
