@@ -18,7 +18,7 @@ our @Types = qw(
   String Bytes Float Int Escape
   Bool Fexpr Dict List Name Call
   Result Var
-  Native
+  Native PerlObject
   Scope Block
   Compound Lambda
 );
@@ -40,9 +40,11 @@ use constant DEBUG => $ENV{XCL_DEBUG} || 0;
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
   my $file = "XCL/V/${type}.pm";
-  monkey_patch __PACKAGE__, $type, sub ($data, $metadata = {}) {
+  monkey_patch __PACKAGE__, $type, sub {
+    return $class unless @_;
+    my ($data, $metadata) = @_;
     require $file;
-    $class->new(data => $data, metadata => $metadata);
+    $class->new(data => $data, metadata => $metadata||{});
   }
 }
 

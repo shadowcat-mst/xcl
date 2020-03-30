@@ -1,12 +1,16 @@
 use strict;
 use warnings;
-use feature 'say';
 use XCL::Values;
 use JSON::MaybeXS ();
+use Text::xSV;
 
 sub encode_json { Bytes(JSON::MaybeXS::encode_json($_[0])) }
 
-sub say { CORE::say @_ }
+sub say { STDOUT->say(@_) }
+
+sub print { STDOUT->print(@_) }
+
+sub xsv_object { Text::xSV->new }
 
 use xcl::script;
 
@@ -18,3 +22,7 @@ let : = fexpr (s, n) {
 }
 
 say [ encode_json %(:x 1, :y 2) ];
+
+let xsv = xsv_object();
+
+print xsv.format_row('The answer is', 42);

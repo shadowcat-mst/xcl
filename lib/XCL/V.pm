@@ -2,7 +2,6 @@ package XCL::V;
 
 use Scalar::Util qw(blessed);
 use XCL::Class;
-use namespace::clean;
 
 has [ qw(data metadata) ];
 
@@ -119,6 +118,7 @@ sub from_perl ($class, $value) {
   }
   if (blessed $value) {
     return $value if $value->isa('XCL::V');
+    return XCL::V::PerlObject->from_perl($value);
   }
   die "Can't inflate reftype ${ref} to perl" if $ref;
   no warnings 'numeric';

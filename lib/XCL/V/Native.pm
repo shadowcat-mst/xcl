@@ -47,7 +47,7 @@ sub display_data ($self, $depth) {
 
 sub from_foreign ($class, $code) {
   my $wrapped = sub { $class->_invoke_foreign($code, @_) };
-  $class->new(data => { apply => 1, code => $wrapped });
+  $class->new(data => { apply => 1, code => $wrapped }, metadata => {});
 }
 
 sub _invoke_foreign ($class, $code, $scope, $vals) {
@@ -61,6 +61,7 @@ sub _invoke_foreign ($class, $code, $scope, $vals) {
   } catch {
     return ErrF [ Name('FOREIGN') => String('INVOKE') => String($@) ];
   };
+  return ErrF([ Name('NO_SUCH_VALUE') ]) unless defined($ret);
   return try do {
     ValF(XCL::V->from_perl($ret));
   } catch {
