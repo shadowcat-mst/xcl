@@ -295,6 +295,12 @@ foreach h ('www', 'docs') {
   vhost fqdn { root = '/var/www/vhosts/' ++ fqdn }
 }
 
+qw'www docs'.map(n => "$(n).foo.com").each h => {
+  vhost h {
+    root = '/var/www/vhosts' ++ h;
+  }
+}
+
 ###################
 
 # 'a' x 5 -> 'aaaaa'
