@@ -58,15 +58,23 @@ sub _weave_apply ($self, $thing, @list) {
   my @min_idxes = min_by { $ops->{$list[$_]->data}[0] } @op_indices;
   my ($prec, $assoc, $reverse) = @{$ops->{$list[$min_idxes[0]]->data}};
   $assoc //= 0;
+  my $min_idx = $min_idxes[$assoc];
   if ($prec > 0) {
-    my $min_idx = $min_idxes[$assoc];
+    my ($op, $after, @rest) = @list[$min_idx..$#list];
+    if ($thing->isa('XCL::V::Compound')) {
+      my $before = Compound([ @list[0 .. $min_idx-1] ]);
+      return $self->_weave_expr($thing,
+        Call([ $op, $before, $after ]),
+        @rest
+      );
+    }
+    my $before = $list[$min_idx-1];
     splice(
       @list, $min_idx - 1, 3,
-      Call([ @list[ $min_idx, $min_idx - 1, $min_idx + 1 ] ])
+      Call([ $op, $before, $after ])
     );
     return $self->_weave_expr($thing, @list);
   }
-  my $min_idx = $min_idxes[$assoc];
   my @sides = (
     $self->_weave_expr($thing, @list[0..$min_idx-1]),
     $self->_weave_expr($thing, @list[$min_idx+1..$#list]),
