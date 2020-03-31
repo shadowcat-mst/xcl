@@ -1,0 +1,66 @@
+# const context = {
+#   name: { first: 'Sterling', last: 'Archer' },
+#   assoc: [
+#     { first: 'Lana', last: 'Kane' },
+#     { first: 'Cyril', last: 'Figgis' },
+#     { first: 'Pam', last: 'Poovey' }
+#   ],
+#   age: 36
+# }
+
+const context = %(
+  :name %( :first 'Sterling', :last 'Archer' },
+  :assoc (
+    %( :first('Lana'), :last('Kane') ),
+    %( :first('Cyril'), :last('Figgs') ),
+    %( :first('Pam'), :last('Poovey') ),
+  ),
+  :age 36,
+);
+
+let (name, assoc, age) = context(qw'name assoc age');
+ 
+# // Filter an array asynchronously...
+# jexl.eval('assoc[.first == "Lana"].last', context).then(function(res) {
+#   console.log(res) // Output: Kane
+# })
+
+assoc.where ::first == 'Lana' | ::last | say;
+
+# // Do math
+# const res = await jexl.eval('age * (3 - 1)', context)
+# console.log(res) // Output: 72
+
+say age * [ 3 - 1 ];
+ 
+# // Concatenate
+# await jexl.eval('name.first + " " + name["la" + "st"]', context)
+# // "Sterling Archer"
+
+say name::first ++ ' ' ++ name('la' ++ 'st')
+
+# // Compound
+# await jexl.eval(
+#   'assoc[.last == "Figgis"].first == "Cyril" && assoc[.last == "Poovey"].first == "Pam"',
+#   context
+# )
+# // true
+
+let b = assoc.where .at('last').eq('Figgis') && .at('first').eq('Cyril')
+        and assoc.where .at('last').eq('Poovey') && .at('first').eq('Pam');
+
+let b = assoc.where ::last == 'Figgis' && ::first == 'Cyril'
+        and assoc.where ::last == 'Poovey' && ::first == 'Pam';
+
+# // Use array indexes
+# await jexl.eval('assoc[1]', context)
+# // { first: 'Cyril', last: 'Figgis' }
+
+let el = assoc(1);
+
+# // Use conditional logic
+# await jexl.eval('age > 62 ? "retired" : "working"', context)
+# // "working"
+
+let status = ?: [ age > 62 ] 'retired' 'working';
+
