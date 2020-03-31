@@ -1,0 +1,19 @@
+use strict;
+use warnings;
+use Mojo::UserAgent;
+
+sub say { STDOUT->say(@_) }
+
+sub new_ua { Mojo::UserAgent->new }
+
+use xcl::script;
+
+let ua = new_ua();
+
+let tx = ua.get_p('http://trout.me.uk/');
+
+let res = tx.result();
+
+let body = res.body();
+
+say body;
