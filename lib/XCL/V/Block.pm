@@ -12,6 +12,10 @@ async sub _invoke ($self, $scope, $) {
   return $res;
 }
 
-sub display_data { '{...}' }
+sub display_data ($self, $depth) {
+  join "\n", '{',
+    (map '  '.$_->display($depth-1).';', @{$self->data}),
+  '}', '';
+}
 
 1;
