@@ -94,4 +94,10 @@ xcl_is '
   7
 ', '7';
 
+xcl_is '(1, 2).map(x => { x + 1 })',
+  '(2, 3)';
+
+xcl_is '(1, 2).map(x => { x + 1 }).map(x => { x + 2 })',
+  '(4, 5)';
+
 done_testing;

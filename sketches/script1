@@ -10,10 +10,6 @@ use xcl::script;
 
 let ua = new_ua();
 
-let tx = ua.get_p('http://trout.me.uk/');
-
-let res = tx.result();
-
-let body = res.body();
+let body = ua.get_p('http://trout.me.uk/').result().body();
 
 say body;

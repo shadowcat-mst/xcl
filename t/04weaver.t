@@ -47,4 +47,6 @@ $w->ops({ 'if' => [ -73, 0, 1 ] });
 
 is(xw('x if y'), xw('if y x'));
 
+$w->ops({ '.' => [ 10 ] });
+
 done_testing;
