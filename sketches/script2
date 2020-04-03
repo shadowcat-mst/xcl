@@ -1,0 +1,10 @@
+use strict;
+use warnings;
+
+sub say { STDOUT->say(@_) }
+
+use xcl::script;
+
+let foo = %();
+
+foo('x') = 1;

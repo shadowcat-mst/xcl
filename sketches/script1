@@ -11,3 +11,7 @@ use xcl::script;
 let ua = new_ua();
 
 say ua.get_p('http://trout.me.uk/').result().body();
+
+#say ua.get_p('http://trout.me.uk/')
+#      |> .result()
+#      |> .body();

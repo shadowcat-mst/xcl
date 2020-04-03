@@ -24,15 +24,17 @@ class Logger {
   public var default_level = levels::info;
   has var level = default_level;
   has dest;
-  method log (this_level, string) {
-    if [this_level >= levels(level) ] {
-      dest "[$(this_level.name_to_string())] $(string)";
+  method log (\level_name, string) {
+    let this_level = level_name.name_to_string();
+    if [levels(this_level) <= level] {
+      dest "[$(this_level)] $(string)";
     }
     $true;
   }
-  static log_to (dest, this_level, string) {
-    if [this_level >= levels(default_level) ] {
-      dest "[$(this_level.name_to_string())] $(string)";
+  static log_to (dest, \level_name, string) {
+    let this_level = level_name.name_to_string();
+    if [levels(this_level) <= level] {
+      dest "[$(this_level)] $(string)";
     }
     $true;
   }
