@@ -100,4 +100,8 @@ xcl_is '(1, 2).map(x => { x + 1 })',
 xcl_is '(1, 2).map(x => { x + 1 }).map(x => { x + 2 })',
   '(4, 5)';
 
+xcl_is '(1, 2, 3).1', '2';
+
+xcl_is q{%(('foo', 1), ('bar', 2)).'foo'}, '1';
+
 done_testing;

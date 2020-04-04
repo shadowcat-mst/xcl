@@ -95,20 +95,19 @@ async sub c_fx_else ($class, $scope, $lst) {
   return await $else_res->val->bool;
 }
 
-async sub _dot_rhs_to_string ($class, $scope, $rp) {
-  return Val $rp if $rp->is('String');
-  return Val String $rp->data if $rp->is('Name');
-  return $_ for not_ok my $res = await $scope->eval($rp);
-  return Err([ Name('WRONG_TYPE') ]) unless $res->val->is('String');
-  return $res;
+async sub dot_flip ($class, $scope, $lst) {
+  return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
+  my ($first, $inv, @args) = $lst->values;
+  return $_ for not_ok
+    my $mres = await $class->c_fx_dot($scope, List [ $inv, $first ]);
+  return $mres->val unless $first->is('Name');
+  return await $mres->val->invoke($scope, List \@args);
 }
 
-async sub dot_name ($class, $scope, $lst) {
-  return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
-  my ($name, $inv, @args) = $lst->values;
-  return $_ for not_ok
-    my $mres = await $class->c_fx_dot($scope, List [ $inv, $name ]);
-  return await $mres->val->invoke($scope, List \@args);
+async sub _expand_dot_rhs ($class, $scope, $rp) {
+  return Val $rp if $rp->is('Name');
+  return $_ for not_ok my $res = await $scope->eval($rp);
+  return $res;
 }
 
 # dot / .
@@ -117,19 +116,25 @@ async sub c_fx_dot ($class, $scope, $lst) {
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ]
     unless my @p = $lst->values;
 
-  my ($name) = (
+  my ($rhs) = (
     map { $_->is_ok ? $_->val : return $_ }
-      await $class->_dot_rhs_to_string($scope, $p[-1])
+      await $class->_expand_dot_rhs($scope, $p[-1])
   );
 
   unless (@p > 1) {
     return Val Call [
-      Native({ ns => $class, native_name => 'dot_name' }),
-      $name
+      Native({ ns => $class, native_name => 'dot_flip' }),
+      $rhs
     ];
   }
 
   my ($l) = map { $_->is_ok ? $_->val : return $_ } await $scope->eval($p[0]);
+
+  unless ($rhs->is('Name')) {
+    return await $l->invoke($scope, List[$rhs]);
+  }
+
+  my $name = String($rhs->data);
 
   my $fallthrough = !(my $dot_methods = $l->metadata->{dot_methods});
 
@@ -144,7 +149,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
       $l->metadata->{dot_via}
         || ($fallthrough && Name($l->type));
   return $_ for not_ok my $res = await $class->c_fx_dot(
-    $scope, List [ $try, $name ]
+    $scope, List [ $try, $rhs ]
   );
 
   return Val Call [ Escape($res->val), Escape($l) ];
