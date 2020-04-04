@@ -6,3 +6,9 @@ requires "Import::Into";
 requires "curry":
 requires "Test2::V0";
 requires "Future";
+requires "Future::AsyncAwait";
+requires "Class::Method::Modifiers";
+requires "Syntax::Keyword::Dynamically":
+requires "Syntax::Keyword::Try";
+requires "Object::Tap";
+requires "Safe::Isa";
