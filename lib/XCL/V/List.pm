@@ -45,15 +45,50 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-async sub fx_map ($self, $scope, $lst) {
+sub _arg_to_cb ($self, $scope, $arg) {
+  if ($arg->is('Fexpr') or $arg->is('Call') or $arg->is('Native')) {
+    return sub ($el) { $arg->invoke($scope, List[$el]) };
+  }
+  if ($arg->is('Block')) {
+    my $f = Fexpr({
+      argnames => [ 'this', '$.' ],
+      scope => $scope,
+      body => $arg,
+    });
+    return sub ($el) {
+      $f->invoke($scope, List[ $el, Call [ $el, Name('.') ] ]);
+    };
+  }
+  return sub { ValF($arg) };
+}
+
+async sub _map_cb ($self, $scope, $lst, $wrap) {
   return $_ for not_ok my $lres = await $scope->eval($lst);
-  my ($f) = $lres->val->values;
+  my $cb = $self->_arg_to_cb($scope, $lres->val->values);
   my @val;
   foreach my $el ($self->values) {
-    return $_ for not_ok my $res = await $f->invoke($scope, List[$el]);
-    push @val, $res->val;
+    return $_ for not_ok my $res = await $cb->($el);
+    return $_ for not_ok my $wres = await $wrap->($res->val);
+    push @val, $wres->val->values;
   }
   return Val List \@val;
+}
+
+sub fx_map ($self, $scope, $lst) {
+  $self->_map_cb($scope, $lst, sub ($val) { ValF List[$val] });
+}
+
+sub fx_where ($self, $scope, $lst) {
+  $self->_map_cb($scope, $lst, async sub ($val) {
+    return $_ for not_ok my $bres = await $val->bool;
+    return Val List[ $bres->val->data ? ($val) : () ];
+  });
+}
+
+sub fx_pipe ($self, $scope, $lst) {
+  $self->_map_cb($scope, $lst, async sub ($val) {
+    Val($val->is('List') ? $val : List[$val]);
+  });
 }
 
 sub to_perl ($self) {
