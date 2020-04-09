@@ -72,10 +72,12 @@ sub _value_type_builtins ($vtype) {
 sub _assemble_value ($builtins, $to) {
   my @bits = split /\./, $to;
   if (@bits > 1) {
-    return XCL::Builtins::Functions->c_fx_dot(
-      Scope(Dict $builtins),
+    my $scope = Scope(Dict $builtins);
+    my $dotf = XCL::Builtins::Functions->c_fx_dot(
+      $scope,
       List [ map Name($_), grep length, @bits ]
     )->get;
+    return $to =~ /^\./ ? $dotf->val->invoke($scope, List[])->get : $dotf;
   }
   return $builtins->{$bits[0]};
 }

@@ -97,11 +97,24 @@ async sub c_fx_else ($class, $scope, $lst) {
 
 async sub dot_flip ($class, $scope, $lst) {
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
-  my ($first, $inv, @args) = $lst->values;
-  return $_ for not_ok
-    my $mres = await $class->c_fx_dot($scope, List [ $inv, $first ]);
-  return $mres->val unless $first->is('Name');
-  return await $mres->val->invoke($scope, List \@args);
+  if (($lst->values)[0]->is('Name')) {
+   return Val Call [
+      Native({ ns => $class, native_name => 'dot_curried' }),
+      $lst
+   ];
+  }
+  my ($arg, $inv) = $lst->values;
+  return await $class->c_fx_dot($scope, List [ $inv, $arg ]);
+}
+
+async sub dot_curried ($class, $scope, $lst) {
+  return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
+  my ($curried, $inv, @extra_args) = $lst->values;
+  my ($name, @args) = $curried->values;
+  return $_ for not_ok my $mres = await $class->c_fx_dot(
+    $scope, List [ $inv, $name ]
+  );
+  return await $mres->val->invoke($scope, List [ @args, @extra_args ]);
 }
 
 async sub _expand_dot_rhs ($class, $scope, $rp) {
