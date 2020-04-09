@@ -77,9 +77,11 @@ sub c_f_make ($class, $, $lst) {
   }));
 }
 
-sub f_pairs ($self, $) {
-  ValF List [ $self->pairs ];
-}
+sub f_pairs ($self, $) { ValF List [ $self->pairs ] }
+
+sub f_keys ($self, $) { ValF List [ $self->keys ] }
+
+sub f_values ($self, $) { ValF List [ $self->values ] }
 
 sub c_f_concat ($class, $lst) {
   return $_ for $class->_same_types($lst);
