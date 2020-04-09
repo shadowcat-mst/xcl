@@ -8,3 +8,9 @@ use xcl::script;
 let foo = %();
 
 foo('x') = 1;
+
+let list = (foo, foo);
+
+list | .'x' | say;
+
+list | { $.'x' } | say;
