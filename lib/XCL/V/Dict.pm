@@ -3,7 +3,7 @@ package XCL::V::Dict;
 use curry;
 use XCL::Class 'XCL::V';
 
-sub get ($self, $key) {
+async sub get ($self, $key) {
   my $dict = $self->data;
   Result({
     ($dict->{$key}
@@ -15,7 +15,7 @@ sub get ($self, $key) {
 }
 
 sub set ($self, $key, $value) {
-  return Val($self->data->{$key} = $value);
+  return ValF($self->data->{$key} = $value);
 }
 
 sub _invoke ($self, $, $vals) {
@@ -23,7 +23,7 @@ sub _invoke ($self, $, $vals) {
     unless (my ($string) = $vals->values) == 1;
   return ErrF([ Name('NOT_A_STRING') => String($string->type) ])
     unless $string->is('String');
-  ResultF $self->get($string->data);
+  $self->get($string->data);
 }
 
 sub has_key ($self, $key) {

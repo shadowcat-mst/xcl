@@ -45,7 +45,7 @@ async sub eval ($self, $thing) {
 }
 
 async sub get ($self, $key) {
-  my $res = $self->data->get($key);
+  my $res = await $self->data->get($key);
   return Err($res->data->{err}) unless $res->is_ok;
   my $val = $res->val;
   return $val if $val->is('Result');
