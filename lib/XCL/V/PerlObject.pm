@@ -2,6 +2,8 @@ package XCL::V::PerlObject;
 
 use XCL::Class 'XCL::V';
 
+sub bool ($self) { ValF True }
+
 sub display_data ($self, $) { 'PerlObject('.$self->data.')' }
 
 sub _make_perl_call ($method) {
