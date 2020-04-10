@@ -49,6 +49,13 @@ async sub invoke ($self, $scope, @lst) {
   return $res;
 }
 
+sub can_invoke ($self) {
+  my $class = ref($self) || $self;
+  state %can_invoke;
+  state $me = __PACKAGE__->can('_invoke');
+  $can_invoke{$class} //= 0+!!($me ne $class->can("_invoke"));
+}
+
 sub _invoke ($self, $scope, $lst) {
   # Was seriously wondering if this should always just be an error.
   return ErrF([ Name('CANT_INVOKE'), String($self->type) ]);

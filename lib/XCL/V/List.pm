@@ -45,26 +45,12 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-sub _arg_to_cb ($self, $scope, $arg) {
-  if ($arg->is('Fexpr') or $arg->is('Call') or $arg->is('Native')) {
-    return sub ($el) { $arg->invoke($scope, List[$el]) };
-  }
-  if ($arg->is('Block')) {
-    my $f = Fexpr({
-      argnames => [ 'this', '$.' ],
-      scope => $scope,
-      body => $arg,
-    });
-    return sub ($el) {
-      $f->invoke($scope, List[ $el, Call [ $el, Name('.') ] ]);
-    };
-  }
-  return sub { ValF($arg) };
-}
-
 async sub _map_cb ($self, $scope, $lst, $wrap) {
   return $_ for not_ok my $lres = await $scope->eval($lst);
-  my $cb = $self->_arg_to_cb($scope, $lres->val->values);
+  my ($arg) = $lres->val->values;
+  my $cb = $arg->can_invoke
+    ? sub ($el) { $arg->invoke($scope, List[$el]) }
+    : sub { ValF($arg) };
   my @val;
   foreach my $el ($self->values) {
     return $_ for not_ok my $wres = await $wrap->($el, await $cb->($el));
