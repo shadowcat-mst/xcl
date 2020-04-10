@@ -132,7 +132,7 @@ sub from_perl ($class, $value) {
   ) {
     return $value =~ /\./ ? Float($value) : Int($value);
   }
-  return ($is_utf8 ? String($value) : Bytes($value));
+  return String($value);
 }
 
 sub fx_or ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 0) }
