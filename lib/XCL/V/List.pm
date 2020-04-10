@@ -67,26 +67,32 @@ async sub _map_cb ($self, $scope, $lst, $wrap) {
   my $cb = $self->_arg_to_cb($scope, $lres->val->values);
   my @val;
   foreach my $el ($self->values) {
-    return $_ for not_ok my $res = await $cb->($el);
-    return $_ for not_ok my $wres = await $wrap->($res->val);
+    return $_ for not_ok my $wres = await $wrap->($el, await $cb->($el));
     push @val, $wres->val->values;
   }
   return Val List \@val;
 }
 
 sub fx_map ($self, $scope, $lst) {
-  $self->_map_cb($scope, $lst, sub ($val) { ValF List[$val] });
+  $self->_map_cb($scope, $lst, async sub ($, $res) {
+    return $res unless $res->is_ok;
+    return Val List[$res->val];
+  });
 }
 
 sub fx_where ($self, $scope, $lst) {
-  $self->_map_cb($scope, $lst, async sub ($val) {
+  $self->_map_cb($scope, $lst, async sub ($el, $res) {
+    return $_ for not_ok_except NO_SUCH_VALUE => $res;
+    my $val = $res->is_ok ? $res->val : return Val List[];
     return $_ for not_ok my $bres = await $val->bool;
-    return Val List[ $bres->val->data ? ($val) : () ];
+    return Val List[ $bres->val->data ? ($el) : () ];
   });
 }
 
 sub fx_pipe ($self, $scope, $lst) {
-  $self->_map_cb($scope, $lst, async sub ($val) {
+  $self->_map_cb($scope, $lst, async sub ($, $res) {
+    return $_ for not_ok_except NO_SUCH_VALUE => $res;
+    my $val = $res->is_ok ? $res->val : return Val List[];
     Val($val->is('List') ? $val : List[$val]);
   });
 }
