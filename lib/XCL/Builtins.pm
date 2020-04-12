@@ -66,7 +66,7 @@ sub _builtin_map () {
     '.' => [ dot => 10 ],
 
     # EXPERIMENT
-    where => [ '.where', 15, 0 ],
+    where => [ '.where', 15, -1 ],
 
     in => [ '.has_value', 20, 1 ],
   );
