@@ -1,0 +1,21 @@
+let sswitch = fexpr (scope, vproto, sblock) {
+  let cases = %;
+  let default = { raise NO_SUCH_CASE }
+  let dscope = scope.derive(
+    :case (string, block) => { cases(string) = block },
+    :default (block) => { default = block },
+  );
+  dscope.eval sblock;
+  let val = scope.eval vproto;
+  let match = ?:
+    exists(cases val)
+    cases(val)
+    default;
+  scope.call match val;
+}
+
+let ans = sswitch v {
+  case 'foo' { ... }
+  case 'bar' { ... }
+  default { ... }
+}

@@ -1,0 +1,12 @@
+use strict;
+use warnings;
+
+sub say { STDOUT->say(@_) }
+
+use xcl::script;
+
+let foo = (1, 6, 2, 10);
+
+var count = 0;
+
+count = count + 1 if el > 5 foreach [el in foo];
