@@ -41,7 +41,7 @@ sub _reify_expr ($self, @args) {
 }
 
 sub _reify_stmt ($self, @args) {
-  @args == 1 && $args[0][0] eq 'compound'
+  @args == 1 && (grep { $_ eq 'compound' or $_ eq 'list' } $args[0][0])
     ? $self->reify_ast(@{$args[0]})
     : $self->_reify_call(@args);
 }
