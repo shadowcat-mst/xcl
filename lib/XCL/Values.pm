@@ -68,7 +68,7 @@ sub Err ($err, $metadata = {}, $l = 0) {
 sub not_ok (@things) { grep !$_->is_ok, @things }
 
 sub not_ok_except ($or, @things) {
-  grep +(!$_->is_ok and !$_->err->data->[0]->data eq $or), @things
+  grep +(!$_->is_ok and not $_->err->data->[0]->data eq $or), @things
 }
 
 async sub ResultF {
