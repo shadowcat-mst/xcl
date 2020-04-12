@@ -1,5 +1,6 @@
 package XCL::V::PerlObject;
 
+use constant CODULATE => '(&{}';
 use XCL::Class 'XCL::V';
 
 sub bool ($self) { ValF True }
@@ -20,6 +21,13 @@ sub from_perl ($class, $obj) {
 }
 
 sub to_perl { shift->data }
+
+sub can_invoke ($self) { 0+!!$self->can(CODULATE) }
+
+sub _invoke ($self, $scope, $vals) {
+  $self->SUPER::_invoke($scope, $vals) unless $self->can_invoke;
+  _make_perl_call($self->data->${\+CODULATE})->invoke($scope, $vals);
+}
 
 1;
 
