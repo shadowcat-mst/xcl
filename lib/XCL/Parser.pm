@@ -44,7 +44,8 @@ sub _extract_spacecall ($self, $call_type, @toks) {
     my $type = $toks[0][0];
     if ($type eq 'ws' or $type eq 'comment') {
       my $t = shift @toks;
-      if (@spc and $spc[-1][0] eq 'block' and $t->[1] =~ /\n/) {
+      if ($call_type eq 'stmt' and @spc
+            and $spc[-1][0] eq 'block' and $t->[1] =~ /\n/) {
         unshift @toks, [ semicolon => ';' ];
         last;
       }
