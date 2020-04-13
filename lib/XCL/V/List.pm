@@ -83,6 +83,19 @@ sub fx_pipe ($self, $scope, $lst) {
   });
 }
 
+async sub fx_each ($self, $scope, $lst) {
+  my $empty = Val(List[]);
+  return $_ for not_ok await $self->_map_cb($scope, $lst, async sub ($, $res) {
+    return $res unless $res->is_ok;
+    return $empty;
+  });
+  return Val True;
+}
+
+sub fx_dict ($self, $scope, $) {
+  Dict->c_f_make($scope, $self)
+}
+
 sub to_perl ($self) {
   [ map $_->to_perl, @{$self->data} ]
 }
