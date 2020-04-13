@@ -114,6 +114,7 @@ sub make ($proto, $data, $metadata = {}) {
 sub to_perl ($self) { $self }
 
 sub from_perl ($class, $value) {
+  die "Can't inflate undef" unless defined($value);
   my $ref = ref($value);
   if ($ref eq 'HASH') {
     return Dict({
