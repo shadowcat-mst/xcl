@@ -20,4 +20,9 @@ sub c_f_range ($self, $lst) {
   ValF List [ map Int($_), @range ];
 }
 
+sub f_to_int ($self, $) { ValF Int $self->data }
+
+sub _is_zero ($self, $num) { 0+!!($num == 0) }
+sub _is_positive ($self, $num) { 0+!!($num > 0) }
+
 1;

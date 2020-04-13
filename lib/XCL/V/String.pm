@@ -36,7 +36,7 @@ sub f_concat ($self, $lst) {
   $self->c_f_make(List [ $self, $lst->values ]);
 }
 
-sub f_Int ($self, $) {
+sub f_to_int ($self, $) {
   ErrF [ NON_NUMERIC => $self ] unless $self->data =~ /^[0-9]+$/;
   ValF Int $self->data;
 }
