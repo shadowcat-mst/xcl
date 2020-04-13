@@ -43,22 +43,6 @@ sub f_divide ($self, $lst) {
 sub f_to_int ($self, $) { return ValF Int($self->data) }
 sub f_to_float ($self, $) { return ValF Float($self->data) }
 
-sub _is_zero ($self, $num) {
-  # hack, move this to the classes
-  if ($self->type eq 'Float') {
-    return 0+!!($num >= -1e-6 and $num <= 1e-6);
-  }
-  return 0+!!($num == 0);
-}
-
-sub _is_positive ($self, $num) {
-  # hack, move this to the classes
-  if ($self->type eq 'Float') {
-    return 0+!!($num > 1e-6);
-  }
-  return 0+!!($num > 0);
-}
-
 sub _isnt_negative ($self, $num) { 0+!!$self->_is_positive(-$num) }
 
 sub f_eq ($self, $lst) {
