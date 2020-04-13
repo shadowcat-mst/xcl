@@ -40,7 +40,6 @@ sub f_divide ($self, $lst) {
   ValF(Float($self->data / $lst->data->[0]->data));
 }
 
-sub f_to_int ($self, $) { return ValF Int($self->data) }
 sub f_to_float ($self, $) { return ValF Float($self->data) }
 
 sub _isnt_negative ($self, $num) { 0+!!$self->_is_positive(-$num) }
