@@ -41,6 +41,10 @@ sub f_to_int ($self, $) {
   ValF Int $self->data;
 }
 
+sub f_to_name ($self, $) {
+  ValF Name $self->data;
+}
+
 sub to_perl ($self) { $self->data }
 
 1;
