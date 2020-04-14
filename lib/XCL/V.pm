@@ -157,7 +157,7 @@ async sub fx_where ($self, $scope, $lst) {
   return $_ for not_ok my $lres = await $scope->eval($lst);
   my ($where) = $lres->val->values;
   my $res = await $where->invoke($scope, List[$self]);
-  return $_ for not_ok_except NO_SUCH_VALUE => $res;
+  return $_ for not_ok $res;
   return Val List[] unless $res->is_ok;
   return $_ for not_ok my $bres = await $res->val->bool;
   return Val List[$bres->val->data ? ($self) : ()];

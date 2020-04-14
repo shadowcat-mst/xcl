@@ -48,10 +48,11 @@ sub f_count ($self, $) {
 }
 
 async sub _map_cb ($self, $scope, $lst, $wrap) {
-  return $_ for not_ok my $lres = await $scope->eval($lst);
-  my ($arg) = $lres->val->values;
+  my ($head, $tail) = $lst->ht;
+  return $_ for not_ok my $lres = await $scope->eval($head);
+  my $arg = $lres->val;
   my $cb = $arg->can_invoke
-    ? sub ($el) { $arg->invoke($scope, List[$el]) }
+    ? sub ($el) { $arg->invoke($scope, List[$tail->values, $el]) }
     : sub { ValF($arg) };
   my @val;
   foreach my $el ($self->values) {
@@ -70,7 +71,7 @@ sub fx_map ($self, $scope, $lst) {
 
 sub fx_where ($self, $scope, $lst) {
   $self->_map_cb($scope, $lst, async sub ($el, $res) {
-    return $_ for not_ok_except NO_SUCH_VALUE => $res;
+    return $_ for not_ok $res;
     my $val = $res->is_ok ? $res->val : return Val List[];
     return $_ for not_ok my $bres = await $val->bool;
     return Val List[ $bres->val->data ? ($el) : () ];
@@ -79,7 +80,7 @@ sub fx_where ($self, $scope, $lst) {
 
 sub fx_pipe ($self, $scope, $lst) {
   $self->_map_cb($scope, $lst, async sub ($, $res) {
-    return $_ for not_ok_except NO_SUCH_VALUE => $res;
+    return $_ for not_ok $res;
     my $val = $res->is_ok ? $res->val : return Val List[];
     Val($val->is('List') ? $val : List[$val]);
   });
