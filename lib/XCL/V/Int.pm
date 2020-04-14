@@ -9,8 +9,8 @@ sub bool ($self) { ValF(Bool($self->data == 0 ? 0 : 1)) }
 
 sub display_data ($self, $) { ''.$self->data }
 
-sub c_f_range ($self, $lst) {
-  return $_ for $self->_same_types($lst);
+sub c_f_range ($class, $lst) {
+  return $_ for $class->_same_types($lst);
   my ($start, $end) = map $_->data, $lst->values;
   my @range = (
     ($start > $end)
