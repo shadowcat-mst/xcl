@@ -49,4 +49,8 @@ sub f_tail ($self, $) {
   defined($first) ? ValF(List \@rest) : ErrF([ Name('NO_SUCH_VALUE') ]);
 }
 
+sub f_ht ($self, $lst) {
+  ValF List[ $self->f_head($lst), $self->f_tail($lst) ];
+}
+
 1;
