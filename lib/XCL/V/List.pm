@@ -41,6 +41,8 @@ sub display_data ($self, $depth) {
 
 sub bool ($self) { ValF(Bool(@{$self->data} ? 1 : 0)) }
 
+sub count ($self) { scalar @{$self->data} }
+
 sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
