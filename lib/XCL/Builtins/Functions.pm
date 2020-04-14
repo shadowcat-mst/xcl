@@ -189,4 +189,15 @@ sub c_f_metadata ($class, $lst) {
   Dict($lst->[0]->metadata);
 }
 
+# exists
+async sub c_fx_exists ($class, $scope, $lst) {
+  my $res = await (
+    $lst->count > 1
+      ? $scope->f_call($lst)
+      : $scope->f_eval($lst)
+  );
+  return $_ for not_ok_except NO_SUCH_VALUE => $res;
+  return Val Bool $res->is_ok;
+}
+
 1;
