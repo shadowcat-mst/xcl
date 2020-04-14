@@ -73,7 +73,7 @@ sub is ($self, $type) {
 }
 
 sub type ($self) {
-  (split '::', ref($self))[-1];
+  (split '::', ref($self)||$self)[-1];
 }
 
 sub display ($self, $depth) {
