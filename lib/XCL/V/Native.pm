@@ -22,7 +22,7 @@ async sub _invoke ($self, $scope, $valp) {
       : not_ok($res = await $scope->eval($first)) ? return $res : $res->val;
     return await $fval->$method_name(($apply ? () : $scope), $rest);
   }
-  return await $ns->$method_name($scope, $vals);
+  return await $ns->$method_name(($apply ? () : $scope), $vals);
 }
 
 sub display_data ($self, $depth) {
