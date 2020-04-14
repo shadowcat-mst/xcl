@@ -117,6 +117,12 @@ async sub dot_curried ($class, $scope, $lst) {
   return await $mres->val->invoke($scope, List [ @args, @extra_args ]);
 }
 
+async sub dot_combi ($class, $scope, $lst) {
+  my ($l, $r, @rest) = $lst->values;
+  return $_ for not_ok my $lres = await $l->invoke($scope, List \@rest);
+  return await $class->c_fx_dot($scope, List [ $lres->val, $r ]);
+}
+
 async sub _expand_dot_rhs ($class, $scope, $rp) {
   return Val $rp if $rp->is('Name');
   return $_ for not_ok my $res = await $scope->eval($rp);
@@ -141,31 +147,44 @@ async sub c_fx_dot ($class, $scope, $lst) {
     ];
   }
 
-  my ($l) = map { $_->is_ok ? $_->val : return $_ } await $scope->eval($p[0]);
+  my ($lhs) = map { $_->is_ok ? $_->val : return $_ } await $scope->eval($p[0]);
+
+  if ($lhs->is('Call') and (my $native = ($lhs->values)[0])->is('Native')) {
+    my $m = $native->data;
+    if (($m->{ns}||'') eq $class) {
+      my $n = $m->{native_name};
+      if ($n eq 'dot_flip' or $n eq 'dot_curried') {
+        return Val Call [
+          Native({ ns => $class, native_name => 'dot_combi' }),
+          $lhs, $rhs
+        ];
+      }
+    }
+  }
 
   unless ($rhs->is('Name')) {
-    return await $l->invoke($scope, List[$rhs]);
+    return await $lhs->invoke($scope, List[$rhs]);
   }
 
   my $name = String($rhs->data);
 
-  my $fallthrough = !(my $dot_methods = $l->metadata->{dot_methods});
+  my $fallthrough = !(my $dot_methods = $lhs->metadata->{dot_methods});
 
   if ($dot_methods) {
     return $_ for not_ok_except NO_SUCH_VALUE =>
       my $res = await $dot_methods->invoke($scope, List [ $name ]);
-    return Val Call [ Escape($res->val), Escape($l) ] if $res->is_ok;
+    return Val Call [ Escape($res->val), Escape($lhs) ] if $res->is_ok;
   }
 
   return Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ]
     unless my $try =
-      $l->metadata->{dot_via}
-        || ($fallthrough && Name($l->type));
+      $lhs->metadata->{dot_via}
+        || ($fallthrough && Name($lhs->type));
   return $_ for not_ok my $res = await $class->c_fx_dot(
     $scope, List [ $try, $rhs ]
   );
 
-  return Val Call [ Escape($res->val), Escape($l) ];
+  return Val Call [ Escape($res->val), Escape($lhs) ];
 }
 
   # let meta = metadata(l);
