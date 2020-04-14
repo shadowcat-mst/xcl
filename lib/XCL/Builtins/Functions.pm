@@ -216,7 +216,7 @@ async sub c_fx_exists ($class, $scope, $lst) {
       : $scope->f_eval($lst)
   );
   return $_ for not_ok_except NO_SUCH_VALUE => $res;
-  return Val Bool $res->is_ok;
+  return Val List[ $res->is_ok ? ($res->val) : () ];
 }
 
 1;
