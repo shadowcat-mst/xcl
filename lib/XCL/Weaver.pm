@@ -10,7 +10,8 @@ has reifier => sub {
 
 has ops => sub { {} };
 
-sub parse ($self, $type, $str) {
+sub parse ($self, $type, $str, $ops = $self->ops) {
+  local $self->{ops} = $ops;
   $self->weave($self->reifier->parse($type, $str));
 }
 
