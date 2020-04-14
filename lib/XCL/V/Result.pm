@@ -2,7 +2,7 @@ package XCL::V::Result;
 
 use XCL::Class 'XCL::V';
 
-sub is_ok ($self) { exists $self->data->{val} }
+sub is_ok ($self) { 0+!!exists $self->data->{val} }
 
 sub val ($self) { $self->data->{val} }
 
