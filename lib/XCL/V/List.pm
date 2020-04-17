@@ -73,7 +73,7 @@ sub fx_map ($self, $scope, $lst) {
 
 sub fx_where ($self, $scope, $lst) {
   $self->_map_cb($scope, $lst, async sub ($el, $res) {
-    return $_ for not_ok $res;
+    return $_ for not_ok_except NO_SUCH_VALUE => $res;
     my $val = $res->is_ok ? $res->val : return Val List[];
     return $_ for not_ok my $bres = await $val->bool;
     return Val List[ $bres->val->data ? ($el) : () ];
