@@ -51,9 +51,11 @@ async sub _map_cb ($self, $scope, $lst, $wrap) {
   my ($head, $tail) = $lst->ht;
   return $_ for not_ok my $lres = await $scope->eval($head);
   my $arg = $lres->val;
-  my $cb = $arg->can_invoke
-    ? sub ($el) { $arg->invoke($scope, List[$tail->values, $el]) }
-    : sub { ValF($arg) };
+  # require a callable for the moment
+  #my $cb = $arg->can_invoke
+  #  ? sub ($el) { $arg->invoke($scope, List[$tail->values, $el]) }
+  #  : sub { ValF($arg) };
+  my $cb = sub ($el) { $arg->invoke($scope, List[$tail->values, $el]) };
   my @val;
   foreach my $el ($self->values) {
     return $_ for not_ok my $wres = await $wrap->($el, await $cb->($el));
