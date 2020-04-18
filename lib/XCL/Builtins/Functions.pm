@@ -48,6 +48,19 @@ async sub c_fx_unless ($class, $scope, $lst) {
   return $bres;
 }
 
+async sub c_fx_where ($class, $scope, $lst) {
+  my ($cond, $block, $dscope) = @{$lst->data};
+  $dscope ||= $scope->snapshot;
+  return $_ for
+    not_ok_except NO_SUCH_VALUE => my $res = await $dscope->eval($cond);
+  return Val False unless $res->is_ok;
+  return $_ for not_ok my $bres = await $res->val->bool;
+  if ($bres->val->data) {
+    return $_ for not_ok await $block->invoke($dscope, List []);
+  }
+  return $bres;
+}
+
 # wutcol / ?:
 async sub c_fx_wutcol ($class, $scope, $lst) {
   my ($cond, @ans) = $lst->values;
