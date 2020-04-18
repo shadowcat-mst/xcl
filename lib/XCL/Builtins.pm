@@ -26,7 +26,7 @@ sub _builtin_map () {
     let => [ 'Scope.val_in_current' ],
     var => [ 'Scope.var_in_current' ],
 
-    '**' => [ exp => -5 ],
+    #'**' => [ '.exp' => -5 ],
 
     '+' => [ '.plus', -10 ],
     '-' => [ '.minus', -10 ],
@@ -65,10 +65,6 @@ sub _builtin_map () {
     '=>' => [ lambda => 1 ],
     '.' => [ dot => 10 ],
 
-    # EXPERIMENT
-    where => [ '.where', 15, -1 ],
-
-    in => [ '.has_value', 20, 1 ],
   );
   map [ @map[$_*2,$_*2+1] ], 0 .. int $#map/2;
 }
