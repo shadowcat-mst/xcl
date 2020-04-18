@@ -91,13 +91,13 @@ async sub c_fx_else ($class, $scope, $lst) {
 
 async sub dot_flip ($class, $scope, $lst) {
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
-  if (($lst->values)[0]->is('Name')) {
+  my ($arg, $inv) = $lst->values;
+  if (my $invoke = $arg->can_invoke or $arg->is('Name')) {
    return Val Call [
       Native({ ns => $class, native_name => 'dot_curried' }),
-      $lst
+      $invoke ? List[ Escape($arg), $inv ] : $lst
    ];
   }
-  my ($arg, $inv) = $lst->values;
   return await $class->c_fx_dot($scope, List [ $inv, $arg ]);
 }
 
@@ -154,6 +154,10 @@ async sub c_fx_dot ($class, $scope, $lst) {
         ];
       }
     }
+  }
+
+  if ($rhs->can_invoke) {
+    return Val Call [ Escape($rhs), $lhs ];
   }
 
   unless ($rhs->is('Name')) {
