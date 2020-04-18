@@ -50,7 +50,7 @@ async sub c_fx_unless ($class, $scope, $lst) {
 
 # wutcol / ?:
 async sub c_fx_wutcol ($class, $scope, $lst) {
-  my ($cond, @ans) = @{$lst->data};
+  my ($cond, @ans) = $lst->values;
   my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans));
   return $_ for not_ok my $res = await $scope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
