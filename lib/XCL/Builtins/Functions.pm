@@ -14,23 +14,17 @@ async sub c_fx_set ($class, $scope, $lst) {
 }
 
 # id / $
-sub c_fx_id ($class, $scope, $lst) {
-  my @values = $lst->values;
-  return $scope->eval($values[0]) if @values == 1;
-  return $scope->eval(Call(\@values));
-}
+sub c_fx_id ($class, $scope, $lst) { $scope->f_expr($lst) }
 
 # do
-sub c_fx_do ($class, $scope, $lst) {
-  $scope->eval(Call([ $lst->values ]));
-}
+sub c_fx_do ($class, $scope, $lst) { $scope->f_call($lst) }
 
 # escape / \
 sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
 # result_of / ?
 async sub c_fx_result_of ($class, $scope, $lst) {
-  Val $class->c_fx_id($scope, $lst);
+  Val await $scope->f_expr($lst);
 }
 
 async sub c_fx_if ($class, $scope, $lst) {
