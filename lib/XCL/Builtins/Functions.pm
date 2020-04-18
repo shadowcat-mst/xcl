@@ -214,7 +214,7 @@ async sub c_fx_maybe ($class, $scope, $lst) {
 }
 
 async sub c_fx_exists ($class, $scope, $lst) {
-  return $_ for not_ok my $res = $class->c_fx_maybe($scope, $lst);
+  return $_ for not_ok my $res = await $class->c_fx_maybe($scope, $lst);
   return Val Bool 0+!!$res->val->count;
 }
 
