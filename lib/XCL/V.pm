@@ -163,4 +163,16 @@ async sub fx_where ($self, $scope, $lst) {
   return Val List[$bres->val->data ? ($self) : ()];
 }
 
+sub fx_maybe ($self, $scope, $lst) {
+  return XCL::Builtins::Functions->c_fx_maybe(
+    $scope, List[ $lst->values, $self ]
+  );
+}
+
+sub fx_exists ($self, $scope, $lst) {
+  return XCL::Builtins::Functions->c_fx_exists(
+    $scope, List[ $lst->values, $self ]
+  );
+}
+
 1;
