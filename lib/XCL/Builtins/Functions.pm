@@ -22,9 +22,8 @@ sub c_fx_do ($class, $scope, $lst) { $scope->f_call($lst) }
 # escape / \
 sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
-# result_of / ?
 async sub c_fx_result_of ($class, $scope, $lst) {
-  Val await $scope->f_expr($lst);
+  Val await $scope->f_call($lst);
 }
 
 async sub c_fx_if ($class, $scope, $lst) {
