@@ -9,9 +9,12 @@ my $scope = XCL::Builtins->builtins;
 
 sub xcl_is ($xcl, $expect, $name = "xcl: $xcl -> $expect") {
   my $t = $w->parse(stmt_list => $xcl);
-  my $val = (my $res = $t->invoke($scope, List[])->get)->val;
-  die $res->err->display(4) unless $res->is_ok;
-  is($val->display(-1), $expect, $name);
+  my $res = $t->invoke($scope, List[])->get;
+  if ($res->is_ok) {
+    is($res->val->display(-1), $expect, $name);
+  } else {
+    fail("${name} returned error: ".$res->err->display(4));
+  }
 }
 
 xcl_is '3 + 4', '7';
@@ -36,13 +39,13 @@ xcl_is 'let x = x => { x + 3 }; x(4)', '7';
 
 xcl_is '(1, 2, 3) ++ (4, 5, 6)', '(1, 2, 3, 4, 5, 6)';
 
-xcl_is '.concat (1, 2) (3, 4)', '(1, 2, 3, 4)';
+xcl_is '.concat() (1, 2) (3, 4)', '(1, 2, 3, 4)';
 
 xcl_is 'let x = \[ + 3 ]; let y = x ++ (4); y 5', '12';
 
 xcl_is '[ + ++ (3, 4) ] 5', '12';
 
-xcl_is '[ .concat \[+] (3, 4) ](5)', '12';
+xcl_is '[ .concat() \[+] (3, 4) ](5)', '12';
 
 xcl_is '[ \[+] . concat (3, 4) ] 5', '12';
 
