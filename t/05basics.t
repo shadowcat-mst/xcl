@@ -33,7 +33,7 @@ my $curried = $scope->eval(Call([ Name('.'), $three, Name('plus') ]))
 is $curried->invoke($scope, List[ $four ])->get, Val(Int 7);
 
 is(
-  $scope->eval(Call[ Call([ Name('.'), Name('plus') ]), $three, $four ])->get,
+  $scope->eval(Call[ Call([ Call([ Name('.'), Name('plus') ]) ]), $three, $four ])->get,
   Val(Int 7)
 );
 
