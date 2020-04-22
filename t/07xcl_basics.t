@@ -1,15 +1,11 @@
 use XCL::Class -test;
 use XCL::Values;
 use XCL::Builtins;
-use XCL::Weaver;
-
-my $w = XCL::Weaver->new(ops => XCL::Builtins->ops);
 
 my $scope = XCL::Builtins->builtins;
 
 sub xcl_is ($xcl, $expect, $name = "xcl: $xcl -> $expect") {
-  my $t = $w->parse(stmt_list => $xcl);
-  my $res = $t->invoke($scope, List[])->get;
+  my $res = $scope->eval_string($xcl)->get;
   if ($res->is_ok) {
     is($res->val->display(-1), $expect, $name);
   } else {

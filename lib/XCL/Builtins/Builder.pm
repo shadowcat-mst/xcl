@@ -103,7 +103,7 @@ sub _load_builtins (@map) {
     my ($alias, $to) = @$thing;
     $builtins->{$alias} = _assemble_value $builtins, $to->[0];
   }
-  $builtins->{'_OPS'} = XCL::V->from_perl(_load_ops(@map));
+  $builtins->{'_OPS'} = Val(XCL::V->from_perl(_load_ops(@map)));
   return Scope Dict $builtins;
 }
 

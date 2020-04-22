@@ -3,6 +3,8 @@ package XCL::V::Scope;
 use XCL::Weaver;
 use XCL::Class 'XCL::V';
 
+has weaver => sub { XCL::Weaver->new };
+
 async sub eval ($self, $thing) {
   state $state_id = '000';
   my $op_id = ++$state_id;
@@ -111,15 +113,17 @@ sub f_expr ($self, $lst) {
   $self->eval($lst->count > 1 ? Call [ $lst->values ] : $lst->head);
 }
 
-sub fx_eval_string ($self, $scope, $lstp) {
-  return ResultF $_ for not_ok my $lres = $scope->eval($lstp);
-  my ($string) = $lres->val->values;
-  my $weaver = XCL::Weaver->new;
-  my $ans = $weaver->parse(
+async sub f_eval_string ($self, $lst) {
+  my ($string) = $lst->values;
+  my $ans = $self->weaver->parse(
     stmt_list => $string->data, 
-    $self->data->data->{'_OPS'}->to_perl
+    await($self->get('_OPS'))->val->to_perl
   );
-  $ans->invoke($scope, List[]);
+  await $ans->invoke($self, List[]);
+}
+
+sub eval_string ($self, $string) {
+  $self->f_eval_string(List[String $string]);
 }
 
 1;
