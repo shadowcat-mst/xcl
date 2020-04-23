@@ -61,12 +61,12 @@ async sub set ($self, $key, $val) {
   return await $val->invoke($self);
 }
 
-sub _invoke ($self, $, $vals) {
-  return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
+async sub _invoke ($self, $, $vals) {
+  return Err([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
     unless (my ($string) = $vals->values) == 1;
-  return ErrF([ Name('NOT_A_STRING') => String($string->type) ])
+  return Err([ Name('NOT_A_STRING') => String($string->type) ])
     unless $string->is('String');
-  return ResultF $self->get($string->data);
+  return await $self->get($string->data);
 }
 
 sub derive ($self, $merge) {
@@ -125,5 +125,11 @@ async sub f_eval_string ($self, $lst) {
 sub eval_string ($self, $string) {
   $self->f_eval_string(List[String $string]);
 }
+
+sub f_pairs ($self, $) { ValF List [ $self->data->pairs ] }
+
+sub f_keys ($self, $) { ValF List [ $self->data->keys ] }
+
+sub f_values ($self, $) { ValF List [ $self->data->values ] }
 
 1;
