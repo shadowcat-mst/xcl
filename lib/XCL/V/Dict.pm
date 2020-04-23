@@ -67,7 +67,7 @@ sub display_data ($self, $depth) {
 
 sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
 
-sub c_f_make ($class, $, $lst) {
+sub c_f_make ($class, $lst) {
   my @pairs = $lst->values;
   return ErrF([ Name('NOT_PAIRS'), String('FIXME') ])
     if grep !($_->is('List') and @{$_->data} == 2), @pairs;
