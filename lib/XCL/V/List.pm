@@ -97,6 +97,17 @@ async sub fx_each ($self, $scope, $lst) {
   return Val True;
 }
 
+async sub f_join ($self, $lst) {
+  my ($join) = $lst->values;
+  return Err [ Name('NOT_A_STRING'), $join ] unless $join->is('String');
+  my @to_join;
+  foreach my $el ($self->values) {
+    return $_ for not_ok my $res = await $el->string;
+    push @to_join, $res->val->data;
+  }
+  Val String join $join->data, @to_join;
+}
+
 sub fx_dict ($self, $scope, $) {
   Dict->c_f_make($scope, $self)
 }
