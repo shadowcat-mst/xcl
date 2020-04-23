@@ -1,0 +1,15 @@
+use strict;
+use warnings;
+use XCL::Builtins;
+
+my $scope = XCL::Builtins->builtins;
+
+my $res = $scope->eval_string($ARGV[0])->get;
+
+if ($res->is_ok) {
+  print $res->val->display(-1)."\n";
+  exit 0;
+}
+
+print STDERR $res->display(8)."\n";
+exit 255;
