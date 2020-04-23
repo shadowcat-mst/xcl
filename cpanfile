@@ -3,12 +3,14 @@ requires "List::UtilsBy";
 requires "Mojolicious";
 requires "Package::Stash";
 requires "Import::Into";
-requires "curry":
+requires "curry";
 requires "Test2::V0";
 requires "Future";
 requires "Future::AsyncAwait";
 requires "Class::Method::Modifiers";
-requires "Syntax::Keyword::Dynamically":
+requires "Syntax::Keyword::Dynamically";
 requires "Syntax::Keyword::Try";
 requires "Object::Tap";
 requires "Safe::Isa";
+requires "Async::Methods";
+requires "Mojo::Promise::Role::Get";
