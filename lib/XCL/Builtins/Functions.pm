@@ -123,12 +123,6 @@ async sub dot_curried ($class, $scope, $lst) {
   return await $mres->val->invoke($scope, List [ @args, @extra_args ]);
 }
 
-async sub dot_combi ($class, $scope, $lst) {
-  my ($l, $r, @rest) = $lst->values;
-  return $_ for not_ok my $lres = await $l->invoke($scope, List \@rest);
-  return await $class->c_fx_dot($scope, List [ $lres->val, $r ]);
-}
-
 async sub _expand_dot_rhs ($class, $scope, $rp) {
   return Val $rp if $rp->is('Name');
   return $_ for not_ok my $res = await $scope->eval($rp);
@@ -154,19 +148,6 @@ async sub c_fx_dot ($class, $scope, $lst) {
   }
 
   my ($lhs) = map { $_->is_ok ? $_->val : return $_ } await $scope->eval($p[0]);
-
-  if ($lhs->is('Call') and (my $native = ($lhs->values)[0])->is('Native')) {
-    my $m = $native->data;
-    if (($m->{ns}||'') eq $class) {
-      my $n = $m->{native_name};
-      if ($n eq 'dot_flip' or $n eq 'dot_curried') {
-        return Val Call [
-          Native({ ns => $class, native_name => 'dot_combi' }),
-          $lhs, $rhs
-        ];
-      }
-    }
-  }
 
   if ($rhs->can_invoke) {
     return Val Call [ Escape($rhs), $lhs ];
