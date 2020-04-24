@@ -13,4 +13,3 @@ requires "Syntax::Keyword::Try";
 requires "Object::Tap";
 requires "Safe::Isa";
 requires "Async::Methods";
-requires "Mojo::Promise::Role::Get";
