@@ -4,11 +4,11 @@ xcl
 
 # ABSTRACT
 
-Extensible (command|control|configuration) Language
+Extensible (Command | Control | Configuration) Language
 
 # DESCRIPTION
 
-This project provides the source for a metalanguage called xcl, which itself is
+This project provides the source for a metalanguage called xcl, which itself
 provides a powerful extensible object-oriented programming environment using a
 simple and intuitive language syntax.
 
