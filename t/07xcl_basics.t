@@ -5,11 +5,11 @@ use XCL::Builtins;
 my $scope = XCL::Builtins->builtins;
 
 sub xcl_is ($xcl, $expect, $name = "xcl: $xcl -> $expect") {
-  my $res = $scope->eval_string($xcl)->get;
+  my $res = $scope->await::eval_string($xcl);
   if ($res->is_ok) {
     is($res->val->display(-1), $expect, $name);
   } else {
-    fail("${name} returned error: ".$res->err->display(4));
+    fail("${name} returned error: ".$res->err->display(8));
   }
 }
 
