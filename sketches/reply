@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+
+use Reply;
+
+use xcl::script ();
+
+my $reply = Reply->new(config => '.replyrc');
+
+*Reply::_eval = sub {
+  my ($self, $line) = @_;
+
+  my $result = XCL::Builtins->builtins->await::eval_string($line);
+
+  return undef unless $result;
+
+  return $result->val ? $result->val->display(-1) : $result;
+};
+
+$reply->run;
