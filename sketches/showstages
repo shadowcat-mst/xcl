@@ -17,7 +17,14 @@ my $t = $p->tokenizer;
 my ($str) = @ARGV;
 
 DwarnT(TOKENIZER => $t->tokenize($str));
+warn "\n";
 DwarnT(PARSER => $p->parse(stmt_list => $str));
+warn "\n";
 DwarnT(REIFIER => $r->parse(stmt_list => $str));
+warn "\n";
 DwarnT(WEAVER => my $f = $w->parse(stmt_list => $str));
+warn "\n";
 DwarnT(DISPLAY => $f->display(-1));
+warn "\n";
+local $ENV{XCL_DEBUG} = 3;
+$b->await::eval_string($str);
