@@ -17,15 +17,23 @@ jobs:
       run: git config --global user.name "Matt S Trout"
     - name: Setup Git Email
       run: git config --global user.email "mstrout@cpan.org"
+    - name: Install Perlbrew
+      run: sudo apt install -y perlbrew
+    - name: Initial Perlbrew
+      run: sudo perlbrew init
     - name: Install CPANM
-      run: sudo apt install -y cpanminus
+      run: sudo perlbrew install-cpanm
+    - name: Install Perl 5.30
+      run: sudo perlbrew install -n perl-5.30.0
+    - name: Verify Perl Version
+      run: sudo perlbrew exec --with perl-5.30.0 perl -V
     - name: Install Perl::Critic
-      run: sudo cpanm -qn Perl::Critic
-    - name: Install Project Dependencies
-      run: sudo cpanm -qn --reinstall --installdeps .
+      run: sudo perlbrew exec --with perl-5.30.0 cpanm -qn Perl::Critic
+    - name: Install Perl Dependencies
+      run: sudo perlbrew exec --with perl-5.30.0 cpanm -qn --reinstall --installdeps .
     - name: Critiquing Project
-      run: perlcritic lib t
+      run: sudo perlbrew exec --with perl-5.30.0 perlcritic lib t
     - name: Testing Project
-      run: prove -Ilib -r t
+      run: sudo perlbrew exec --with perl-5.30.0 prove -Ilib -r t
       env:
         HARNESS_OPTIONS: j9
