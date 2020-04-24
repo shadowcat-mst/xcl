@@ -19,4 +19,8 @@ sub display_data ($self, $depth) {
   join '', map $_->display($depth), @{$self->data};
 }
 
+sub f_list ($self, $) {
+  ValF List $self->data;
+}
+
 1;

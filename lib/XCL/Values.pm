@@ -35,15 +35,14 @@ our $Eval_Depth = -1;
 our $Did_Thing;
 our $Am_Running;
 
-use constant DEBUG => $ENV{XCL_DEBUG} || 0;
+sub DEBUG { $ENV{XCL_DEBUG} || 0 }
 
 foreach my $type (@Types) {
   my $class = "XCL::V::${type}";
-  my $file = "XCL/V/${type}.pm";
   monkey_patch __PACKAGE__, $type, sub {
     return $class unless @_;
     my ($data, $metadata) = @_;
-    require $file;
+    load_class $class;
     $class->new(data => $data, metadata => $metadata||{});
   }
 }
