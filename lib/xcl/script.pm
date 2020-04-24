@@ -1,5 +1,6 @@
 package xcl::script;
 
+use Package::Stash;
 use XCL::Class 'XCL::Inline';
 
 before run => sub ($self) {
