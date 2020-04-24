@@ -1,0 +1,23 @@
+use XCL::Weaver;
+use XCL::Builtins;
+use Devel::DDCWarn;
+
+use XCL::Class -strict;
+
+my $b = XCL::Builtins->builtins;
+
+my $w = XCL::Weaver->new(ops => $b->await::get('_OPS')->val->to_perl);
+
+my $r = $w->reifier;
+
+my $p = $r->parser;
+
+my $t = $p->tokenizer;
+
+my ($str) = @ARGV;
+
+DwarnT(TOKENIZER => $t->tokenize($str));
+DwarnT(PARSER => $p->parse(stmt_list => $str));
+DwarnT(REIFIER => $r->parse(stmt_list => $str));
+DwarnT(WEAVER => my $f = $w->parse(stmt_list => $str));
+DwarnT(DISPLAY => $f->display(-1));
