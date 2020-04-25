@@ -37,8 +37,7 @@ sub _explode_name ($stash_name) {
 }
 
 sub _builtin_names_of ($namespace) {
-  my $file = join('/', split '::', $namespace).'.pm';
-  require $file;
+  load_class $namespace;
   no strict 'refs';
   return +(map _builtin_names_of($_), @{"${namespace}::ISA"}),
     grep { $namespace->can($_->[0]) }

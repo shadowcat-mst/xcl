@@ -22,6 +22,7 @@ sub import ($, $superclass = 'Mojo::Base') {
   }
   Safe::Isa->import::into(1);
   Object::Tap->import::into(1);
+  Mojo::Loader->import::into(1, qw(load_class));
   Mojo::Base->import::into(1, $superclass, -signatures);
   Future::AsyncAwait->import::into(1, future_class => 'XCL::Strand::Future');
   Syntax::Keyword::Dynamically->import::into(1);
