@@ -31,3 +31,12 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 
   is res (1, 1) 'Hello world example';
 }
+
+{
+  let dismantle = fexpr (s, v) {
+    let l = v.list();
+    %(('type', l(0)), ('of', l(1)(0)))
+  }
+
+  is dismantle(ArrayRef(Str)) %(('type', \ArrayRef), ('of', \Str)) 'fexpr';
+}
