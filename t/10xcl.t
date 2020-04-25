@@ -35,7 +35,7 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 {
   let dismantle = fexpr (s, v) {
     let l = v.list();
-    %(('type', l(0)), ('of', l(1)(0)))
+    %(('type', l.0), ('of', l(1)(0)))
   }
 
   is dismantle(ArrayRef(Str)) %(('type', \ArrayRef), ('of', \Str)) 'fexpr';
