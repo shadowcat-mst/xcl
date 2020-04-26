@@ -8,6 +8,8 @@ our @EXPORT_OK = qw(
   _construct_builtin
   _explode_name
   _builtin_names_of
+  _nonbuiltin_names_of
+  _sub_names_of
   _builtins_of
   _value_builtins
   _value_type_builtins
@@ -40,9 +42,17 @@ sub _builtin_names_of ($namespace) {
   load_class $namespace;
   no strict 'refs';
   return +(map _builtin_names_of($_), @{"${namespace}::ISA"}),
-    grep { $namespace->can($_->[0]) }
-      map +(_explode_name $_),
-        keys %{"${namespace}::"};
+    map +(_explode_name $_),
+      _sub_names_of($namespace);
+}
+
+sub _nonbuiltin_names_of ($namespace) {
+  return grep !_explode_name($_), _sub_names_of($namespace);
+}
+
+sub _sub_names_of ($namespace) {
+  no strict 'refs';
+  return grep { $namespace->can($_) } keys %{"${namespace}::"};
 }
 
 sub _builtins_of ($namespace, $unwrap = 0) {
