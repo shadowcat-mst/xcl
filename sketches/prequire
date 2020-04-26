@@ -1,3 +1,4 @@
+use Sys::Hostname qw(hostname);
 use XCL::Class -strict;
 
 sub perl_require ($class) {
@@ -14,3 +15,5 @@ say dt.now().stringify();
 let sys_hn = perl_require 'Sys::Hostname';
 
 say sys_hn.can('hostname')();
+
+say hostname();
