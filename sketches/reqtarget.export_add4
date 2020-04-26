@@ -1,0 +1,3 @@
+fexpr (scope) {
+  scope.val add4 = x => { 4 + x }
+}

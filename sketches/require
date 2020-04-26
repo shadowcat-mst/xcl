@@ -10,3 +10,7 @@ use xcl::script;
 let add2 = require 'sketches/reqtarget.add2';
 
 say add2(6);
+
+require('sketches/reqtarget.export_add4')();
+
+say add4(6);
