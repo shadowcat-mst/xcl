@@ -78,6 +78,10 @@ sub snapshot ($self) {
   Scope(Dict({ %{$self->data->data} }));
 }
 
+sub f_snapshot ($self, $) {
+  ValF $self->snapshot;
+}
+
 sub display_data ($self, $depth) {
   'Scope(...)',
   #'Scope('.$self->data->display($depth).')'
@@ -114,21 +118,24 @@ sub f_expr ($self, $lst) {
   $self->eval($lst->count > 1 ? Call [ $lst->values ] : $lst->head);
 }
 
-async sub f_eval_string ($self, $lst) {
-  my ($string) = $lst->values;
+async sub eval_string ($self, $string) {
   my $ans = $self->weaver->parse(
-    stmt_list => $string->data, 
+    stmt_list => $string, 
     await($self->get('_OPS'))->val->to_perl
   );
   await $ans->invoke($self, List[]);
 }
 
-sub eval_string ($self, $string) {
-  $self->f_eval_string(List[String $string]);
+sub f_eval_string ($self, $lst) {
+  $self->eval_string($lst->head->data);
 }
 
 sub eval_file ($self, $file) {
   $self->eval_string(path($file)->slurp);
+}
+
+sub f_eval_file ($self, $lst) {
+  $self->eval_file($lst->head->data);
 }
 
 sub f_pairs ($self, $) { ValF List [ $self->data->pairs ] }

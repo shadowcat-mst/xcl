@@ -1,10 +1,8 @@
-use XCL::Class -strict;
-
-sub c_fx_require ($, $scope, $lst) {
-  $scope->snapshot->eval_file($lst->head->data);
-}
-
 use xcl::script;
+
+let require = fexpr (scope, file) {
+  scope.snapshot().eval_file(file)
+}
 
 let add2 = require 'sketches/reqtarget.add2';
 
