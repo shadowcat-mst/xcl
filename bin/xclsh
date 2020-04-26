@@ -15,7 +15,11 @@ unless (@ARGV) {
   my $scope = $script->scope;
   $scope->await::eval_string_inscope(q{var PROMPT = '$ '});
   while (defined(
-    my $line = $c->readline($scope->await::eval_string('$PROMPT')->val->data)
+    my $line = $c->readline(
+      $scope->await::eval(
+        $scope->await::eval_string('$PROMPT')->val
+      )->val->data
+    )
   )) {
     if ($line =~ /\S/) {
       my $res = $scope->await::eval_string_inscope($line);
