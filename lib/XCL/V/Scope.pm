@@ -1,5 +1,6 @@
 package XCL::V::Scope;
 
+use Mojo::File qw(path);
 use XCL::Weaver;
 use XCL::Class 'XCL::V';
 
@@ -124,6 +125,10 @@ async sub f_eval_string ($self, $lst) {
 
 sub eval_string ($self, $string) {
   $self->f_eval_string(List[String $string]);
+}
+
+sub eval_file ($self, $file) {
+  $self->eval_string(path($file)->slurp);
 }
 
 sub f_pairs ($self, $) { ValF List [ $self->data->pairs ] }
