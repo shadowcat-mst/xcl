@@ -19,6 +19,11 @@ sub display_data ($self, $depth) {
   return 'err '.$self->err->display($depth);
 }
 
+sub get ($self) {
+  return $self->val if $self->is_ok;
+  die $self->err->display(8)."\n";
+}
+
 sub f_get ($self) { ResultF $self }
 
 1;

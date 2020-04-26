@@ -14,11 +14,14 @@ unless (@ARGV) {
   my $c = Caroline->new;
   my $scope = $script->scope;
   $scope->await::eval_string_inscope(q{var PROMPT = '$ '});
+  if (my ($rcfile) = grep { -f $_ } map { "$_/.xclshrc" } $ENV{HOME}||()) {
+    $scope->await::eval_file_inscope($rcfile)->get;
+  }
   while (defined(
     my $line = $c->readline(
       $scope->await::eval(
-        $scope->await::eval_string('$PROMPT')->val
-      )->val->data
+        $scope->await::eval_string('$PROMPT')->get
+      )->get->await::string->get->data
     )
   )) {
     if ($line =~ /\S/) {

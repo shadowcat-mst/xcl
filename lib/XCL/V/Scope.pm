@@ -143,6 +143,10 @@ sub f_eval_string ($self, $lst) {
   $self->eval_string($lst->head->data);
 }
 
+sub eval_file_inscope ($self, $file) {
+  $self->eval_string_inscope(path($file)->slurp);
+}
+
 sub eval_file ($self, $file) {
   $self->eval_string(path($file)->slurp);
 }
