@@ -1,8 +1,6 @@
 use xcl::script;
 
-let require = fexpr (scope, file) {
-  scope.snapshot().eval_file(file)
-}
+let require = fexpr (scope, file) { scope.snapshot().eval_file(file) }
 
 let add2 = require 'sketches/reqtarget.add2';
 

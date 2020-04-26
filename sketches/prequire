@@ -1,0 +1,21 @@
+use XCL::Class -strict;
+
+sub perl_class ($class) {
+  load_class $class;
+  sub ($method, @args) { $class->$method(@args) }
+}
+
+sub perl_module ($module) {
+  load_class $module;
+  sub ($sub, @args) { $module->can($sub)->(@args) }
+}
+
+use xcl::script;
+
+let dt = perl_class 'DateTime';
+
+say dt('now').stringify();
+
+let sys_hn = perl_module 'Sys::Hostname';
+
+say sys_hn('hostname')();

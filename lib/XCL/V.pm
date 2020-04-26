@@ -125,6 +125,9 @@ sub from_perl ($class, $value) {
   if ($ref eq 'ARRAY') {
     return List([ map $class->from_perl($_), @$value ]);
   }
+  if ($ref eq 'CODE') {
+    return Native->from_foreign($value);
+  }
   if (blessed $value) {
     return $value if $value->isa('XCL::V');
     return XCL::V::PerlObject->from_perl($value);
