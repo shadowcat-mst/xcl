@@ -1,0 +1,12 @@
+use Mojo::File qw(path);
+use XCL::Class -strict;
+
+sub c_fx_require ($, $scope, $lst) {
+  $scope->snapshot->eval_string(path($lst->head->data)->slurp);
+}
+
+use xcl::script;
+
+let add2 = require 'sketches/reqtarget.add2';
+
+say add2(6);
