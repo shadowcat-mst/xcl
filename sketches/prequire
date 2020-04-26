@@ -14,8 +14,8 @@ use xcl::script;
 
 let dt = perl_class 'DateTime';
 
-say dt('now').stringify();
+say dt.'now'.stringify();
 
 let sys_hn = perl_module 'Sys::Hostname';
 
-say sys_hn('hostname')();
+say sys_hn.'hostname'();
