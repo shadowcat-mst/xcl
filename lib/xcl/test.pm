@@ -4,11 +4,12 @@ use XCL::Builtins::Test;
 use XCL::Builtins::Builder qw(_builtins_of);
 use XCL::Class 'XCL::Inline';
 
-before run => sub ($self) {
+sub setup_scope ($self) {
   my $test_builtins = _builtins_of 'XCL::Builtins::Test';
   my $scope = $self->scope;
   $scope->await::set($_ => Val $test_builtins->{$_})
     for sort keys %$test_builtins;
+  return $self;
 };
 
 after run => sub ($self) {

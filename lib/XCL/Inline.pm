@@ -26,7 +26,10 @@ sub import ($class) {
   });
 }
 
+sub setup_scope ($self) { $self }
+
 sub run ($self) {
+  $self->setup_scope;
   my $res = $self->scope->await::eval_string($self->inline_xcl);
   die $res->err->display(8) unless $res->is_ok;
   return;

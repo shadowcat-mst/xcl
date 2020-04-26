@@ -118,6 +118,19 @@ sub f_expr ($self, $lst) {
   $self->eval($lst->count > 1 ? Call [ $lst->values ] : $lst->head);
 }
 
+async sub eval_string_inscope ($self, $string) {
+  my $ans = $self->weaver->parse(
+    stmt_list => $string, 
+    await($self->get('_OPS'))->val->to_perl
+  );
+  my $res;
+  foreach my $stmt (@{$ans->data}) {
+    $res = await $self->eval($stmt);
+    return $res unless $res->is_ok;
+  }
+  return $res;
+}
+
 async sub eval_string ($self, $string) {
   my $ans = $self->weaver->parse(
     stmt_list => $string, 

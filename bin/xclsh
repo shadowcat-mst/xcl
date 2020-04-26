@@ -1,0 +1,43 @@
+#!perl
+
+use if (__FILE__ eq 'bin/xclsh' and -e 'lib/XCL/Values.pm'), lib => do {
+  require Cwd;
+  require File::Spec;
+  File::Spec->catdir(Cwd::abs_path(File::Spec->curdir), 'lib');
+};
+use xcl::script ();
+
+my $script = xcl::script->new->setup_scope;
+
+unless (@ARGV) {
+  require Caroline;
+  my $c = Caroline->new;
+  my $scope = $script->scope;
+  while (defined(my $line = $c->readline('$ '))) {
+    if ($line =~ /\S/) {
+      my $res = $scope->await::eval_string_inscope($line);
+      if ($res->is_ok) {
+        print $res->val->display(-1)."\n";
+      } else {
+        print $res->display(8)."\n";
+      }
+    }
+  }
+  exit 0;
+}
+
+my $text = do {
+  if (@ARGV == 1) {
+    require Mojo::File;
+    Mojo::File::path($ARGV[0])->slurp;
+  } elsif (@ARGV == 2 and $ARGV[0] eq '-c') {
+    $ARGV[1];
+  } else {
+    die "Usage:
+  xclsh
+  xclsh script
+  xclsh -c 'command'\n";
+  }
+};
+
+$script->inline_xcl($text)->run;
