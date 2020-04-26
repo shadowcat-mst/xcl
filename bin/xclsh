@@ -25,6 +25,7 @@ unless (@ARGV) {
     )
   )) {
     if ($line =~ /\S/) {
+      $c->history_add($line);
       my $res = $scope->await::eval_string_inscope($line);
       if ($res->is_ok) {
         print $res->val->display(-1)."\n";
