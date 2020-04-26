@@ -1,19 +1,9 @@
-use Sys::Hostname qw(hostname);
-use XCL::Class -strict;
-
-sub perl_require ($class) {
-  load_class $class;
-  PerlObject->from_perl($class);
-}
-
 use xcl::script;
 
-let dt = perl_require 'DateTime';
+let dt = perl_module 'DateTime';
 
 say dt.now().stringify();
 
-let sys_hn = perl_require 'Sys::Hostname';
+let sys_hn = perl_module 'Sys::Hostname';
 
 say sys_hn.can('hostname')();
-
-say hostname();

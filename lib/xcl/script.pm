@@ -7,8 +7,12 @@ before run => sub ($self) {
   my $scope = $self->scope;
   $scope->set(say => Val(Native->from_foreign(sub { STDOUT->say($_[0]) })));
   $scope->set(log => Val(Native->from_foreign(sub { STDERR->say($_[0]) })));
+  $scope->set(perl_module => Val(Native->from_foreign(sub {
+    load_class $_[0];
+    PerlObject->from_perl($_[0]);
+  })));
   my $pkg = $self->package;
-  foreach my $name (grep /^[A-Za-z]/, _nonbuiltin_names_of $pkg) {
+  foreach my $name (grep /^[a-z]/, _nonbuiltin_names_of $pkg) {
     my $native = Native->from_foreign($pkg->can($name));
     $scope->set($name => Val($native));
   }
