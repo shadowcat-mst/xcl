@@ -11,6 +11,14 @@ let add2 = require 'sketches/reqtarget.add2';
 
 say add2(6);
 
-require('sketches/reqtarget.export_add4')();
+let export_add4 = require('sketches/reqtarget.export_add4');
+
+export_add4();
 
 say add4(6);
+
+let dict_add6 = require('sketches/reqtarget.dict_add6');
+
+let add6 = dict_add6.'add6';
+
+say add6(6);
