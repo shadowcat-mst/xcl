@@ -213,7 +213,8 @@ async sub c_fx_exists ($class, $scope, $lst) {
 
 async sub c_fx_exists_or ($class, $scope, $lst) {
   my ($exists, $or) = $lst->values;
-  return $_ for not_ok my $res = await $class->c_fx_maybe($scope, List[$exists]);
+  return $_ for not_ok
+    my $res = await $class->c_fx_maybe($scope, List[$exists]);
   return Val($_) for $res->val->values;
   return await $scope->eval($or);
 }
