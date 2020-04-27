@@ -90,10 +90,12 @@ sub fx_pipe ($self, $scope, $lst) {
 
 async sub fx_each ($self, $scope, $lst) {
   my $empty = Val(List[]);
-  return $_ for not_ok await $self->_map_cb($scope, $lst, async sub ($, $res) {
-    return $res unless $res->is_ok;
-    return $empty;
-  });
+  return $_ for not_ok +await $self->_map_cb(
+    $scope, $lst, async sub ($, $res) {
+      return $res unless $res->is_ok;
+      return $empty;
+    }
+  );
   return Val True;
 }
 

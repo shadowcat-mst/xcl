@@ -32,7 +32,7 @@ async sub c_fx_if ($class, $scope, $lst) {
   return $_ for not_ok my $res = await $dscope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
   if ($bres->val->data) {
-    return $_ for not_ok await $block->invoke($dscope, List []);
+    return $_ for not_ok +await $block->invoke($dscope, List []);
   }
   return $bres;
 }
@@ -42,7 +42,7 @@ async sub c_fx_unless ($class, $scope, $lst) {
   return $_ for not_ok my $res = await $scope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
   unless ($bres->val->data) {
-    return $_ for not_ok await $block->invoke($scope);
+    return $_ for not_ok +await $block->invoke($scope);
   }
   return $bres;
 }
@@ -55,7 +55,7 @@ async sub c_fx_where ($class, $scope, $lst) {
   return Val False unless $res->is_ok;
   return $_ for not_ok my $bres = await $res->val->bool;
   if ($bres->val->data) {
-    return $_ for not_ok await $block->invoke($dscope, List []);
+    return $_ for not_ok +await $block->invoke($dscope, List []);
   }
   return $bres;
 }
@@ -83,7 +83,7 @@ async sub c_fx_while ($class, $scope, $lst) {
     if ($bres->val->data) {
       $did = 1;
       my $bscope = $dscope->derive;
-      return $_ for not_ok await $body->invoke($bscope);
+      return $_ for not_ok +await $body->invoke($bscope);
     } else {
       last WHILE;
     }
