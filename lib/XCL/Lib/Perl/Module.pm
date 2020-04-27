@@ -8,13 +8,19 @@ sub f_name ($self, $) {
   ValF String $self->data;
 }
 
+sub f_sub ($self, $lst) {
+  my ($sub) = $lst->values;
+  my $sub_name = $sub->must_be('String')->data;
+  my $code = $self->data->can($sub_name);
+  return ErrF([ Name('NO_SUCH_VALUE') => $sub ]) unless $code;
+  return ValF(Native->from_foreign($code));
+}
+
 async sub fx_call_sub ($self, $scope, $lst_p) {
   return $_ for not_ok my $lres = await $scope->eval($lst_p);
   my ($sub, $args) = $lres->val->ht;
-  my $sub_name = $sub->must_be('String')->data;
-  my $code = $self->data->can($sub_name);
-  return Err([ Name('NO_SUCH_VALUE') => $sub ]) unless $code;
-  return await Native->from_foreign($code)->invoke($scope, $args);
+  return $_ for not_ok my $sres = await $self->f_sub(List[$sub]);
+  return await $sres->val->invoke($scope, $args);
 }
 
 sub fx_call_method ($self, $scope, $lst_p) {
