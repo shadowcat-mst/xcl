@@ -1,0 +1,26 @@
+use XCL::Lib::Perl;
+use XCL::Builtins::Builder qw(_builtins_of);
+use XCL::Class -strict;
+
+async sub c_fx_plib ($, $scope, $) {
+  my $lib_meta = { dot_methods =>
+    Dict _builtins_of 'XCL::Lib::Perl'
+  };
+  #$scope->data->set(Lib_Perl => Val Name Lib_Perl => $lib_meta);
+  Val(XCL::Lib::Perl->new(
+    data => 'lib.perl',
+    metadata => $lib_meta, # { dot_via => Name('Lib_Perl') },
+  ));
+}
+
+use xcl::script;
+
+let perl = plib();
+
+say perl.module('Sys::Hostname').call_sub('hostname');
+
+say perl.class('Time::Piece').new().strftime();
+
+perl.import 'File::stat';
+
+say stat('sketches').uid();

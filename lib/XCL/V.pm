@@ -1,10 +1,17 @@
 package XCL::V;
 
-use utf8 ();
-use Scalar::Util qw(blessed);
+use XCL::Builtins::Builder;
+use Scalar::Util ();
 use XCL::Class;
 
 has [ qw(data metadata) ];
+
+sub new_with_methods ($class, @rest) {
+  my $new = $class->new(@rest);
+  $new->metadata->{dot_methods}
+    ||= Dict XCL::Builtins::Builder::_builtins_of($class);
+  $new;
+}
 
 sub but ($self, @args) { ref($self)->new(%$self, @args) }
 
@@ -72,6 +79,11 @@ sub is ($self, $type) {
   $self->isa("XCL::V::${type}");
 }
 
+sub must_be ($self, $type) {
+  die "${self} is not of ${type}" unless $self->is($type);
+  $self;
+}
+
 sub type ($self) {
   (split '::', ref($self)||$self)[-1];
 }
@@ -102,7 +114,7 @@ sub _same_types ($self, $lst, $type = $self->type) {
 
 sub DESTROY ($self) {
   return if ${^GLOBAL_PHASE} eq 'DESTRUCT';
-  return unless my $drop = $self->metadata->{drop};
+  return unless my $drop = ($self->metadata||{})->{drop};
   $drop->invoke(Scope({}), List $self);
   return;
 }
@@ -128,7 +140,7 @@ sub from_perl ($class, $value) {
   if ($ref eq 'CODE') {
     return Native->from_foreign($value);
   }
-  if (blessed $value) {
+  if (Scalar::Util::blessed $value) {
     return $value if $value->isa('XCL::V');
     return XCL::V::PerlObject->from_perl($value);
   }
