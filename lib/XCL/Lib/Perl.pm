@@ -3,6 +3,8 @@ package XCL::Lib::Perl;
 use XCL::Lib::Perl::Module;
 use XCL::Class 'XCL::V';
 
+has data => sub { 'lib/perl' };
+
 sub f_module ($self, $lst) {
   my ($name_v) = $lst->values;
   my $name = $name_v->must_be('String')->data;

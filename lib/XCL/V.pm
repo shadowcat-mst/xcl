@@ -4,7 +4,8 @@ use XCL::Builtins::Builder;
 use Scalar::Util ();
 use XCL::Class;
 
-has [ qw(data metadata) ];
+has 'data';
+has metadata => sub { {} };
 
 sub new_with_methods ($class, @rest) {
   my $new = $class->new(@rest);
