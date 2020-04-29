@@ -13,10 +13,10 @@ sub _invoke ($self, $scope, $lst) {
   $self->_call($scope, @{$self->data}, $lst->values);
 }
 
-async sub _call ($self, $scope, $command, @args) {
-  my $res = await $scope->eval($command);
-  return $res unless $res->is_ok;
-  return await $res->val->invoke($scope, List(\@args));
+async sub _call ($self, $scope, $command_p, @args) {
+  return $_ for not_ok my $res = await $scope->eval(List[$command_p]);
+  my ($command, @rest) = $res->val->values;
+  return await $command->invoke($scope, List[ @rest, @args ]);
 }
 
 sub display_data ($self, $depth) {

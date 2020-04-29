@@ -45,3 +45,8 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
   let lst = (1, 2, 3, 4);
   is [ + @lst ] 10 '@ prefix flattens list into args';
 }
+
+{
+  let lst = ((x, y) => { x + y }, 2, 6);
+  is [ @lst ] 8 '@ prefix in call';
+}
