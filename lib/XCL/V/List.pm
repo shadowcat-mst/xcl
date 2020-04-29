@@ -15,6 +15,17 @@ async sub evaluate_against ($self, $scope) {
         eq XCL::V->can('evaluate_against')
     );
     if ($is_basic) { push @ret, $el; next; }
+    if ($el->is('Compound')
+      and $el->data->[0]->is('Name')
+      and $el->data->[0]->data eq '@'
+    ) {
+      my (undef, @tail) = @{$el->data};
+      die "WHAT" unless @tail;
+      return $_ for not_ok my $res = await $scope->eval(Compound \@tail);
+      die "WHAT" unless $res->val->is('List');
+      push @ret, $res->val->values;
+      next;
+    }
     return $_ for not_ok my $res = await $scope->eval($el);
     push @ret, $res->val;
   }

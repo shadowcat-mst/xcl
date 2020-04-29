@@ -40,3 +40,8 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 
   is dismantle(ArrayRef(Str)) %(('type', \ArrayRef), ('of', \Str)) 'fexpr';
 }
+
+{
+  let lst = (1, 2, 3, 4);
+  is [ + 0 @lst ] 10 '@ prefix flattens list into args';
+}
