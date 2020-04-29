@@ -118,9 +118,9 @@ async sub dot_curried ($class, $scope, $lst) {
   my ($curried, $inv, @extra_args) = $lst->values;
   my ($name, @args) = $curried->values;
   return $_ for not_ok my $mres = await $class->c_fx_dot(
-    $scope, List [ $inv, $name ]
+    $scope, List [ $inv, $name, @args ]
   );
-  return await $mres->val->invoke($scope, List [ @args, @extra_args ]);
+  return await $mres->val->invoke($scope, List \@extra_args);
 }
 
 async sub _expand_dot_rhs ($class, $scope, $rp) {
@@ -137,7 +137,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
 
   my ($rhs) = (
     map { $_->is_ok ? $_->val : return $_ }
-      await $class->_expand_dot_rhs($scope, $p[-1])
+      await $class->_expand_dot_rhs($scope, $p[0+!!$#p])
   );
 
   unless (@p > 1) {
@@ -147,14 +147,17 @@ async sub c_fx_dot ($class, $scope, $lst) {
     ];
   }
 
-  my ($lhs) = map { $_->is_ok ? $_->val : return $_ } await $scope->eval($p[0]);
+  return $_ for not_ok my $lres = await $scope->eval(List[ $p[0] ]);
+  my ($lhs, @rest) = $lres->val->values;
+
+  push @rest, @p[2..$#p];
 
   if ($rhs->can_invoke) {
-    return Val Call [ Escape($rhs), $lhs ];
+    return Val Call [ Escape($rhs), $lhs, @rest ];
   }
 
   unless ($rhs->is('Name')) {
-    return await $lhs->invoke($scope, List[$rhs]);
+    return await $lhs->invoke($scope, List[$rhs, @rest]);
   }
 
   my $name = String($rhs->data);
@@ -164,7 +167,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
   if ($dot_methods) {
     return $_ for not_ok_except NO_SUCH_VALUE =>
       my $res = await $dot_methods->invoke($scope, List [ $name ]);
-    return Val Call [ Escape($res->val), Escape($lhs) ] if $res->is_ok;
+    return Val Call [ Escape($res->val), Escape($lhs), @rest ] if $res->is_ok;
   }
 
   return Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ]
@@ -175,7 +178,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
     $scope, List [ $try, $rhs ]
   );
 
-  return Val Call [ Escape($res->val), Escape($lhs) ];
+  return Val Call [ Escape($res->val), Escape($lhs), @rest ];
 }
 
   # let meta = metadata(l);

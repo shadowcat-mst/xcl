@@ -43,5 +43,5 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 
 {
   let lst = (1, 2, 3, 4);
-  is [ + 0 @lst ] 10 '@ prefix flattens list into args';
+  is [ + @lst ] 10 '@ prefix flattens list into args';
 }
