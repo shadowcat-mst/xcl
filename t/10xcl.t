@@ -42,6 +42,17 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 }
 
 {
+  let lst = (2, 3, 4);
+  is (1, @lst, 5, 6) 1..6 '@ prefix inside list';
+}
+
+{
+  let lst = (('c', 3), ('b', 2));
+  is %(('d', 4), @lst, ('a', 1)) %(('a', 1), ('b', 2), ('c', 3), ('d', 4))
+    '@ prefix inside dict constructor';
+}
+
+{
   let lst = (1, 2, 3, 4);
   is [ + @lst ] 10 '@ prefix flattens list into args';
 }
