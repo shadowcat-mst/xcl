@@ -181,22 +181,6 @@ async sub c_fx_dot ($class, $scope, $lst) {
   return Val Call [ Escape($res->val), Escape($lhs), @rest ];
 }
 
-  # let meta = metadata(l);
-  # if [exists let dm = meta('dot_methods')] {
-  #   if [exists let m = dm(r)] {
-  #     m ++ (l)
-  #   } {
-  #     meta('dot_via')(r) ++ (l);
-  #   }
-  # } {
-  #   if [exists let dv = meta('dot_via')] {
-  #     scope.eval(dv.r) ++ (l);
-  #   } {
-  #     let sym = Name.make l.type();
-  #     scope.eval(sym.r) ++ (l);
-  #   }
-  # }
-
 # metadata / ^
 sub c_f_metadata ($class, $lst) {
   Dict($lst->[0]->metadata);
