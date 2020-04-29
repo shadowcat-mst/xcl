@@ -50,3 +50,9 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
   let lst = ((x, y) => { x + y }, 2, 6);
   is [ @lst ] 8 '@ prefix in call';
 }
+
+{
+  let sum = lst => { + 0 @lst }
+  let lst = (1, 2, 3, 4);
+  is sum(lst) 10 '@ prefix inside function test';
+}
