@@ -19,7 +19,7 @@ sub f_class ($self, $lst) {
   my ($name_v) = $lst->values;
   my $name = $name_v->must_be('String')->data;
   load_class $name;
-  return ValF PerlObject->from_perl($name);
+  return ValF +PerlObject->from_perl($name);
 }
 
 async sub fx_import ($self, $scope, $lst_p) {
