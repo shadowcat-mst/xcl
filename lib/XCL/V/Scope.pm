@@ -48,9 +48,12 @@ async sub eval ($self, $thing) {
   return $res;
 }
 
+sub get_place ($self, $key) {
+  $self->data->get($key);
+}
+
 async sub get ($self, $key) {
-  my $res = await $self->data->get($key);
-  return Err($res->data->{err}) unless $res->is_ok;
+  return $_ for not_ok my $res = await $self->get_place($key);
   my $val = $res->val;
   return $val if $val->is('Result');
   return await $val->invoke($self);
