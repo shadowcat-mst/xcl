@@ -183,7 +183,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
 
 # metadata / ^
 sub c_f_metadata ($class, $lst) {
-  Dict($lst->[0]->metadata);
+  ValF Dict($lst->data->[0]->metadata);
 }
 
 # maybe

@@ -10,6 +10,7 @@ sub _builtin_map () {
 
     '$' => [ 'id' ],
     ':' => [ 'pair' ],
+    '^' => [ 'metadata' ],
 
     fexpr => [ 'Fexpr.make' ],
     lambda => [ 'Lambda.make' ],
