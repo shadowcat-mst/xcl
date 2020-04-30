@@ -51,7 +51,7 @@ sub f_eq ($self, $lst) {
 
 sub f_ne ($self, $lst) {
   return $_ for $self->_same_types($lst);
-  return ValF Bool 0+!!$self->_is_zero($self->data - $lst->data->[0]->data);
+  return ValF Bool 0+!$self->_is_zero($self->data - $lst->data->[0]->data);
 }
 
 sub f_gt ($self, $lst) {
