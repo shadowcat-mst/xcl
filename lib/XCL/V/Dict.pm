@@ -85,7 +85,7 @@ sub f_values ($self, $) { ValF List [ $self->values ] }
 
 sub c_f_concat ($class, $lst) {
   return $_ for $class->_same_types($lst);
-  ValF Dict +{ map %$_, $lst->values };
+  ValF Dict +{ map %{$_->data}, $lst->values };
 }
 
 sub to_perl ($self) {
