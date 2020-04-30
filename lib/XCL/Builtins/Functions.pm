@@ -206,4 +206,26 @@ async sub c_fx_exists_or ($class, $scope, $lst) {
   return await $scope->eval($or);
 }
 
+
+async sub c_fx_pair ($class, $scope, $lst) {
+  my ($key_p, $val_p) = $lst->values;
+
+  return Val Call [
+    Native({ ns => $class, native_name => 'c_fx_pair' }),
+    $key_p
+  ] unless $val_p;
+
+  my $key = do {
+    if ($key_p->is('Name')) {
+      String($key_p->data);
+    } else {
+      return $_ for not_ok my $res = await $scope->eval($key_p);
+      die "WHAT" unless (my $val = $res->val)->is('String');
+      $val;
+    }
+  };
+  return $_ for not_ok my $res = await $scope->eval($val_p);
+  return Val List[ $key, $res->val ];
+}
+
 1;

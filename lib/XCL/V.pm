@@ -1,6 +1,5 @@
 package XCL::V;
 
-use XCL::Builtins::Builder;
 use Scalar::Util ();
 use XCL::Class;
 
@@ -8,6 +7,7 @@ has 'data';
 has metadata => sub { {} };
 
 sub new_with_methods ($class, @rest) {
+  state $loaded = require XCL::Builtins::Builder;
   my $new = $class->new(@rest);
   $new->metadata->{dot_methods}
     ||= Dict XCL::Builtins::Builder::_builtins_of($class);
@@ -180,12 +180,14 @@ async sub fx_where ($self, $scope, $lst) {
 }
 
 sub fx_maybe ($self, $scope, $lst) {
+  state $loaded = require XCL::Builtins::Functions;
   return XCL::Builtins::Functions->c_fx_maybe(
     $scope, List[ $lst->values, $self ]
   );
 }
 
 sub fx_exists ($self, $scope, $lst) {
+  state $loaded = require XCL::Builtins::Functions;
   return XCL::Builtins::Functions->c_fx_exists(
     $scope, List[ $lst->values, $self ]
   );

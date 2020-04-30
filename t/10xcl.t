@@ -35,10 +35,10 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 {
   let dismantle = fexpr (s, v) {
     let l = v.list();
-    %(('type', l.0), ('of', l(1)(0)))
+    %(: type l.0, : of l(1)(0))
   }
 
-  is dismantle(ArrayRef(Str)) %(('type', \ArrayRef), ('of', \Str)) 'fexpr';
+  is dismantle(ArrayRef(Str)) %(:type(\ArrayRef), :of(\Str)) 'fexpr';
 }
 
 {
@@ -48,7 +48,7 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 
 {
   let lst = (('c', 3), ('b', 2));
-  is %(('d', 4), @lst, ('a', 1)) %(('a', 1), ('b', 2), ('c', 3), ('d', 4))
+  is %(:d 4, @lst, :a 1) %(:a(1), :b(2), :c(3), :d(4))
     '@ prefix inside dict constructor';
 }
 

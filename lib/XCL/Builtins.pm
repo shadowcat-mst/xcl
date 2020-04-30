@@ -9,6 +9,7 @@ sub _builtin_map () {
   state @map = (
 
     '$' => [ 'id' ],
+    ':' => [ 'pair' ],
 
     fexpr => [ 'Fexpr.make' ],
     lambda => [ 'Lambda.make' ],
