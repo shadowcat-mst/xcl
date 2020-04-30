@@ -16,7 +16,7 @@ sub _iota ($self) { return 1e-6 } # enhance this later
 
 sub _is_zero ($self, $num) {
   my $iota = $self->_iota;
-  return 0+!!($num >= $iota and $num <= $iota);
+  return 0+!!($num >= -$iota and $num <= $iota);
 }
 
 sub _is_positive ($self, $num) {
