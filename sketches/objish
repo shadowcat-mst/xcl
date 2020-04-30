@@ -1,0 +1,11 @@
+use xcl::script;
+
+let Person = \Person;
+let m = ^Person;
+m.'dot_methods' = %();
+m.'dot_methods'.'new' = (class, fname, lname) => { let p = %(:fname fname, :lname lname); let m = ^p; m.'dot_via' = \Person; $p }
+m.'dot_methods'.'name' = (class, self) => { self.'fname' ++ ' ' ++ self.'lname' }
+
+let al = Person.new 'Al' 'Newkirk';
+
+say al.name(); # 'Al Newkirk'
