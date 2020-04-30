@@ -228,4 +228,9 @@ async sub c_fx_pair ($class, $scope, $lst) {
   return Val List[ $key, $res->val ];
 }
 
+sub c_fx_assign ($class, $scope, $lst) {
+  my ($l, $r) = $lst->values;
+  dot_call_escape($scope, $l, assign => $r);
+}
+
 1;

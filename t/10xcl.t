@@ -70,6 +70,6 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 
 {
   var x = 3;
-  [\x].assign 7;
+  assign x 7;
   is x 7 'assign method';
 }

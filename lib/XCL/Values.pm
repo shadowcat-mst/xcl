@@ -26,7 +26,7 @@ our @Types = qw(
 our @EXPORT = (
   @Types,
   qw(ResultF Val ValF Err ErrF),
-  qw(not_ok not_ok_except dot_lookup dot_call),
+  qw(not_ok not_ok_except dot_lookup dot_call dot_call_escape),
   qw(DEBUG $Eval_Depth $Did_Thing $Am_Running),
   qw(True False),
 );
@@ -81,6 +81,10 @@ sub dot_lookup ($scope, $obj, $method, @args) {
 async sub dot_call ($scope, $obj, $method, @args) {
   return $_ for not_ok my $res = await dot_lookup($scope, $obj, $method);
   return await $res->val->invoke($scope, List(\@args));
+}
+
+sub dot_call_escape ($scope, $obj, $method, @args) {
+  dot_call($scope, Escape($obj), $method, @args);
 }
 
 async sub ResultF {

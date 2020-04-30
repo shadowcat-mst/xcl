@@ -6,6 +6,8 @@ use XCL::Class 'XCL::V';
 
 has weaver => sub { XCL::Weaver->new };
 
+has 'allow_intro';
+
 async sub eval ($self, $thing) {
   state $state_id = '000';
   my $op_id = ++$state_id;
