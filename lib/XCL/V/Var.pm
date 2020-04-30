@@ -16,4 +16,8 @@ sub display_data ($self, $depth) {
   'Var('.$self->data->display($depth).')'
 }
 
+sub f_assign ($self, $lst) {
+  return $self->set_data($lst->values);
+}
+
 1;

@@ -67,3 +67,9 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
   let lst = (1, 2, 3, 4);
   is sum(lst) 10 '@ prefix inside function test';
 }
+
+{
+  var x = 3;
+  [\x].assign 7;
+  is x 7 'assign method';
+}
