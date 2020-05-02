@@ -26,4 +26,8 @@ sub get ($self) {
 
 sub f_get ($self) { ResultF $self }
 
+sub f_assign ($self, $lst) {
+  $self->set_value($lst->values);
+}
+
 1;

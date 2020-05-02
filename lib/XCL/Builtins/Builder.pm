@@ -21,14 +21,20 @@ our @EXPORT_OK = qw(
 sub _construct_builtin (
   $namespace, $stash_name, $is_class, $is_fexpr, $f_name, $cls_unwrap = 0
 ) {
-
-  return Native {
-    apply => !$is_fexpr,
-    is_method => !$is_class,
-    unwrap => $cls_unwrap,
-    ns => $namespace,
-    native_name => $stash_name,
-  };
+  my $metadata = {};
+  if (my $method = $namespace->can("metadata_for_${stash_name}")) {
+    $metadata = $namespace->$method;
+  }
+  Native(
+    {
+      apply => !$is_fexpr,
+      is_method => !$is_class,
+      unwrap => $cls_unwrap,
+      ns => $namespace,
+      native_name => $stash_name,
+    },
+    $metadata
+  );
 }
 
 sub _explode_name ($stash_name) {

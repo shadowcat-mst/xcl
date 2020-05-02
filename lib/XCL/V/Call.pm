@@ -33,4 +33,20 @@ sub f_to_list ($self, $) {
   ValF List[ $self->values ];
 }
 
+async sub fx_assign ($self, $scope, $lst) {
+  my ($head, $tail) = $self->ht;
+  return $_ for not_ok my $res = await $scope->eval(List[$head]);
+  my ($command, @rest) = $res->val->values;
+  return $_ for not_ok_except NO_SUCH_VALUE =>
+    my $lres = await dot_lookup($scope, $command, 'assign_via_call');
+  if ($lres->is_ok) {
+    return await $lres->val->invoke(
+      $scope, List[List([@rest, $tail->values]), $lst->values]
+    );
+  }
+  return $_ for not_ok
+    my $cres = await $command->invoke($scope, List \@rest);
+  return await dot_call_escape($scope, $cres->val, assign => $lst->values);
+}
+
 1;

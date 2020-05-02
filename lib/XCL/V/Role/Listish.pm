@@ -30,6 +30,18 @@ sub values ($self) {
   return @{$self->data};
 }
 
+sub head ($self) { $self->data->[0] }
+
+sub tail ($self) {
+  return () unless my (undef, @tail) = $self->values;
+  List \@tail;
+}
+
+sub ht ($self) {
+  return () unless my ($head, @tail) = $self->values;
+  ($head, List \@tail);
+}
+
 sub f_concat ($self, $lst) {
   # Check for List even if we're Call
   return $_ for $self->_same_types($lst, 'List');

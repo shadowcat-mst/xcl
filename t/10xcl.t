@@ -73,3 +73,8 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
   assign x 7;
   is x 7 'assign method';
 }
+
+{
+  assign [ alet z ] 12;
+  is z 12 'alet';
+}
