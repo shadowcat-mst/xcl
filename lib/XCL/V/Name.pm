@@ -13,8 +13,7 @@ sub f_name_to_string ($self, $) {
 async sub fx_assign ($self, $scope, $lst) {
   return $_ for not_ok_except INTRO_REQUIRES_SET =>
      my $res = await $scope->get_place($self->data);
-  return $_ for not_ok my $vres = await $scope->f_expr($lst);
-  return await dot_call($scope, $res, assign => $vres->val);
+  return await dot_call($scope, $res, assign => $lst->values);
 }
 
 1;

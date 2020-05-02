@@ -26,7 +26,7 @@ sub get ($self) {
 
 sub f_get ($self) { ResultF $self }
 
-sub f_assign ($self, $lst) {
+sub fx_assign ($self, $scope, $lst) {
   $self->set_value($lst->values);
 }
 

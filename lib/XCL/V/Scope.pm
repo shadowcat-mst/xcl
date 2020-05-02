@@ -58,7 +58,9 @@ async sub get_place ($self, $key) {
       return $self->intro_name($type, $key);
     }
   }
-  return $res;
+  my $val = $res->val;
+  return $val if $val->is('Result');
+  return await $val->invoke($self);
 }
 
 async sub get ($self, $key) {

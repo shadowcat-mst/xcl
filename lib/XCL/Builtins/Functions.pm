@@ -228,47 +228,48 @@ async sub c_fx_pair ($class, $scope, $lst) {
   return Val List[ $key, $res->val ];
 }
 
-sub c_fx_assign ($class, $scope, $lst) {
+async sub c_fx_assign ($class, $scope, $lst) {
   my ($l, $r) = $lst->values;
-  dot_call_escape($scope, $l, assign => $r);
+  return for not_ok my $res = await $scope->eval($r);
+  await dot_call_escape($scope, $l, assign => $res->val);
 }
 
-sub c_fx_alet (@) {
-  ErrF [ VALID_ONLY_IN_ASSIGN => Name('alet') ];
+sub c_fx_let (@) {
+  ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name('let') ];
 }
 
-sub alet_assign_via_call ($class, $scope, $lst) {
+sub let_assign_via_call ($class, $scope, $lst) {
   my ($self, $args, $to_assign) = $lst->values;
   my ($assign_to) = $args->values;
   my $assign_scope = $scope->but(allow_intro => \&Val);
   dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
 }
 
-sub metadata_for_c_fx_alet ($class) {
+sub metadata_for_c_fx_let ($class) {
   return +{
     dot_methods => Dict +{
       assign_via_call =>
-        Native({ ns => $class, native_name => 'alet_assign_via_call' })
+        Native({ ns => $class, native_name => 'let_assign_via_call' })
     },
   };
 }
 
-sub c_fx_avar (@) {
-  ErrF [ VALID_ONLY_IN_ASSIGN => Name('avar') ];
+sub c_fx_var (@) {
+  ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name('var') ];
 }
 
-sub avar_assign_via_call ($class, $scope, $lst) {
+sub var_assign_via_call ($class, $scope, $lst) {
   my ($self, $args, $to_assign) = $lst->values;
   my ($assign_to) = $args->values;
   my $assign_scope = $scope->but(allow_intro => \&Var);
   dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
 }
 
-sub metadata_for_c_fx_avar ($class) {
+sub metadata_for_c_fx_var ($class) {
   return +{
     dot_methods => Dict +{
       assign_via_call =>
-        Native({ ns => $class, native_name => 'avar_assign_via_call' })
+        Native({ ns => $class, native_name => 'var_assign_via_call' })
     },
   };
 }

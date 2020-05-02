@@ -17,7 +17,9 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 {
   var res = ();
 
-  let say = v => { res = res ++ (v) };
+  let say = v => {
+    res = res ++ (v);
+  }
 
   {
     let foo = %();
@@ -75,18 +77,18 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 }
 
 {
-  alet z := 12;
-  is z 12 'alet';
+  let z = 12;
+  is z 12 'let';
 }
 
 {
-  avar x := 3;
-  x := 1 + 3;
+  var x = 3;
+  x = 1 + 3;
   is x 4 'assign';
 }
 
 {
-  alet bloop := %();
-  bloop('x') := 6;
+  let bloop = %();
+  bloop('x') = 6;
   is bloop %(:x 6) 'dict assign';
 }

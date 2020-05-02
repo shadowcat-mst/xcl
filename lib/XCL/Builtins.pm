@@ -24,8 +24,6 @@ sub _builtin_map () {
     "\\" => [ 'escape' ],
 
     current_scope => [ 'Scope.current' ],
-    let => [ 'Scope.val_in_current' ],
-    var => [ 'Scope.var_in_current' ],
 
     #'**' => [ '.exp' => -5 ],
 
@@ -52,8 +50,7 @@ sub _builtin_map () {
 
     '|' => [ '.pipe', -65, -1 ],
 
-    '=' => [ set => -70 ],
-    ':=' => [ assign => -70 ],
+    '=' => [ assign => -70 ],
 
     if => [ undef, -90, 0, 1 ],
     unless => [ undef, -90, 0, 1 ],

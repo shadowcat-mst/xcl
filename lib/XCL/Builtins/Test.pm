@@ -53,4 +53,9 @@ async sub c_fx_todo ($class, $scope, $lst) {
   return await $func->invoke($scope, List[]);
 }
 
+sub c_f_diag ($class, $lst) {
+  diag($lst->display(8));
+  return ValF True;
+}
+
 1;
