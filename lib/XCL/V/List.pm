@@ -124,4 +124,17 @@ sub to_perl ($self) {
   [ map $_->to_perl, @{$self->data} ]
 }
 
+async sub fx_assign ($self, $scope, $lst) {
+  # need to add @ support
+  my ($vlist) = $lst->values;
+  return Err [ Name('MISMATCH') ] unless $self->count == $vlist->count;
+  foreach my $idx (0..$#{$self->data}) {
+    return $_ for not_ok my $vres = await $vlist->get($idx);
+    return $_ for not_ok +await dot_call_escape(
+      $scope, $self->data->[$idx], assign => $vres->val
+    );
+  }
+  return Val $self;
+}
+
 1;

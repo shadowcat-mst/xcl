@@ -92,3 +92,8 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
   bloop('x') = 6;
   is bloop %(:x 6) 'dict assign';
 }
+
+{
+  let (x, y) = (1, 2);
+  is (y, x) (2, 1) 'destructure list';
+}
