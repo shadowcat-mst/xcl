@@ -4,7 +4,10 @@ use curry;
 use Role::Tiny::With;
 use XCL::Class 'XCL::V';
 
+with 'XCL::V::Role::Indexable';
 with 'XCL::V::Role::Listish';
+
+sub index_is { 'Int' }
 
 async sub evaluate_against ($self, $scope) {
   my @ret;
@@ -30,14 +33,6 @@ async sub evaluate_against ($self, $scope) {
     push @ret, $res->val;
   }
   return Val List(\@ret);
-}
-
-sub _invoke ($self, $, $vals) {
-  return ErrF([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
-    unless (my ($idx) = $vals->values) == 1;
-  return ErrF([ Name('NOT_AN_INT') => String($idx->type) ])
-    unless $idx->is('Int');
-  ResultF $self->get($idx->data);
 }
 
 sub display_data ($self, $depth) {

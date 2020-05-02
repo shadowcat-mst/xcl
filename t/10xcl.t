@@ -75,6 +75,18 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
 }
 
 {
-  assign [ alet z ] 12;
+  alet z := 12;
   is z 12 'alet';
+}
+
+{
+  avar x := 3;
+  x := 1 + 3;
+  is x 4 'assign';
+}
+
+{
+  alet bloop := %();
+  bloop('x') := 6;
+  is bloop %(:x 6) 'dict assign';
 }

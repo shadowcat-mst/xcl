@@ -253,4 +253,24 @@ sub metadata_for_c_fx_alet ($class) {
   };
 }
 
+sub c_fx_avar (@) {
+  ErrF [ VALID_ONLY_IN_ASSIGN => Name('avar') ];
+}
+
+sub avar_assign_via_call ($class, $scope, $lst) {
+  my ($self, $args, $to_assign) = $lst->values;
+  my ($assign_to) = $args->values;
+  my $assign_scope = $scope->but(allow_intro => \&Var);
+  dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
+}
+
+sub metadata_for_c_fx_avar ($class) {
+  return +{
+    dot_methods => Dict +{
+      assign_via_call =>
+        Native({ ns => $class, native_name => 'avar_assign_via_call' })
+    },
+  };
+}
+
 1;

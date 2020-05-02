@@ -3,7 +3,7 @@ package XCL::V::Role::Listish;
 use curry;
 use XCL::Class -role;
 
-sub get ($self, $idx) {
+async sub get ($self, $idx) {
   die "NOT YET" if $idx < 0;
   my $ary = $self->data;
   Result({
@@ -14,7 +14,7 @@ sub get ($self, $idx) {
   });
 }
 
-sub set ($self, $idx, $value) {
+async sub set ($self, $idx, $value) {
   die "NOT YET" if $idx < 0;
   my $ary = $self->data;
   return Err([ Name('NO_SUCH_INDEX') => Int($idx) ]) if $idx > @$ary;

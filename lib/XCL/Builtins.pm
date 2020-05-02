@@ -53,6 +53,7 @@ sub _builtin_map () {
     '|' => [ '.pipe', -65, -1 ],
 
     '=' => [ set => -70 ],
+    ':=' => [ assign => -70 ],
 
     if => [ undef, -90, 0, 1 ],
     unless => [ undef, -90, 0, 1 ],
