@@ -8,7 +8,7 @@ sub _invoke_values ($self, $scope, $vals) {
 }
 
 sub display_data ($self, $) {
-  return 'lambda ('.join(', ', @{$self->data->{argnames}}).') { ... }';
+  return 'lambda '.$self->data->{argspec}->display(3).' { ... }';
 }
 
 # Only necessary because builtin code doesn't walk isa yet

@@ -166,3 +166,15 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   let (:x, :y, f, b) = args;
   is (x, y, f, b) (1, 2, 'foo', 'bar') 'mixed destructure';
 }
+
+{
+  var called = 0;
+  let f = (%opts, @args) => {
+    is opts %(:x 1, :y 2) 'opts in function';
+    is args (7, 8, 9) 'args in function';
+    called = 1;
+  }
+  let x = 1;
+  f :x :y(2) 7 8 9;
+  is called 1 'function called';
+}
