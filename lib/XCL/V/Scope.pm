@@ -50,17 +50,6 @@ async sub eval ($self, $thing) {
   return $res;
 }
 
-async sub get_place ($self, $key) {
-  my $res = await $self->data->get($key);
-  if (my $type = $self->intro_as) {
-    return $_ for not_ok_except NO_SUCH_VALUE => $res;
-    unless ($res->is_ok) {
-      return $self->intro_name($type, $key);
-    }
-  }
-  return $res;
-}
-
 async sub get ($self, $key) {
   return $_ for not_ok my $res = await $self->data->get($key);
   my $val = $res->val;
@@ -110,27 +99,6 @@ sub f_snapshot ($self, $) {
 sub display_data ($self, $depth) {
   'Scope(...)',
   #'Scope('.$self->data->display($depth).')'
-}
-
-sub c_fx_val_in_current ($class, $self, $lst) { $self->intro(\&Val, $lst); }
-sub c_fx_var_in_current ($class, $self, $lst) { $self->intro(\&Var, $lst); }
-
-sub fx_val ($self, $, $lst) { $self->intro(\&Val, $lst); }
-sub fx_var ($self, $, $lst) { $self->intro(\&Var, $lst); }
-
-async sub intro ($self, $type, $lst) {
-  my ($name) = @{$lst->data};
-  return Err([ Name('NOT_A_NAME') => String($name->type) ])
-    unless $name->is('Name');
-  $self->intro_name($type, $name->data);
-}
-
-sub intro_name ($self, $type, $name) {
-  my $_set = $self->curry::weak::set($name);
-  return Result {
-    err => List([ Name('INTRO_REQUIRES_SET') => String($name) ]),
-    set => sub { $_set->($type->($_[0])) },
-  };
 }
 
 sub c_fx_current ($class, $scope, $lst) { ValF($scope) }
