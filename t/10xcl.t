@@ -133,3 +133,12 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   let d = %(:x, @splat);
   is d %(:x 1, :y 2, :z 3) 'dict assembly w/dict splat';
 }
+
+
+diag ^(%);
+
+{
+  let d = %(:x 1);
+  let %(:x) = d;
+  is x 1 'single pair dict destructure';
+}

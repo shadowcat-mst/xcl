@@ -93,7 +93,7 @@ sub _assemble_value ($builtins, $to) {
       $scope,
       List [ map Name($_), grep length, @bits ]
     )->get;
-    return $to =~ /^\./ ? $dotf->val->invoke($scope, List[])->get : $dotf;
+    return $to =~ /^\./ ? $dotf->val->await::invoke($scope, List[]) : $dotf;
   }
   return $builtins->{$bits[0]};
 }
@@ -119,7 +119,7 @@ sub _load_builtins (@map) {
     my $v = $builtins->{$alias} = _assemble_value $builtins, $to->[0];
     my $ns = 'XCL::Builtins::Functions';
     if (my $method = $ns->can("metadata_for_alias_${alias}")) {
-      $v->metadata($ns->$method);
+      $v->val->metadata($ns->$method);
     }
   }
   $builtins->{'_OPS'} = Val(XCL::V->from_perl(_load_ops(@map)));

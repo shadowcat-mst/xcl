@@ -100,4 +100,70 @@ sub to_perl ($self) {
   +{ map +($_ => $d{$_}->to_perl), CORE::keys %d };
 }
 
+# possibly this should be exposed somehow
+
+async sub destructure ($class, $scope, $lst) {
+  my ($to, $from) = $lst->values;
+  my @to_spec_p = $to->values;
+  if (@to_spec_p == 1 and (my $name = $to_spec_p[0])->is('Name')) {
+    return $_ for not_ok my $res = await $class->c_fx_make($scope, $from);
+    return await dot_call_escape($scope, $name, assign => $res->val);
+  }
+  my %from = %{$from->data};
+  my $splat_to;
+  # pop off @pairs or @(%dict) or etc.
+  if (@to_spec_p and my $last = $to_spec_p[-1]) {
+    if (
+      ($last->is('Compound') or $last->is('Call'))
+      and grep $_->is('Name') && $_->data eq '@', $last->data->[0]
+    ) {
+      die "WHAT" unless ((undef, $splat_to) = @{$last->data}) == 2;
+      pop @to_spec_p;
+    }
+  }
+  foreach my $to_spec_p (@to_spec_p) {
+    # Valid are: :x, : x, :x(y), :x y, : x y
+    die "WHAT" unless $to_spec_p->is('Call') or $to_spec_p->is('Compound');
+    # convert to: [ : x ] [ [ : x ] y ] [ : x y ]
+    my ($h, $t) = $to_spec_p->to_call->ht;
+    # then: (:, x) or (:, x, y)
+    my ($first, $key_p, $to_value) = (
+      ($h->is('Call') ? $h->values : $h),
+      $t->values
+    );
+    die "WHAT" unless $first->is('Name') and $first->data eq ':';
+    unless ($to_value) {
+      die "WHAT" unless $key_p->is('Name');
+      return Err [ Name('MISMATCH') ]
+        unless my $from_value = delete $from{$key_p->data};
+      return $_ for not_ok +await dot_call_escape(
+        $scope, $key_p, assign => $from_value
+      );
+      next;
+    }
+    # same logic as XCL::Builtins::Functions->c_fx_pair
+    my $key = do {
+      if ($key_p->is('Name')) {
+        String($key_p->data);
+      } else {
+        return $_ for not_ok my $res = await $scope->eval($key_p);
+        die "WHAT" unless (my $val = $res->val)->is('String');
+        $val;
+      }
+    };
+    return Err [ Name('MISMATCH') ]
+      unless my $from_value = delete $from{$key->data};
+    return $_ for not_ok +await dot_call_escape(
+      $scope, $to_value, assign => $from_value
+    );
+  }
+  return Err [ Name('MISMATCH') ] if CORE::keys(%from) and not $splat_to;
+  if ($splat_to) {
+    return $_ for not_ok +await dot_call_escape(
+      $scope, $splat_to, assign => List[ Dict(\%from)->pairs ]
+    );
+  }
+  return Val $from;
+}
+
 1;

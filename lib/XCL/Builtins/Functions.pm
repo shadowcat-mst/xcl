@@ -253,7 +253,11 @@ async sub c_fx_assign ($class, $scope, $lst) {
 sub metadata_for_alias_dict ($class) {
   return +{
     dot_methods => Dict +{
-      assign_via_call => Native({ ns => Dict, native_name => 'destructure' })
+      assign_via_call => Native({
+        ns => Dict,
+        native_name => 'destructure',
+        unwrap => 1,
+      })
     },
   };
 }
