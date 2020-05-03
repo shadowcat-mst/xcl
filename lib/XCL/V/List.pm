@@ -116,7 +116,7 @@ async sub f_join ($self, $lst) {
   Val String join $join->data, @to_join;
 }
 
-sub fx_dict ($self, $scope, $) {
+sub fx_to_dict ($self, $scope, $) {
   Dict->c_f_make($scope, $self)
 }
 
@@ -125,16 +125,31 @@ sub to_perl ($self) {
 }
 
 async sub fx_assign ($self, $scope, $lst) {
-  # need to add @ support
-  my ($vlist) = $lst->values;
-  return Err [ Name('MISMATCH') ] unless $self->count == $vlist->count;
-  foreach my $idx (0..$#{$self->data}) {
-    return $_ for not_ok my $vres = await $vlist->get($idx);
+  return Err [ Name('MISMATCH') ] unless (my $from = $lst->head)->is('List');
+  my @assign_from = $from->values;
+  my @assign_to = $self->values;
+  while (my $to_slot = shift @assign_to) {
+    my $name = $to_slot->is('Name') ? $to_slot->data : '';
+    if ($name eq '@') {
+      return Val $from;
+    } elsif (
+      ($to_slot->is('Call') or $to_slot->is('Compound'))
+      and grep $_->is('Name') && $_->data eq '@', $to_slot->data->[0]
+    ) {
+      die "WHAT" unless (my (undef, $splat_to) = @{$to_slot->data}) == 2;
+      return $_ for not_ok +await dot_call_escape(
+        $scope, $splat_to, assign => List \@assign_from
+      );
+      return Val $from;
+    }
+    return Err [ Name('MISMATCH') ] unless my $from_val = shift @assign_from;
+    next if $name eq '$';
     return $_ for not_ok +await dot_call_escape(
-      $scope, $self->data->[$idx], assign => $vres->val
+      $scope, $to_slot, assign => $from_val
     );
   }
-  return Val $self;
+  return Err [ Name('MISMATCH') ] if @assign_from;
+  return Val $from;
 }
 
 1;

@@ -108,3 +108,8 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   let (a, cur y) = (7, 8);
   is (y, a) (8, 7) 'destructure with cur';
 }
+
+{
+  let ($, $, @foo) = (1, 2, 3, 4);
+  is foo (3, 4) 'destructure with rest param';
+}
