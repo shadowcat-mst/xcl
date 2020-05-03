@@ -104,4 +104,7 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   let (x, var y, z) = (1, 2, 3);
   y = 4;
   is (z, y, x) (3, 4, 1) 'destructure with var';
+
+  let (a, cur y) = (7, 8);
+  is (y, a) (8, 7) 'destructure with cur';
 }

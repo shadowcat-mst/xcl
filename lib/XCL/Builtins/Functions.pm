@@ -1,17 +1,8 @@
 package XCL::Builtins::Functions;
 
+use Mojo::Util 'monkey_patch';
 use XCL::V::Scope;
 use XCL::Class -strict;
-
-# set / =
-async sub c_fx_set ($class, $scope, $lst) {
-  my ($set, $valproto) = $lst->values;
-  my $place = await $scope->eval($set);
-  return Err [ Name('NOT_SETTABLE') => String('FIXME') ]
-    unless $place->can_set_value;
-  return $_ for not_ok my $valres = await $scope->eval($valproto);
-  return await $place->set_value($valres->val);
-}
 
 # id / $
 sub c_fx_id ($class, $scope, $lst) { $scope->f_expr($lst) }
@@ -234,44 +225,29 @@ async sub c_fx_assign ($class, $scope, $lst) {
   await dot_call_escape($scope, $l, assign => $res->val);
 }
 
-sub c_fx_let (@) {
-  ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name('let') ];
-}
-
-sub let_assign_via_call ($class, $scope, $lst) {
-  my ($self, $args, $to_assign) = $lst->values;
-  my ($assign_to) = $args->values;
-  my $assign_scope = $scope->but(intro_as => \&Val);
-  dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
-}
-
-sub metadata_for_c_fx_let ($class) {
-  return +{
-    dot_methods => Dict +{
-      assign_via_call =>
-        Native({ ns => $class, native_name => 'let_assign_via_call' })
-    },
-  };
-}
-
-sub c_fx_var (@) {
-  ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name('var') ];
-}
-
-sub var_assign_via_call ($class, $scope, $lst) {
-  my ($self, $args, $to_assign) = $lst->values;
-  my ($assign_to) = $args->values;
-  my $assign_scope = $scope->but(intro_as => \&Var);
-  dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
-}
-
-sub metadata_for_c_fx_var ($class) {
-  return +{
-    dot_methods => Dict +{
-      assign_via_call =>
-        Native({ ns => $class, native_name => 'var_assign_via_call' })
-    },
-  };
+{
+  my %intro_as = (cur => undef, let => \&Val, var => \&Var);
+  foreach my $type (sort keys %intro_as) {
+    my $intro_as = $intro_as{$type};
+    monkey_patch __PACKAGE__,
+      "c_fx_${type}" => sub (@) {
+        ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name($type) ];
+      },
+      "${type}_assign_via_call" => sub ($class, $scope, $lst) {
+        my ($self, $args, $to_assign) = $lst->values;
+        my ($assign_to) = $args->values;
+        my $assign_scope = $scope->but(intro_as => $intro_as);
+        dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
+      },
+      "metadata_for_c_fx_${type}" => sub ($class) {
+        return +{
+          dot_methods => Dict +{
+            assign_via_call =>
+              Native({ ns => $class, native_name => "${type}_assign_via_call" })
+          },
+        };
+      };
+  }
 }
 
 1;
