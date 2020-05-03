@@ -113,3 +113,23 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   let ($, $, @foo) = (1, 2, 3, 4);
   is foo (3, 4) 'destructure with rest param';
 }
+
+{
+  let (x, yval) = (1, 2);
+  let d = %(x, :y yval);
+  is d %(:x 1, :y 2) 'dict assembly';
+}
+
+{
+  let x = 1;
+  let splat = (:y 2, :z 3);
+  let d = %(x, @splat);
+  is d %(:x 1, :y 2, :z 3) 'dict assembly w/list splat';
+}
+
+{
+  let x = 1;
+  let splat = %(:y 2, :z 3);
+  let d = %(x, @splat);
+  is d %(:x 1, :y 2, :z 3) 'dict assembly w/dict splat';
+}

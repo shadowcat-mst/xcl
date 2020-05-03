@@ -63,17 +63,29 @@ sub display_data ($self, $depth) {
 
 sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
 
-sub c_f_make ($class, $lst) {
-  my @pairs = $lst->values;
-  return ErrF([ Name('NOT_PAIRS'), String('FIXME') ])
-    if grep !($_->is('List') and @{$_->data} == 2), @pairs;
-  return ValF(Dict({
-    map +($_->data->[0]->data, $_->data->[1]),
-      @pairs
-  }));
+async sub c_fx_make ($class, $scope, $lst) {
+  my @pairs_p = $lst->values;
+  my %new;
+  foreach my $pair_p (@pairs_p) {
+    if ($pair_p->is('Name')) {
+      return $_ for not_ok my $res = await $scope->eval($pair_p);
+      $new{$pair_p->data} = $res->val;
+      next;
+    }
+    return $_ for not_ok my $res = await $scope->eval(List[$pair_p]);
+    foreach my $val ($res->val->values) {
+      return Err([ Name('NOT_PAIR'), $val ])
+        unless $val->is('List') and $val->count == 2;
+      return $_ for not_ok my $kres = await $val->data->[0]->string;
+      $new{$kres->val->data} = $val->data->[1];
+    }
+  }
+  return Val Dict \%new;
 }
 
 sub f_pairs ($self, $) { ValF List [ $self->pairs ] }
+
+sub f_to_list ($self, $) { ValF List [ $self->pairs ] }
 
 sub f_keys ($self, $) { ValF List [ $self->keys ] }
 

@@ -21,9 +21,14 @@ async sub set ($self, $idx, $value) {
   return Val($ary->[$idx] = $value);
 }
 
+sub pairs ($self) {
+  my $ary = $self->data;
+  return map List([Int($_), $ary->[$_]]), 0 .. $#$ary;
+}
+
 sub keys ($self) {
   my $ary = $self->data;
-  return map Int($_), 0 .. $ary;
+  return map Int($_), 0 .. $#$ary;
 }
 
 sub values ($self) {
@@ -48,7 +53,10 @@ sub f_concat ($self, $lst) {
   ValF($self->of_data([ map $_->values, $self, $lst->values ]));
 }
 
+sub f_pairs ($self, $) { ValF List [ $self->pairs ] }
+
 sub f_keys ($self, $) { ValF List [ $self->keys ] }
+
 sub f_values ($self, $) { ValF List [ $self->values ] }
 
 sub f_head ($self, $) {

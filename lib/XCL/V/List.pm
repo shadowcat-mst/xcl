@@ -25,7 +25,11 @@ async sub evaluate_against ($self, $scope) {
       my (undef, @tail) = @{$el->data};
       die "WHAT" unless @tail;
       return $_ for not_ok my $res = await $scope->eval(Compound \@tail);
-      die "WHAT" unless $res->val->is('List');
+      unless ($res->val->is('List')) {
+        return $_ for not_ok $res = await dot_call_escape(
+          $scope, $res->val, 'to_list'
+        );
+      }
       push @ret, $res->val->values;
       next;
     }
