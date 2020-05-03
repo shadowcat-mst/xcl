@@ -216,7 +216,7 @@ async sub c_fx_pair ($class, $scope, $lst) {
     }
   };
   return $_ for not_ok my $res = await $scope->eval($val_p);
-  return Val List[ $key, $res->val ];
+  return Val List[ $key, $res->val ], { is_pair => True };
 }
 
 async sub c_fx_assign ($class, $scope, $lst) {

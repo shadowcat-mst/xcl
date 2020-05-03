@@ -160,3 +160,9 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   is x 1 'extract one dict value w/rest';
   is rest %(:y 2, :z 3) 'extract dict rest as dict';
 }
+
+{
+  let args = (:x 1, :y 2, 'foo', 'bar');
+  let (:x, :y, f, b) = args;
+  is (x, y, f, b) (1, 2, 'foo', 'bar') 'mixed destructure';
+}

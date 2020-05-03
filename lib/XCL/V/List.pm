@@ -132,6 +132,29 @@ async sub fx_assign ($self, $scope, $lst) {
   return Err [ Name('MISMATCH') ] unless (my $from = $lst->head)->is('List');
   my @assign_from = $from->values;
   my @assign_to = $self->values;
+  my @dict_to;
+  while (
+    @assign_to
+    and ($assign_to[0]->is('Compound') or $assign_to[0]->is('Call'))
+    and grep $_->is('Name') && $_->data =~ /^[:%]$/, $assign_to[0]->data->[0]
+  ) {
+    push @dict_to, shift @assign_to;
+  }
+  if (@dict_to) {
+    my @dict_from;
+    while (
+      @assign_from
+      and grep $_->{is_pair} || $_->{is_pair_proto},
+            $assign_from[0]->metadata
+    ) {
+      push @dict_from, shift @assign_from;
+    }
+    return $_ for not_ok
+      my $dres = await Dict->c_fx_make($scope, List \@dict_from);
+    return $_ for not_ok +await Dict->destructure(
+      $scope, List[List(\@dict_to), $dres->val]
+    );
+  }
   while (my $to_slot = shift @assign_to) {
     my $name = $to_slot->is('Name') ? $to_slot->data : '';
     if ($name eq '@') {
