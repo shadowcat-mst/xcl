@@ -178,3 +178,16 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   f :x :y(2) 7 8 9;
   is called 1 'function called';
 }
+
+{
+  var called = 0;
+  let f = (first, @((%opts, @args))) => {
+    is first 3 'initial arg';
+    is opts %(:x 1, :y 2) 'opts in function';
+    is args (7, 8, 9) 'args in function';
+    called = 1;
+  }
+  let x = 1;
+  f 3 :x :y(2) 7 8 9;
+  is called 1 'function called';
+}

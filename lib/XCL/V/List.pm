@@ -161,9 +161,10 @@ async sub fx_assign ($self, $scope, $lst) {
       return Val $from;
     } elsif (
       ($to_slot->is('Call') or $to_slot->is('Compound'))
-      and grep $_->is('Name') && $_->data eq '@', $to_slot->data->[0]
+      and grep $_->is('Name') && $_->data eq '@',
+        (my $splat_call = $to_slot->to_call)->data->[0]
     ) {
-      die "WHAT" unless (my (undef, $splat_to) = @{$to_slot->data}) == 2;
+      die "WHAT" unless (my (undef, $splat_to) = @{$splat_call->data}) == 2;
       return $_ for not_ok +await dot_call_escape(
         $scope, $splat_to, assign => List \@assign_from
       );
