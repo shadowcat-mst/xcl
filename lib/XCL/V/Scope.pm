@@ -6,7 +6,7 @@ use XCL::Class 'XCL::V';
 
 has weaver => sub { XCL::Weaver->new };
 
-has 'allow_intro';
+has 'intro_as';
 
 async sub eval ($self, $thing) {
   state $state_id = '000';
@@ -52,28 +52,39 @@ async sub eval ($self, $thing) {
 
 async sub get_place ($self, $key) {
   my $res = await $self->data->get($key);
-  if (my $type = $self->allow_intro) {
+  if (my $type = $self->intro_as) {
     return $_ for not_ok_except NO_SUCH_VALUE => $res;
     unless ($res->is_ok) {
       return $self->intro_name($type, $key);
     }
   }
-  my $val = $res->val;
-  return $val if $val->is('Result');
-  return await $val->invoke($self);
+  return $res;
 }
 
 async sub get ($self, $key) {
   return $_ for not_ok my $res = await $self->data->get($key);
   my $val = $res->val;
   return $val if $val->is('Result');
-  return await $val->invoke($self);
+  return await $val->invoke($self, List[]);
 }
 
 async sub set ($self, $key, $val) {
-  $self->data->data->{$key} = $val;
-  return $val if $val->is('Result');
-  return await $val->invoke($self);
+  if (my $intro = $self->intro_as) {
+    return for not_ok +await $self->data->set($key => $intro->($val));
+  } else {
+    return $_ for not_ok my $res = await $self->data->get($key);
+    my $cur = $res->val;
+    if ($cur->is('Result')) {
+      return $_ for not_ok await
+        my $bres = dot_call_escape($self, $cur, 'eq' => $val);
+      return Err[ Name('MISMATCH') ] unless $bres->data;
+    } else {
+      return $_ for not_ok +await dot_call_escape(
+        $self, $cur, assign_via_call => List([]), $val
+      );
+    }
+  }
+  return await $self->get($key);
 }
 
 async sub _invoke ($self, $, $vals) {

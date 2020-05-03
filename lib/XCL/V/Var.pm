@@ -16,8 +16,8 @@ sub display_data ($self, $depth) {
   'Var('.$self->data->display($depth).')'
 }
 
-sub fx_assign ($self, $lst) {
-  return $self->set_data($lst->values);
+sub fx_assign_via_call ($self, $scope, $lst) {
+  return $self->set_data($lst->tail->head);
 }
 
 1;

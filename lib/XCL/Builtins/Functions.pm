@@ -241,7 +241,7 @@ sub c_fx_let (@) {
 sub let_assign_via_call ($class, $scope, $lst) {
   my ($self, $args, $to_assign) = $lst->values;
   my ($assign_to) = $args->values;
-  my $assign_scope = $scope->but(allow_intro => \&Val);
+  my $assign_scope = $scope->but(intro_as => \&Val);
   dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
 }
 
@@ -261,7 +261,7 @@ sub c_fx_var (@) {
 sub var_assign_via_call ($class, $scope, $lst) {
   my ($self, $args, $to_assign) = $lst->values;
   my ($assign_to) = $args->values;
-  my $assign_scope = $scope->but(allow_intro => \&Var);
+  my $assign_scope = $scope->but(intro_as => \&Var);
   dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
 }
 

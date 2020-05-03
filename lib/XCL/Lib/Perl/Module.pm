@@ -33,9 +33,10 @@ async sub fx_import ($self, $scope, $lst_p) {
   return $_ for not_ok my $lres = await $scope->eval($lst_p);
   my $scratch_pkg = __PACKAGE__.'::_Scratch_::'.($pkg_stub++);
   $self->data->import::into($scratch_pkg, @{$lres->val->to_perl});
+  my $iscope = $scope->but(intro_as => \&Val);
   foreach my $name (_sub_names_of $scratch_pkg) {
-    await $scope->set(
-      $name => Val Native->from_foreign($scratch_pkg->can($name))
+    await $iscope->set(
+      $name => Native->from_foreign($scratch_pkg->can($name))
     )
   }
   Symbol::delete_package $scratch_pkg;

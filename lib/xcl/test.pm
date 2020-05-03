@@ -6,8 +6,8 @@ use XCL::Class 'XCL::Inline';
 
 sub setup_scope ($self) {
   my $test_builtins = _builtins_of 'XCL::Builtins::Test';
-  my $scope = $self->scope;
-  $scope->await::set($_ => Val $test_builtins->{$_})
+  my $scope = $self->scope->but(intro_as => \&Val);
+  $scope->await::set($_ => $test_builtins->{$_})
     for sort keys %$test_builtins;
   return $self;
 };

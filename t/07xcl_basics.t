@@ -21,7 +21,7 @@ xcl_is 'let x = 4', '4';
 
 xcl_is 'let x = 3; + x 4', '7';
 
-xcl_is 'set [let x] 3; $x', '3';
+xcl_is 'assign [let x] 3; $x', '3';
 
 xcl_is 'let x = \[ + 3 ]; x 4', '7';
 
