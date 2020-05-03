@@ -134,11 +134,36 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   is d %(:x 1, :y 2, :z 3) 'dict assembly w/dict splat';
 }
 
-
-diag ^(%);
+#diag ^(%);
 
 {
   let d = %(:x 1);
   let %(:x) = d;
   is x 1 'single pair dict destructure';
+}
+
+{
+  let d = %(:x 1);
+  let %(:x(y)) = d;
+  is y 1 'single pair dict destructure w/name';
+}
+
+{
+  let d = %(:x 1, :y 2);
+  let %(:x, :y(yval)) = d;
+  is (x, yval) (1, 2) 'two pair dict destructure';
+}
+
+{
+  let d = %(:x 1, :y 2, :z 3);
+  let %(:x, @rest) = d;
+  is x 1 'extract one dict value w/rest';
+  is rest (('y', 2), ('z', 3)) 'extract dict rest as pairs';
+}
+
+{
+  let d = %(:x 1, :y 2, :z 3);
+  let %(:x, @(%rest)) = d;
+  is x 1 'extract one dict value w/rest';
+  is rest %(:y 2, :z 3) 'extract dict rest as dict';
 }

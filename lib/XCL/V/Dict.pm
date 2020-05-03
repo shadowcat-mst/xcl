@@ -115,9 +115,10 @@ async sub destructure ($class, $scope, $lst) {
   if (@to_spec_p and my $last = $to_spec_p[-1]) {
     if (
       ($last->is('Compound') or $last->is('Call'))
-      and grep $_->is('Name') && $_->data eq '@', $last->data->[0]
+      and grep $_->is('Name') && $_->data eq '@',
+            (my $last_call = $last->to_call)->data->[0]
     ) {
-      die "WHAT" unless ((undef, $splat_to) = @{$last->data}) == 2;
+      die "WHAT" unless ((undef, $splat_to) = @{$last_call->data}) == 2;
       pop @to_spec_p;
     }
   }
