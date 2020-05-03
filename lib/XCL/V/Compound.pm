@@ -1,5 +1,6 @@
 package XCL::V::Compound;
 
+use List::Util qw(reduce);
 use XCL::Class 'XCL::V';
 
 async sub evaluate_against ($self, $scope) {
@@ -42,6 +43,12 @@ async sub fx_assign ($self, $scope, $lst) {
     return $_ for not_ok $res = await $res->val->invoke($scope, $step_list);
   }
   return await dot_call_escape($scope, $res->val, assign => $lst->values);
+}
+
+sub f_to_call ($self, $) {
+  return ValF reduce {
+    Call[ $a, $b->is('List') ? $b->values : $b ]
+  } @{$self->data};
 }
 
 1;

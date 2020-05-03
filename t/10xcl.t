@@ -97,3 +97,5 @@ is [ 1 + 2 ] 3 'Basic arithmetic';
   let (x, y) = (1, 2);
   is (y, x) (2, 1) 'destructure list';
 }
+
+is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
