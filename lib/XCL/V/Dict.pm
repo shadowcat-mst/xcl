@@ -105,17 +105,13 @@ sub to_perl ($self) {
 async sub destructure ($class, $scope, $lst) {
   my ($to, $from) = $lst->values;
   my @to_spec_p = $to->values;
-  if (@to_spec_p == 1 and (my $name = $to_spec_p[0])->is('Name')) {
-    return $_ for not_ok my $res = await $class->c_fx_make($scope, $from);
-    return await dot_call_escape($scope, $name, assign => $res->val);
-  }
   my %from = %{$from->data};
   my $splat_to;
   # pop off @pairs or @(%dict) or etc.
   if (@to_spec_p and my $last = $to_spec_p[-1]) {
     if (
       ($last->is('Compound') or $last->is('Call'))
-      and grep $_->is('Name') && $_->data eq '@',
+      and grep $_->is('Name') && $_->data eq '%',
             (my $last_call = $last->to_call)->data->[0]
     ) {
       die "WHAT" unless ((undef, $splat_to) = @{$last_call->data}) == 2;
@@ -161,7 +157,7 @@ async sub destructure ($class, $scope, $lst) {
   return Err [ Name('MISMATCH') ] if CORE::keys(%from) and not $splat_to;
   if ($splat_to) {
     return $_ for not_ok +await dot_call_escape(
-      $scope, $splat_to, assign => List[ Dict(\%from)->pairs ]
+      $scope, $splat_to, assign => Dict(\%from)
     );
   }
   return Val $from;

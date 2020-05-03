@@ -156,19 +156,7 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
 
 {
   let d = %(:x 1, :y 2, :z 3);
-  let %(:x, @rest) = d;
-  is x 1 'extract one dict value w/rest';
-  is rest (('y', 2), ('z', 3)) 'extract dict rest as pairs';
-}
-
-{
-  let d = %(:x 1, :y 2, :z 3);
-  let %(:x, @(%rest)) = d;
+  let %(:x, %rest) = d;
   is x 1 'extract one dict value w/rest';
   is rest %(:y 2, :z 3) 'extract dict rest as dict';
-}
-
-{
-  let %d = (:x 1, :y 2);
-  is d %(:x 1, :y 2) 'extract dict from pairs';
 }
