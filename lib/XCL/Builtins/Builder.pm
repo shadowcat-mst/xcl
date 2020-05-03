@@ -116,7 +116,11 @@ sub _load_builtins (@map) {
 
   foreach my $thing (grep defined $_->[1][0], @map) {
     my ($alias, $to) = @$thing;
-    $builtins->{$alias} = _assemble_value $builtins, $to->[0];
+    my $v = $builtins->{$alias} = _assemble_value $builtins, $to->[0];
+    my $ns = 'XCL::Builtins::Functions';
+    if (my $method = $ns->can("metadata_for_alias_${alias}")) {
+      $v->metadata($ns->$method);
+    }
   }
   $builtins->{'_OPS'} = Val(XCL::V->from_perl(_load_ops(@map)));
   return Scope Dict $builtins;

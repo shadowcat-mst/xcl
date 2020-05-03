@@ -204,7 +204,7 @@ async sub c_fx_pair ($class, $scope, $lst) {
   return Val Call [
     Native({ ns => $class, native_name => 'c_fx_pair' }),
     $key_p
-  ] unless $val_p;
+  ], { is_pair_proto => True } unless $val_p;
 
   my $key = do {
     if ($key_p->is('Name')) {
@@ -248,6 +248,14 @@ async sub c_fx_assign ($class, $scope, $lst) {
         };
       };
   }
+}
+
+sub metadata_for_alias_dict ($class) {
+  return +{
+    dot_methods => Dict +{
+      assign_via_call => Native({ ns => Dict, native_name => 'destructure' })
+    },
+  };
 }
 
 1;

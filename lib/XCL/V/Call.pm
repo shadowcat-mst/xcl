@@ -49,4 +49,8 @@ async sub fx_assign ($self, $scope, $lst) {
   return await dot_call_escape($scope, $cres->val, assign => $lst->values);
 }
 
+sub to_call ($self) { $self }
+
+sub f_to_call ($self, $) { ValF $self }
+
 1;

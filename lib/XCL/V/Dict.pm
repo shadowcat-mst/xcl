@@ -64,21 +64,20 @@ sub display_data ($self, $depth) {
 sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
 
 async sub c_fx_make ($class, $scope, $lst) {
-  my @pairs_p = $lst->values;
+  return $_ for not_ok my $lres = await $scope->eval($lst);
   my %new;
-  foreach my $pair_p (@pairs_p) {
-    if ($pair_p->is('Name')) {
-      return $_ for not_ok my $res = await $scope->eval($pair_p);
-      $new{$pair_p->data} = $res->val;
+  foreach my $pair ($lres->val->values) {
+    if ($pair->is('Call') and $pair->metadata->{is_pair_proto}) {
+      my $name = $pair->data->[1];
+      return Err[ Name('NOT_NAME'), $name ] unless $name->is('Name');
+      return $_ for not_ok my $res = await $scope->eval($name);
+      $new{$name->data} = $res->val;
       next;
     }
-    return $_ for not_ok my $res = await $scope->eval(List[$pair_p]);
-    foreach my $val ($res->val->values) {
-      return Err([ Name('NOT_PAIR'), $val ])
-        unless $val->is('List') and $val->count == 2;
-      return $_ for not_ok my $kres = await $val->data->[0]->string;
-      $new{$kres->val->data} = $val->data->[1];
-    }
+    return Err([ Name('NOT_PAIR'), $pair ])
+      unless $pair->is('List') and $pair->count == 2;
+    return $_ for not_ok my $kres = await $pair->data->[0]->string;
+    $new{$kres->val->data} = $pair->data->[1];
   }
   return Val Dict \%new;
 }

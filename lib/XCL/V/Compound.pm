@@ -45,10 +45,14 @@ async sub fx_assign ($self, $scope, $lst) {
   return await dot_call_escape($scope, $res->val, assign => $lst->values);
 }
 
-sub f_to_call ($self, $) {
-  return ValF reduce {
+sub to_call ($self) {
+  return reduce {
     Call[ $a, $b->is('List') ? $b->values : $b ]
   } @{$self->data};
+}
+
+sub f_to_call ($self, $) {
+  return ValF $self->to_call;
 }
 
 1;
