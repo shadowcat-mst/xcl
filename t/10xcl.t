@@ -220,3 +220,10 @@ is [false == true] false 'bool eq';
   let %(:x, :y(y = 2)) = d;
   is (y, x) (2, 1) 'dict destructure with default';
 }
+
+{
+  var x = 3;
+  is x 3 'assign (sanity check)';
+  \x.assign 5;
+  is x 5 'assign via method';
+}
