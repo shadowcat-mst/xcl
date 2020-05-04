@@ -200,3 +200,9 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   let m = matches((1, 2) = l);
   is m true 'match succeeded';
 }
+
+
+is [true == true] true 'bool eq';
+is [false == false] true 'bool eq';
+is [true == false] false 'bool eq';
+is [false == true] false 'bool eq';

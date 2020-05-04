@@ -17,4 +17,9 @@ async sub c_fx_not ($self, $scope, $lst) {
   Val(Bool(0+!$res->val->data));
 }
 
+sub f_eq ($self, $lst) {
+  return $_ for $self->_same_types($lst);
+  return ValF Bool 0+($self->data == $lst->head->data);
+}
+
 1;
