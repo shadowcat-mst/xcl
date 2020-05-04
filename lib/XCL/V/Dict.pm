@@ -14,7 +14,6 @@ async sub get ($self, $key) {
       ? (val => $dict->{$key})
       : (err => List([ Name('NO_SUCH_VALUE') => String($key) ]))
     ),
-    set => $self->curry::weak::set($key),
   });
 }
 

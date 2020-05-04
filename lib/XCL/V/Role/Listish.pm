@@ -10,7 +10,6 @@ async sub get ($self, $idx) {
    ($idx <= $#$ary
      ? (val => $ary->[$idx])
      : (err => List([ Name('NO_SUCH_VALUE') => Int($idx) ]))),
-   (set => $self->curry::weak::set($idx)),
   });
 }
 
