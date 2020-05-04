@@ -147,10 +147,8 @@ async sub destructure ($class, $scope, $lst) {
         $val;
       }
     };
-    return Err [ Name('MISMATCH') ]
-      unless my $from_value = delete $from{$key->data};
     return $_ for not_ok +await dot_call_escape(
-      $scope, $to_value, assign => $from_value
+      $scope, $to_value, assign => (delete($from{$key->data})//())
     );
   }
   return Err [ Name('MISMATCH') ] if CORE::keys(%from) and not $splat_to;

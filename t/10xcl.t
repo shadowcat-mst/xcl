@@ -211,4 +211,12 @@ is [false == true] false 'bool eq';
   is m false 'mismatch on length w/name';
   let m = matches(let (1, 2, ()) = l);
   is m false 'mismatch on length w/list';
+  let (x, y, z = 3) = l;
+  is (z, y, x) (3, 2, 1) 'list destructure with default';
+}
+
+{
+  let d = %(:x 1);
+  let %(:x, :y(y = 2)) = d;
+  is (y, x) (2, 1) 'dict destructure with default';
 }

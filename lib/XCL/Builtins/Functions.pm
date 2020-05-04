@@ -225,9 +225,29 @@ async sub c_fx_pair ($class, $scope, $lst) {
 }
 
 async sub c_fx_assign ($class, $scope, $lst) {
-  my ($l, $r) = $lst->values;
-  return $_ for not_ok my $res = await $scope->eval($r);
-  await dot_call_escape($scope, $l, assign => $res->val);
+  my ($assign_to, $to_assign) = $lst->values;
+  return Err [ Name('MISMATCH') ] unless $to_assign;
+  return $_ for not_ok my $res = await $scope->eval($to_assign);
+  await dot_call_escape($scope, $assign_to, assign => $res->val);
+}
+
+sub metadata_for_c_fx_assign ($class) {
+  return +{
+    dot_methods => Dict +{
+      assign_via_call => Native({
+        ns => $class,
+        native_name => 'assign_assign_via_call',
+        unwrap => 1,
+      })
+    },
+  };
+}
+
+async sub assign_assign_via_call ($class, $scope, $lst) {
+  my ($args, $to_assign) = $lst->values;
+  my ($assign_to, $default_to) = $args->values;
+  return $_ for not_ok my $res = await $scope->eval($to_assign||$default_to);
+  await dot_call_escape($scope, $assign_to, assign => $res->val);
 }
 
 {
@@ -239,7 +259,8 @@ async sub c_fx_assign ($class, $scope, $lst) {
         ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name($type) ];
       },
       "${type}_assign_via_call" => sub ($class, $scope, $lst) {
-        my ($self, $args, $to_assign) = $lst->values;
+        my ($args, $to_assign) = $lst->values;
+        return Err [ Name('MISMATCH') ] unless $to_assign;
         my ($assign_to) = $args->values;
         my $assign_scope = $scope->but(intro_as => $intro_as);
         dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
@@ -247,8 +268,11 @@ async sub c_fx_assign ($class, $scope, $lst) {
       "metadata_for_c_fx_${type}" => sub ($class) {
         return +{
           dot_methods => Dict +{
-            assign_via_call =>
-              Native({ ns => $class, native_name => "${type}_assign_via_call" })
+            assign_via_call => Native({
+              ns => $class,
+              native_name => "${type}_assign_via_call",
+              unwrap => 1
+            })
           },
         };
       };
