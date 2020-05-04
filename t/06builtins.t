@@ -12,12 +12,6 @@ use XCL::Builtins::Builder qw(
 );
 use XCL::V;
 
-&is(
-  map { my %n; @n{@$_} = (1) x scalar @$_; \%n }
-    [ map $_->[3], _builtin_names_of 'XCL::V' ],
-    [ qw(and or exists maybe where) ]
-);
-
 my $plus = $builtins->get('+')->get->val;
 
 is $plus->invoke($builtins, List [ Int(3), Int(4) ])->get, Val(Int 7);
