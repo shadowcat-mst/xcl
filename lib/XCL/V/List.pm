@@ -129,7 +129,8 @@ sub to_perl ($self) {
 }
 
 async sub fx_assign ($self, $scope, $lst) {
-  return Err [ Name('MISMATCH') ] unless (my $from = $lst->head)->is('List');
+  return Err [ Name('MISMATCH') ] unless my $from = $lst->head;
+  return Err [ Name('MISMATCH') ] unless $from->is('List');
   my @assign_from = $from->values;
   my @assign_to = $self->values;
   my @dict_to;
@@ -170,10 +171,12 @@ async sub fx_assign ($self, $scope, $lst) {
       );
       return Val $from;
     }
-    return Err [ Name('MISMATCH') ] unless my $from_val = shift @assign_from;
-    next if $name eq '$';
+    if ($name eq '$') {
+      return Err [ Name('MISMATCH') ] unless shift @assign_from;
+      next;
+    }
     return $_ for not_ok +await dot_call_escape(
-      $scope, $to_slot, assign => $from_val
+      $scope, $to_slot, assign => (shift @assign_from // ())
     );
   }
   return Err [ Name('MISMATCH') ] if @assign_from;

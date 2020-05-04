@@ -193,7 +193,6 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
 }
 
 {
-  var called = 0;
   let l = (1, 2);
   let m = matches((1, 2, 3) = l);
   is m false 'match failed';
@@ -201,8 +200,15 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   is m true 'match succeeded';
 }
 
-
 is [true == true] true 'bool eq';
 is [false == false] true 'bool eq';
 is [true == false] false 'bool eq';
 is [false == true] false 'bool eq';
+
+{
+  let l = (1, 2);
+  let m = matches(let (x, y, z) = l);
+  is m false 'mismatch on length w/name';
+  let m = matches(let (1, 2, ()) = l);
+  is m false 'mismatch on length w/list';
+}
