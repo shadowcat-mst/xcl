@@ -34,10 +34,17 @@ async sub eval ($self, $thing) {
   print STDERR $prefix.$thing->display(DEBUG) if DEBUG;
   my $res = do {
     dynamically $Did_Thing = 0;
-    my $tmp = await $thing->evaluate_against($self);
+    my $f = $thing->evaluate_against($self)
+                  ->catch(sub ($err, @) {
+                      die "$err evaluating ".$thing->display(8)."\n"
+                    });
+    my $tmp = await $f;
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
+  unless ($res) {
+    die "undef return evaluating ".$thing->display(8)."\n";
+  }
   unless ($res->is_ok) {
     my ($prop) = map $_ ? $_->data : [], $res->metadata->{propagated_through};
     $res = $res->new(%$res, metadata => {
@@ -59,7 +66,7 @@ async sub get ($self, $key) {
 
 async sub set ($self, $key, $val) {
   if (my $intro = $self->intro_as) {
-    return for not_ok +await $self->data->set($key => $intro->($val));
+    return $_ for not_ok +await $self->data->set($key => $intro->($val));
   } else {
     return $_ for not_ok my $res = await $self->data->get($key);
     my $cur = $res->val;

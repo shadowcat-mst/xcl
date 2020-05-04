@@ -197,6 +197,11 @@ async sub c_fx_exists_or ($class, $scope, $lst) {
   return await $scope->eval($or);
 }
 
+async sub c_fx_matches ($class, $scope, $lst) {
+  my $res = await $scope->f_expr($lst);
+  return $_ for not_ok_except MISMATCH => $res;
+  return Val Bool $res->is_ok;
+}
 
 async sub c_fx_pair ($class, $scope, $lst) {
   my ($key_p, $val_p) = $lst->values;
@@ -221,7 +226,7 @@ async sub c_fx_pair ($class, $scope, $lst) {
 
 async sub c_fx_assign ($class, $scope, $lst) {
   my ($l, $r) = $lst->values;
-  return for not_ok my $res = await $scope->eval($r);
+  return $_ for not_ok my $res = await $scope->eval($r);
   await dot_call_escape($scope, $l, assign => $res->val);
 }
 

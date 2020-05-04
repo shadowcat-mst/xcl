@@ -49,7 +49,13 @@ async sub invoke ($self, $scope, @lst) {
   print STDERR $prefix.$self->display(DEBUG).' '.$lst->display(DEBUG) if DEBUG;
   my $res = do {
     dynamically $Did_Thing = 0;
-    my $tmp = await $self->_invoke($scope, $lst);
+    my $f = $self->_invoke($scope, $lst)
+                 ->catch(sub ($err, @) {
+                     die "$err invoking "
+                       .(Call[ $self, $lst->values ])->display(8)
+                       ."\n";
+                   });
+    my $tmp = await $f;
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
@@ -191,6 +197,15 @@ sub fx_exists ($self, $scope, $lst) {
   return XCL::Builtins::Functions->c_fx_exists(
     $scope, List[ $lst->values, $self ]
   );
+}
+
+async sub fx_assign ($self, $scope, $lst) {
+  return Err[ Name('MISMATCH') ] unless my ($val) = $lst->values;
+  return $_ for not_ok my $res = await dot_call_escape(
+    $scope, $self, 'eq' => $val
+  );
+  return Err[ Name('MISMATCH') ] unless $res->val->data;
+  return Val List($val);
 }
 
 1;

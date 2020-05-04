@@ -30,6 +30,7 @@ our @EXPORT = (
   qw(dot_lookup dot_lookup_escape dot_call dot_call_escape),
   qw(DEBUG $Eval_Depth $Did_Thing $Am_Running),
   qw(True False),
+  qw(xwarn),
 );
 
 our $Eval_Depth = -1;
@@ -90,6 +91,10 @@ async sub dot_call ($scope, $obj, $method, @args) {
 
 sub dot_call_escape ($scope, $obj, $method, @args) {
   dot_call($scope, Escape($obj), $method, @args);
+}
+
+sub xwarn {
+  warn join ' ', map ref() ? $_->display(3) : $_, @_;
 }
 
 async sub ResultF {

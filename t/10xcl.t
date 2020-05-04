@@ -191,3 +191,12 @@ is [ \ bar('x')(3) ].to_call() \([ [ bar 'x' ] 3 ]) 'Compound.to_call()';
   f 3 :x :y(2) 7 8 9;
   is called 1 'function called';
 }
+
+{
+  var called = 0;
+  let l = (1, 2);
+  let m = matches((1, 2, 3) = l);
+  is m false 'match failed';
+  let m = matches((1, 2) = l);
+  is m true 'match succeeded';
+}

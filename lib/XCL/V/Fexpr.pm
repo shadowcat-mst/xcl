@@ -5,7 +5,7 @@ use XCL::Class 'XCL::V';
 async sub _invoke ($self, $outer_scope, $vals) {
   my ($argspec, $scope, $body) = @{$self->data}{qw(argspec scope body)};
   my $val_res = await $self->_invoke_values($outer_scope, $vals);
-  return for not_ok $val_res;
+  return $_ for not_ok $val_res;
   my $iscope = $scope->snapshot;
   return $_ for not_ok +await dot_call_escape(
     $iscope->but(intro_as => \&Val),
