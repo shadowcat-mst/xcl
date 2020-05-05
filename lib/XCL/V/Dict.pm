@@ -108,7 +108,10 @@ async sub destructure ($class, $scope, $lst) {
   my $splat_to;
   # pop off @pairs or @(%dict) or etc.
   if (@to_spec_p and my $last = $to_spec_p[-1]) {
-    if (
+    if ($last->is('Name') and $last->data eq '%') {
+      $splat_to = 1;
+      pop @to_spec_p;
+    } elsif (
       ($last->is('Compound') or $last->is('Call'))
       and grep $_->is('Name') && $_->data eq '%',
             (my $last_call = $last->to_call)->data->[0]
@@ -152,7 +155,7 @@ async sub destructure ($class, $scope, $lst) {
     );
   }
   return Err [ Name('MISMATCH') ] if CORE::keys(%from) and not $splat_to;
-  if ($splat_to) {
+  if ($splat_to and ref($splat_to)) {
     return $_ for not_ok +await dot_call_escape(
       $scope, $splat_to, assign => Dict(\%from)
     );

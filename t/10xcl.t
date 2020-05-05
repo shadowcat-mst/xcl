@@ -236,3 +236,9 @@ is [false == true] false 'bool eq';
   f :flag1(3) 7;
   is f_args (3, false, 7, 0) 'function args with defaults';
 }
+
+{
+  let user = %(:nick 'alnk', :name %(:first 'al', :last 'newkirk'));
+  let %(:nick, :name(%(:first, %))) = user;
+  is (nick, first) ('alnk', 'al') 'deep dict destructure';
+}
