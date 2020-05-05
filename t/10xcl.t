@@ -227,3 +227,12 @@ is [false == true] false 'bool eq';
   \x.assign 5;
   is x 5 'assign via method';
 }
+
+{
+  var f_args = ();
+  let f = (:flag1, :flag2(flag2 = false), arg1, arg2 = 0) => {
+    f_args = (flag1, flag2, arg1, arg2);
+  }
+  f :flag1(3) 7;
+  is f_args (3, false, 7, 0) 'function args with defaults';
+}
