@@ -49,12 +49,14 @@ async sub invoke ($self, $scope, @lst) {
   print STDERR $prefix.$self->display(DEBUG).' '.$lst->display(DEBUG) if DEBUG;
   my $res = do {
     dynamically $Did_Thing = 0;
-    my $f = $self->_invoke($scope, $lst)
-                 ->catch(sub ($err, @) {
-                     die "$err invoking "
-                       .(Call[ $self, $lst->values ])->display(8)
-                       ."\n";
-                   });
+    my $f = $self->_invoke($scope, $lst);
+    if (DEBUG) {
+      $f = $f->catch(sub ($err, @) {
+             die "$err invoking "
+               .(Call[ $self, $lst->values ])->display(DEBUG)
+               ."\n";
+           });
+    }
     my $tmp = await $f;
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;

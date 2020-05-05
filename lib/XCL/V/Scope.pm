@@ -34,10 +34,12 @@ async sub eval ($self, $thing) {
   print STDERR $prefix.$thing->display(DEBUG) if DEBUG;
   my $res = do {
     dynamically $Did_Thing = 0;
-    my $f = $thing->evaluate_against($self)
-                  ->catch(sub ($err, @) {
-                      die "$err evaluating ".$thing->display(8)."\n"
-                    });
+    my $f = $thing->evaluate_against($self);
+    if (DEBUG) {
+      $f = $f->catch(sub ($err, @) {
+             die "$err evaluating ".$thing->display(8)."\n"
+           });
+    }
     my $tmp = await $f;
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
@@ -59,7 +61,7 @@ async sub eval ($self, $thing) {
 
 async sub get ($self, $key) {
   return $_ for not_ok my $res = await $self->data->get($key);
-  my $val = $res->val;
+  return Err[ Name('MISMATCH') ] unless my $val = $res->val;
   return $val if $val->is('Result');
   return await $val->invoke($self, List[]);
 }
