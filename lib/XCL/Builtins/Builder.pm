@@ -108,7 +108,9 @@ sub _load_builtins (@map) {
   $builtins->{false} = Val False;
 
   foreach my $vtype (@XCL::Values::Types) {
-    $builtins->{$vtype} = _builtins_for_class $vtype => "XCL::V::${vtype}";
+    my $vb = _builtins_for_class $vtype => "XCL::V::${vtype}";
+    $vb->val->metadata->{dot_via} = Name('Name');
+    $builtins->{$vtype} = $vb;
   }
 
   foreach my $thing (grep defined $_->[1][0], @map) {

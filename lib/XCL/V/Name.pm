@@ -16,4 +16,12 @@ sub fx_assign ($self, $scope, $lst) {
   return $scope->set($self->data, $val);
 }
 
+async sub fx_assign_via_call ($self, $scope, $lst) {
+  my ($call_args, $val) = $lst->values;
+  # this should use more clever typing but will do to begin with
+  return Err [ Name('MISMATCH') ]
+     unless $val and $val->is($self->data);
+  return await dot_call_escape($scope, $call_args->head, assign => $val);
+}
+
 1;

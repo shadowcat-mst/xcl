@@ -242,3 +242,15 @@ is [false == true] false 'bool eq';
   let %(:nick, :name(%(:first, %))) = user;
   is (nick, first) ('alnk', 'al') 'deep dict destructure';
 }
+
+{
+  let d = %(:foo 1);
+  is matches(List($) = d) false 'List does not match Dict';
+  is matches(Dict($) = d) true 'Dict does match Dict';
+
+  let f = (Dict arg) => {
+    is arg d 'Dict arg passed in with type check';
+  }
+
+  f(d);
+}
