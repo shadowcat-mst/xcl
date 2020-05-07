@@ -27,9 +27,9 @@ sub _construct_builtin (
   }
   Native(
     {
-      apply => !$is_fexpr,
-      is_method => !$is_class,
-      unwrap => $cls_unwrap,
+      apply => 0+!$is_fexpr,
+      is_method => 0+!$is_class,
+      unwrap => 0+!!($is_class and $cls_unwrap),
       ns => $namespace,
       native_name => $stash_name,
     },
@@ -70,18 +70,16 @@ sub _builtins_of ($namespace, $unwrap = 0) {
   };
 }
 
-sub _value_builtins () {
-  Val Name(
-    Value => {
-      dot_methods => Dict(_builtins_of 'XCL::V', 'unwrap')
-    }
-  );
-}
-
-sub _value_type_builtins ($vtype) {
-  my $vbuiltins = _builtins_of "XCL::V::${vtype}", 'unwrap';
+sub _builtins_for_class ($name, $class) {
+  my %b = %{_builtins_of $class, 'unwrap'};
+  my (%has, %provides);
+  ($b{$_}->data->{is_method} ? \%provides : \%has)->{$_} = $b{$_}
+    for sort keys %b;
   return Val Name(
-    $vtype, { dot_methods => Dict $vbuiltins }
+    $name, {
+      has_methods => Dict(\%has),
+      provides_methods => Dict(\%provides)
+    }
   );
 }
 
@@ -104,14 +102,13 @@ sub _load_builtins (@map) {
 
   my $builtins = { map +($_ => Val($functions->{$_})), keys %$functions };
 
-  $builtins->{Value} = _value_builtins;
+  $builtins->{Value} = _builtins_for_class Value => 'XCL::V';
 
-  $builtins->{true} = Val Bool 1;
-  $builtins->{false} = Val Bool 0;
+  $builtins->{true} = Val True;
+  $builtins->{false} = Val False;
 
   foreach my $vtype (@XCL::Values::Types) {
-    my $vbuiltins = _builtins_of "XCL::V::${vtype}", 'unwrap';
-    $builtins->{$vtype} = _value_type_builtins $vtype;
+    $builtins->{$vtype} = _builtins_for_class $vtype => "XCL::V::${vtype}";
   }
 
   foreach my $thing (grep defined $_->[1][0], @map) {

@@ -153,21 +153,30 @@ async sub c_fx_dot ($class, $scope, $lst) {
 
   my $name = String($rhs->data);
 
-  my $fallthrough = !(my $dot_methods = $lhs->metadata->{dot_methods});
+  my $fallthrough = !(my $has_methods = $lhs->metadata->{has_methods});
 
-  if ($dot_methods) {
+  if ($has_methods) {
     return $_ for not_ok_except NO_SUCH_VALUE =>
-      my $res = await $dot_methods->invoke($scope, List [ $name ]);
+      my $res = await $has_methods->invoke($scope, List [ $name ]);
     return Val Call [ Escape($res->val), Escape($lhs), @rest ] if $res->is_ok;
   }
 
-  return Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ]
+  my $nope = Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ];
+
+  return $nope
     unless my $try =
       $lhs->metadata->{dot_via}
         || ($fallthrough && Name($lhs->type));
-  return $_ for not_ok my $res = await $class->c_fx_dot(
-    $scope, List [ $try, $rhs ]
-  );
+
+  return $_ for not_ok my $tres = await $scope->eval($try);
+
+  return $nope
+    unless my $via_methods = $tres->val->metadata->{provides_methods};
+
+  return $_ for not_ok_except NO_SUCH_VALUE =>
+    my $res = await $via_methods->invoke($scope, List [ $name ]);
+
+  return $nope unless $res->is_ok;
 
   return Val Call [ Escape($res->val), Escape($lhs), @rest ];
 }
@@ -233,7 +242,7 @@ async sub c_fx_assign ($class, $scope, $lst) {
 
 sub metadata_for_c_fx_assign ($class) {
   return +{
-    dot_methods => Dict +{
+    has_methods => Dict +{
       assign_via_call => Native({
         ns => $class,
         native_name => 'assign_assign_via_call',
@@ -267,7 +276,7 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
       },
       "metadata_for_c_fx_${type}" => sub ($class) {
         return +{
-          dot_methods => Dict +{
+          has_methods => Dict +{
             assign_via_call => Native({
               ns => $class,
               native_name => "${type}_assign_via_call",
@@ -281,7 +290,7 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
 
 sub metadata_for_alias_dict ($class) {
   return +{
-    dot_methods => Dict +{
+    has_methods => Dict +{
       assign_via_call => Native({
         ns => Dict,
         native_name => 'destructure',
