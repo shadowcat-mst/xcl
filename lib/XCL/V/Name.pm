@@ -12,6 +12,7 @@ sub f_name_to_string ($self, $) {
 
 sub fx_assign ($self, $scope, $lst) {
   return ErrF [ Name('MISMATCH') ] unless my $val = $lst->head;
+  return ValF $val if $self->data eq '$';
   return $scope->set($self->data, $val);
 }
 

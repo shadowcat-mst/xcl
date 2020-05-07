@@ -171,10 +171,6 @@ async sub fx_assign ($self, $scope, $lst) {
       );
       return Val $from;
     }
-    if ($name eq '$') {
-      return Err [ Name('MISMATCH') ] unless shift @assign_from;
-      next;
-    }
     return $_ for not_ok +await dot_call_escape(
       $scope, $to_slot, assign => (shift @assign_from // ())
     );
