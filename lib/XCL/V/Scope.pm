@@ -73,7 +73,7 @@ async sub set ($self, $key, $val) {
     return $_ for not_ok my $res = await $self->data->get($key);
     my $cur = $res->val;
     if ($cur->is('Result')) {
-      return $_ for not_ok await
+      return $_ for not_ok +await
         my $bres = dot_call_escape($self, $cur, 'eq' => $val);
       return Err[ Name('MISMATCH') ] unless $bres->data;
     } else {
