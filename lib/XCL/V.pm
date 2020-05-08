@@ -9,7 +9,7 @@ has metadata => sub { {} };
 sub new_with_methods ($class, @rest) {
   state $loaded = require XCL::Builtins::Builder;
   my $new = $class->new(@rest);
-  $new->metadata->{dot_methods}
+  $new->metadata->{has_methods}
     ||= Dict XCL::Builtins::Builder::_builtins_of($class);
   $new;
 }

@@ -16,8 +16,8 @@ sub _make_perl_call ($method) {
 }
 
 sub from_perl ($class, $obj) {
-  my $dot_methods = Native->from_foreign(\&_make_perl_call);
-  $class->new(data => $obj, metadata => { dot_methods => $dot_methods });
+  my $has_methods = Native->from_foreign(\&_make_perl_call);
+  $class->new(data => $obj, metadata => { has_methods => $has_methods });
 }
 
 sub to_perl { shift->data }
