@@ -75,7 +75,9 @@ async sub get ($self, $index) {
 async sub set ($self, $index, $val) {
   $index = String($index) unless ref($index);
   if (my $intro = $self->intro_as) {
-    return $_ for not_ok +await $self->data->set($index => $intro->($val));
+    return $_ for not_ok +await dot_call_escape(
+      $self, $self->data, assign_via_call => List([$index]), $intro->($val)
+    );
   } else {
     return $_ for not_ok
       my $res = await $self->data->invoke($self, List[$index]);
