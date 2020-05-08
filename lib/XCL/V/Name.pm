@@ -12,10 +12,13 @@ sub f_name_to_string ($self, $) {
   ValF(String($self->data));
 }
 
-sub fx_assign ($self, $scope, $lst) {
-  return ErrF [ Name('MISMATCH') ] unless my $val = $lst->head;
-  return ValF $val if $self->data eq '$';
-  return $scope->set($self->data, $val);
+async sub fx_assign ($self, $scope, $lst) {
+  return Err [ Name('MISMATCH') ] unless my $val = $lst->head;
+  return Val $val if $self->data eq '$';
+  return $_ for not_ok +await dot_call_escape(
+    $scope, $scope, assign_via_call => List([String($self->data)]), Escape $val
+  );
+  return Val $val;
 }
 
 async sub fx_assign_via_call ($self, $scope, $lst) {
