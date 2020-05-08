@@ -1,0 +1,3 @@
+let require = fexpr (scope, file) {
+   scope.snapshot().eval_file(++ CFG_DIR 'src/' file '.xcl')
+}

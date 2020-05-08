@@ -1,36 +1,57 @@
 #!perl
 
+use Cwd qw(abs_path);
 use if (__FILE__ eq 'bin/xclsh' and -e 'lib/XCL/Values.pm'), lib => do {
-  require Cwd;
   require File::Spec;
-  File::Spec->catdir(Cwd::abs_path(File::Spec->curdir), 'lib');
+  File::Spec->catdir(abs_path(File::Spec->curdir), 'lib');
 };
+use XCL::Values;
+use XCL::Class -strict;
 use xcl::script ();
 
+STDOUT->autoflush(1);
+
 my $script = xcl::script->new->setup_scope;
+
+my ($cfg_dir) = grep { -d $_ }
+                  map { abs_path("$_/.xclsh").'/' }
+                    $ENV{HOME}||();
+
+if ($cfg_dir) {
+  $script->scope->but(intro_as => \&Val)->set(CFG_DIR => String($cfg_dir));
+}
+
+if ($cfg_dir and -f (my $rcfile = "${cfg_dir}rc")) {
+  $script->scope->await::eval_file_inscope($rcfile)->get;
+}
 
 unless (@ARGV) {
   require Caroline;
   my $c = Caroline->new;
   my $scope = $script->scope;
-  $scope->await::eval_string_inscope(q{var PROMPT = '$ '});
-  if (my ($rcfile) = grep { -f $_ } map { "$_/.xclshrc" } $ENV{HOME}||()) {
+  $scope->but(intro_as => \&Var)->await::set(PROMPT => '$ ');
+  if ($cfg_dir and -f (my $rcfile = "${cfg_dir}profile")) {
     $scope->await::eval_file_inscope($rcfile)->get;
   }
   while (defined(
     my $line = $c->readline(
       $scope->await::eval(
-        $scope->await::eval_string('$PROMPT')->get
+        $scope->await::get('PROMPT')->get
       )->get->await::string->get->data
     )
   )) {
     if ($line =~ /\S/) {
       $c->history_add($line);
-      my $res = $scope->await::eval_string_inscope($line);
-      if ($res->is_ok) {
-        print $res->val->display(-1)."\n";
-      } else {
-        print $res->display(8)."\n";
+      unless (eval {
+        my $res = $scope->await::eval_string_inscope($line);
+        if ($res->is_ok) {
+          print $res->val->display(-1)."\n";
+        } else {
+          print $res->display(8)."\n";
+        }
+        1;
+      }) {
+        print STDERR "Internal error: $@\n";
       }
     }
   }

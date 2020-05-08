@@ -1,0 +1,6 @@
+let _prompt = do {
+  let lt = perl.module('Time::Piece').sub('localtime');
+  () => { ++ '[' lt().hms() '] $ ' }
+}
+
+PROMPT = \[ _prompt ];
