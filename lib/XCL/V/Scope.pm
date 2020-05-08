@@ -4,6 +4,10 @@ use Mojo::File qw(path);
 use XCL::Weaver;
 use XCL::Class 'XCL::V';
 
+with 'XCL::V::Role::Indexable';
+
+sub index_is { 'String' }
+
 has weaver => sub { XCL::Weaver->new };
 
 has 'intro_as';
@@ -83,14 +87,6 @@ async sub set ($self, $key, $val) {
     }
   }
   return await $self->get($key);
-}
-
-async sub _invoke ($self, $, $vals) {
-  return Err([ Name('WRONG_ARG_COUNT') => Int(scalar $vals->values) ])
-    unless (my ($string) = $vals->values) == 1;
-  return Err([ Name('NOT_A_STRING') => String($string->type) ])
-    unless $string->is('String');
-  return await $self->get($string->data);
 }
 
 sub derive ($self, $merge) {
