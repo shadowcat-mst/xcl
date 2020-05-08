@@ -11,7 +11,7 @@ async sub _invoke ($self, $scope, $lst) {
     unless (my ($index) = $vres->val->values) == 1;
   return Err([ Name('NOT_A_'.uc($type)) => String($index->type) ])
     unless $index->is($type);
-  await $self->get($index->data);
+  await $self->get($index);
 }
 
 async sub fx_assign_via_call ($self, $scope, $lst) {
@@ -23,7 +23,7 @@ async sub fx_assign_via_call ($self, $scope, $lst) {
     unless (my ($index) = $ilist->values) == 1;
   return Err([ Name('NOT_A_'.uc($type)) => String($index->type) ])
     unless $index->is($type);
-  await $self->set($index->data, $value);
+  await $self->set($index, $value);
 }
 
 1;

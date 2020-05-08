@@ -63,18 +63,20 @@ async sub eval ($self, $thing) {
   return $res;
 }
 
-async sub get ($self, $key) {
-  return $_ for not_ok my $res = await $self->data->get($key);
+async sub get ($self, $index) {
+  $index = String($index) unless ref($index);
+  return $_ for not_ok my $res = await $self->data->get($index);
   return Err[ Name('MISMATCH') ] unless my $val = $res->val;
   return $val if $val->is('Result');
   return await $val->invoke($self, List[]);
 }
 
-async sub set ($self, $key, $val) {
+async sub set ($self, $index, $val) {
+  $index = String($index) unless ref($index);
   if (my $intro = $self->intro_as) {
-    return $_ for not_ok +await $self->data->set($key => $intro->($val));
+    return $_ for not_ok +await $self->data->set($index => $intro->($val));
   } else {
-    return $_ for not_ok my $res = await $self->data->get($key);
+    return $_ for not_ok my $res = await $self->data->get($index);
     my $cur = $res->val;
     if ($cur->is('Result')) {
       return $_ for not_ok +await
@@ -86,7 +88,7 @@ async sub set ($self, $key, $val) {
       );
     }
   }
-  return await $self->get($key);
+  return await $self->get($index);
 }
 
 sub derive ($self, $merge) {

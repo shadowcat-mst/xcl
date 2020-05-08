@@ -7,18 +7,13 @@ with 'XCL::V::Role::Indexable';
 
 sub index_is { 'String' }
 
-async sub get ($self, $key) {
+async sub get ($self, $index) {
   my $dict = $self->data;
-  Result({
-    ($dict->{$key}
-      ? (val => $dict->{$key})
-      : (err => List([ Name('NO_SUCH_VALUE') => String($key) ]))
-    ),
-  });
+  Val($dict->{$index->data}||return Err [ Name('NO_SUCH_VALUE') => $index ]);
 }
 
-sub set ($self, $key, $value) {
-  return ValF($self->data->{$key} = $value);
+sub set ($self, $index, $value) {
+  return ValF($self->data->{$index->data} = $value);
 }
 
 sub has_key ($self, $key) {
