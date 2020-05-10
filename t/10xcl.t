@@ -254,3 +254,11 @@ is [false == true] false 'bool eq';
 
   f(d);
 }
+
+{
+  let d = %();
+
+  d.'foo' = 1;
+
+  is d %(:foo 1) 'dict assign through .';
+}

@@ -40,9 +40,12 @@ async sub fx_assign ($self, $scope, $lst) {
   return $_ for not_ok_except NO_SUCH_VALUE =>
     my $lres = await dot_lookup($scope, $command, 'assign_via_call');
   if ($lres->is_ok) {
-    return await $lres->val->invoke(
-      $scope, List[List([@rest, $tail->values]), $lst->values]
-    );
+    # fall through only if assign_via_call explicitly declines to try
+    return $_ for not_ok_except DECLINE_MATCH =>
+      my $res = await $lres->val->invoke(
+        $scope, List[List([@rest, $tail->values]), $lst->values]
+      );
+    return $res if $res->is_ok;
   }
   return $_ for not_ok
     my $cres = await $command->invoke($scope, List \@rest);

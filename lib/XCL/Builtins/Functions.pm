@@ -126,10 +126,10 @@ async sub c_fx_dot ($class, $scope, $lst) {
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ]
     unless my @p = $lst->values;
 
-  my ($rhs) = (
-    map { $_->is_ok ? $_->val : return $_ }
-      await $class->_expand_dot_rhs($scope, $p[0+!!$#p])
-  );
+  return $_ for not_ok
+    my $rres = await $class->_expand_dot_rhs($scope, $p[0+!!$#p]);
+
+  my $rhs = $rres->val;
 
   unless (@p > 1) {
     return Val Call [
@@ -179,6 +179,37 @@ async sub c_fx_dot ($class, $scope, $lst) {
   return $nope unless $res->is_ok;
 
   return Val Call [ Escape($res->val), Escape($lhs), @rest ];
+}
+
+async sub dot_assign_via_call ($class, $scope, $lst) {
+  my $arg_count = my ($lhs_p, $rhs_p) = $lst->head->values;
+  return Err [ Name('MISMATCH') ] unless $arg_count > 1;
+
+  return $_ for not_ok
+    my $rres = await $class->_expand_dot_rhs($scope, $rhs_p);
+
+  my $rhs = $rres->val;
+
+  return Err [ Name('DECLINE_MATCH') ] if $rhs->is('Name') or $rhs->can_invoke;
+
+  return $_ for not_ok my $lres = await $scope->eval(List[ $lhs_p ]);
+  my ($lhs, @rest) = $lres->val->values;
+
+  return await dot_call_escape(
+    $scope, Call([ $lhs, $rhs ]), assign => $lst->tail->values
+  );
+}
+
+sub metadata_for_c_fx_dot ($class) {
+  return +{
+    has_methods => Dict +{
+      assign_via_call => Native({
+        ns => $class,
+        native_name => 'dot_assign_via_call',
+        unwrap => 1,
+      })
+    },
+  };
 }
 
 # metadata / ^
