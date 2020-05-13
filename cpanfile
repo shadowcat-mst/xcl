@@ -12,3 +12,4 @@ requires "Syntax::Keyword::Try";
 requires "Object::Tap";
 requires "Safe::Isa";
 requires "Async::Methods";
+requires "Caroline";
