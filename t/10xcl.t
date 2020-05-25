@@ -7,7 +7,9 @@ todo 'This is meant to fail' {
   ok false 'False';
 }
 
-is [ 1 + 2 ] 3 'Basic arithmetic';
+is [ 1 + 2 ] 3 'Basic arithmetic (plus)';
+
+is -3 [ 0 - 3 ] 'Basic arithmetic (minus)';
 
 {
   let t = + ++ (3);

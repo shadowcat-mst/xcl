@@ -163,10 +163,8 @@ sub f_eval_file ($self, $lst) {
   $self->eval_file($lst->head->data);
 }
 
-sub f_pairs ($self, $) { ValF List [ $self->data->pairs ] }
-
-sub f_keys ($self, $) { ValF List [ $self->data->keys ] }
-
-sub f_values ($self, $) { ValF List [ $self->data->values ] }
+sub f_store ($self, $lst) {
+  ValF $self->data($lst->values);
+}
 
 1;

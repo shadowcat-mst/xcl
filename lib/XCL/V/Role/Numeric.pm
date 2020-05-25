@@ -31,6 +31,9 @@ sub f_multiply ($self, $lst) {
 }
 
 sub f_minus ($self, $lst) {
+  my ($rhs, @too_many) = $lst->values;
+  ErrF [ Name('ARG_COUNT') => 1 ] if @too_many;
+  return ValF($self->of_data(- $self->data)) unless $rhs;
   return $_ for $self->_same_types($lst);
   ValF($self->of_data($self->data - $lst->data->[0]->data));
 }
