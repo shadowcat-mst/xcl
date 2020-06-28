@@ -1,7 +1,6 @@
 package XCL::Class;
 
 use Import::Into;
-use XCL::Strand::Future;
 use curry;
 use Async::Methods;
 use Mojo::Base -strict, -signatures;
@@ -24,7 +23,7 @@ sub import ($, $superclass = 'Mojo::Base') {
   Object::Tap->import::into(1);
   Mojo::Loader->import::into(1, qw(load_class));
   Mojo::Base->import::into(1, $superclass, -signatures);
-  Future::AsyncAwait->import::into(1, future_class => 'XCL::Strand::Future');
+  Future::AsyncAwait->import::into(1);
   Syntax::Keyword::Dynamically->import::into(1);
   Syntax::Keyword::Try->import::into(1, qw(try try_value));
   warnings->unimport('experimental');

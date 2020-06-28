@@ -1,6 +1,5 @@
 package XCL::Values;
 
-use XCL::Strand::Future;
 use Mojo::Util qw(monkey_patch);
 use XCL::Class -exporter;
 
