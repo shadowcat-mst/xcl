@@ -1,0 +1,28 @@
+# assumption: copy_dbh is pre-primed thing with connection and columns
+
+var copy_data = fs.file('copyfile').lines().all();
+
+let copy_try (lst) {
+  var fail_i = 0;
+  copy_dbh.start();
+  let iter = lst.pairs().iter();
+  while [!fail_i and let (i, l) = iter.next()] {
+    let res = result_of copy_dbh.send l;
+    fail_i = i unless res.is_ok();
+  }
+  if fail_i { copy_dbh.rollback() } else { copy_dbh.commit() }
+  $fail_i
+}
+
+let skipped_rows = ();
+
+while copy_data {
+  if [let first_fail_i = copy_try copy_data] {
+    copy_try copy_data(0..[first_fail_i - 1]);
+    log 'Skipped row ' ++ first_fail_i;
+    skipped_rows.push first_fail_i;
+    copy_data = copy_data([first_fail_i+1]..copy_data.lastidx());
+  } else {
+    copy_data = ();
+  }
+}
