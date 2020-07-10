@@ -58,11 +58,9 @@ sub f_count ($self, $) {
 }
 
 async sub _map_cb ($self, $scope, $lst, $wrap) {
-  my ($head, $tail) = $lst->ht;
-  return $_ for not_ok my $lres = await $scope->eval($head);
-  my $arg = $lres->val;
+  my $call = Call [$lst->values];
   my $cb = async sub ($el) {
-    await $wrap->($el, await $arg->invoke($scope, List[$tail->values, $el]));
+    await $wrap->($el, await $call->invoke($scope, List[$el]));
   };
   my @val;
   my $yield = async sub ($val) { push @val, $val->values; ValF 1; };
