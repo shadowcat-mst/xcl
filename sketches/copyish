@@ -2,15 +2,32 @@
 
 var copy_data = fs.file('copyfile').lines().all();
 
-let copy_try (lst) {
-  var fail_i = 0;
-  copy_dbh.start();
+###################
+#
+# while [!fail_i and let (i, l) = iter.next()] {
+#   let res = result_of copy_dbh.send l;
+#   unless res.is_ok() {
+#     fail_i = i;
+#   }
+# }
+# if fail_i {
+#   copy_dbh.rollback();
+# } else {
+#   copy_dbh.commit();
+# }
+# $fail_i;
+#
+#
+###################
+
+let copy_try lst {
   let iter = lst.pairs().iter();
+  copy_dbh.begin();
+  var fail_i = 0;
   while [!fail_i and let (i, l) = iter.next()] {
-    let res = result_of copy_dbh.send l;
-    fail_i = i unless res.is_ok();
+    fail_i = i unless .is_ok() result_of(copy_dbh.send l);
   }
-  if fail_i { copy_dbh.rollback() } else { copy_dbh.commit() }
+  copy_dbh.[?: fail_i \rollback \commit]();
   $fail_i
 }
 

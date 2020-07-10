@@ -1,0 +1,75 @@
+
+xclsh$ some_command <args>
+out1
+out2
+out3
+
+# script
+some_command <args>;
+# output ignored
+
+# script, output streamed by line
+some_command <args> | say;
+
+# script, output captured
+let out = some_command <args>;
+
+# script, output captured or non-0 ec
+
+let res = result_of some_command <args>;
+
+if res.is_ok() {
+  let out = res.val();
+  ...
+}
+
+# script, output captured no matter what
+
+let res = result_of some_command <args>;
+
+let out = res.stdout();
+
+# script, streaming
+
+let p = start some_command <args>;
+
+p.stdout().lines() | say;
+
+let ec = p.exit_code();
+
+
+
+
+
+#############################
+
+Default synchronous invoke command:
+
+  * returns stdout on ec 0
+  * returns ec as error on ec !0
+
+Output-ignored invoke command:
+
+  * slurps and ignores output
+  * returns nothing on ec 0
+  * returns ec as error on ec !0
+
+Want-both synchronous invoke command:
+
+  * needs to retain stdout
+  * needs to retain ec
+
+Stream invoke command:
+
+  * stdout available as stream
+  * ec available same ways as above
+
+some_cmd @args; # stdout discarded, val 0 or err EC
+
+let out = some_cmd @args; # stdout returned or err EC
+
+let res = result_of some_cmd @args;
+
+^res.'stdout' # stdout retained as metadata error or not
+
+let p = start some_cmd @args;
