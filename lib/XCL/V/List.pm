@@ -61,16 +61,18 @@ async sub _map_cb ($self, $scope, $lst, $wrap) {
   my ($head, $tail) = $lst->ht;
   return $_ for not_ok my $lres = await $scope->eval($head);
   my $arg = $lres->val;
-  my $cb = sub ($el) { $arg->invoke($scope, List[$tail->values, $el]) };
+  my $cb = async sub ($el) {
+    await $wrap->($el, await $arg->invoke($scope, List[$tail->values, $el]));
+  };
   my @val;
-  my $yield = async sub ($val) { push @val, $val->values; Val 1; };
-  return $_ for not_ok +await $self->_gen_cb($yield, $cb, $wrap);
+  my $yield = async sub ($val) { push @val, $val->values; ValF 1; };
+  return $_ for not_ok +await $self->_gen_cb($yield, $cb);
   return Val List \@val;
 }
 
-async sub _gen_cb ($self, $yield, $cb, $wrap) {
+async sub _gen_cb ($self, $yield, $cb) {
   foreach my $el ($self->values) {
-    return $_ for not_ok my $wres = await $wrap->($el, await $cb->($el));
+    return $_ for not_ok my $wres = await $cb->($el);
     await $yield->($wres->val);
   }
   return Val 1;
