@@ -59,21 +59,22 @@ sub f_count ($self, $) {
 
 async sub _map_cb ($self, $scope, $lst, $wrap) {
   my $call = Call [$lst->values];
-  my $cb = async sub ($el) {
-    await $wrap->($el, await $call->invoke($scope, List[$el]));
-  };
   my @val;
-  my $yield = async sub ($val) { push @val, $val->values; ValF 1; };
-  return $_ for not_ok +await $self->_gen_cb($yield, $cb);
+  my $yield = async sub ($el) {
+    return $_ for not_ok my $res = await
+      $wrap->($el, await $call->invoke($scope, List[$el]));
+    push @val, $res->val->values;
+    Val True;
+  };
+  return $_ for not_ok +await $self->_gen_cb($yield);
   return Val List \@val;
 }
 
-async sub _gen_cb ($self, $yield, $cb) {
+async sub _gen_cb ($self, $yield) {
   foreach my $el ($self->values) {
-    return $_ for not_ok my $wres = await $cb->($el);
-    await $yield->($wres->val);
+    return $_ for not_ok +await $yield->($el);
   }
-  return Val 1;
+  return Val True;
 }
 
 sub fx_map ($self, $scope, $lst) {
