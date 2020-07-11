@@ -15,8 +15,8 @@ has 'intro_as';
 async sub eval ($self, $thing) {
   state $state_id = '000';
   my $op_id = ++$state_id;
-  # theoretically harmless but complicated life before, await more tests
-  #return await $thing->evaluate_against($self) unless DEBUG;
+  # theoretically harmless but complicated life before, await concat more tests
+  #return await concat $thing->evaluate_against($self) unless DEBUG;
   my $is_basic = do {
     state %is_basic;
     $is_basic{ref($thing)} //= 0+!!(
@@ -44,7 +44,7 @@ async sub eval ($self, $thing) {
              die "$err evaluating ".$thing->display(8)."\n"
            });
     }
-    my $tmp = await $f;
+    my $tmp = await concat $f;
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
@@ -66,33 +66,33 @@ async sub eval ($self, $thing) {
 async sub get ($self, $index) {
   $index = String($index) unless ref($index);
   return $_ for not_ok
-    my $res = await $self->data->invoke($self, List[$index]);
+    my $res = await concat $self->data->invoke($self, List[$index]);
   return Err[ Name('MISMATCH') ] unless my $val = $res->val;
   return $val if $val->is('Result');
-  return await $val->invoke($self, List[]);
+  return await concat $val->invoke($self, List[]);
 }
 
 async sub set ($self, $index, $val) {
   $index = String($index) unless ref($index);
   if (my $intro = $self->intro_as) {
-    return $_ for not_ok +await dot_call_escape(
+    return $_ for not_ok +await concat dot_call_escape(
       $self, $self->data, assign_via_call => List([$index]), $intro->($val)
     );
   } else {
     return $_ for not_ok
-      my $res = await $self->data->invoke($self, List[$index]);
+      my $res = await concat $self->data->invoke($self, List[$index]);
     my $cur = $res->val;
     if ($cur->is('Result')) {
       return $_ for not_ok +await
         my $bres = dot_call_escape($self, $cur, 'eq' => $val);
       return Err[ Name('MISMATCH') ] unless $bres->data;
     } else {
-      return $_ for not_ok +await dot_call_escape(
+      return $_ for not_ok +await concat dot_call_escape(
         $self, $cur, assign_via_call => List([]), $val
       );
     }
   }
-  return await $self->data->invoke($self, List[$index]);
+  return await concat $self->data->invoke($self, List[$index]);
 }
 
 sub derive ($self, $merge) {
@@ -133,7 +133,7 @@ async sub eval_string_inscope ($self, $string) {
   );
   my $res;
   foreach my $stmt (@{$ans->data}) {
-    $res = await $self->eval($stmt);
+    $res = await concat $self->eval($stmt);
     return $res unless $res->is_ok;
   }
   return $res;
@@ -144,7 +144,7 @@ async sub eval_string ($self, $string) {
     stmt_list => $string, 
     await($self->get('_OPS'))->val->to_perl
   );
-  await $ans->invoke($self, List[]);
+  await concat $ans->invoke($self, List[]);
 }
 
 sub f_eval_string ($self, $lst) {

@@ -25,7 +25,7 @@ our @Types = qw(
 our @EXPORT = (
   @Types,
   qw(ResultF Val ValF Err ErrF),
-  qw(not_ok not_ok_except),
+  qw(not_ok not_ok_except concat),
   qw(dot_lookup dot_lookup_escape dot_call dot_call_escape),
   qw(DEBUG $Eval_Depth $Did_Thing $Am_Running),
   qw(True False),
@@ -71,6 +71,8 @@ sub not_ok_except ($or, @things) {
   grep +(!$_->is_ok and not $_->err->data->[0]->data eq $or), @things
 }
 
+sub concat ($x) { $x }
+
 sub dot_lookup ($scope, $obj, $method, @args) {
   state $loaded = require XCL::Builtins::Functions;
   $method = Name($method) unless ref($method);
@@ -84,8 +86,8 @@ sub dot_lookup_escape ($scope, $obj, $method, @args) {
 }
 
 async sub dot_call ($scope, $obj, $method, @args) {
-  return $_ for not_ok my $res = await dot_lookup($scope, $obj, $method);
-  return await $res->val->invoke($scope, List(\@args));
+  return $_ for not_ok my $res = await concat dot_lookup($scope, $obj, $method);
+  return await concat $res->val->invoke($scope, List(\@args));
 }
 
 sub dot_call_escape ($scope, $obj, $method, @args) {

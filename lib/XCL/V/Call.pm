@@ -14,9 +14,9 @@ sub _invoke ($self, $scope, $lst) {
 }
 
 async sub _call ($self, $scope, $command_p, @args) {
-  return $_ for not_ok my $res = await $scope->eval(List[$command_p]);
+  return $_ for not_ok my $res = await concat $scope->eval(List[$command_p]);
   my ($command, @rest) = $res->val->values;
-  return await $command->invoke($scope, List[ @rest, @args ]);
+  return await concat $command->invoke($scope, List[ @rest, @args ]);
 }
 
 sub display_data ($self, $depth) {
@@ -35,21 +35,21 @@ sub f_to_list ($self, $) {
 
 async sub fx_assign ($self, $scope, $lst) {
   my ($head, $tail) = $self->ht;
-  return $_ for not_ok my $res = await $scope->eval(List[$head]);
+  return $_ for not_ok my $res = await concat $scope->eval(List[$head]);
   my ($command, @rest) = $res->val->values;
   return $_ for not_ok_except NO_SUCH_VALUE =>
-    my $lres = await dot_lookup($scope, $command, 'assign_via_call');
+    my $lres = await concat dot_lookup($scope, $command, 'assign_via_call');
   if ($lres->is_ok) {
     # fall through only if assign_via_call explicitly declines to try
     return $_ for not_ok_except DECLINE_MATCH =>
-      my $res = await $lres->val->invoke(
+      my $res = await concat $lres->val->invoke(
         $scope, List[List([@rest, $tail->values]), $lst->values]
       );
     return $res if $res->is_ok;
   }
   return $_ for not_ok
-    my $cres = await $command->invoke($scope, List \@rest);
-  return await dot_call_escape($scope, $cres->val, assign => $lst->values);
+    my $cres = await concat $command->invoke($scope, List \@rest);
+  return await concat dot_call_escape($scope, $cres->val, assign => $lst->values);
 }
 
 sub to_call ($self) { $self }

@@ -58,19 +58,19 @@ sub display_data ($self, $depth) {
 sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
 
 async sub c_fx_make ($class, $scope, $lst) {
-  return $_ for not_ok my $lres = await $scope->eval($lst);
+  return $_ for not_ok my $lres = await concat $scope->eval($lst);
   my %new;
   foreach my $pair ($lres->val->values) {
     if ($pair->is('Call') and $pair->metadata->{is_pair_proto}) {
       my $name = $pair->data->[1];
       return Err[ Name('NOT_NAME'), $name ] unless $name->is('Name');
-      return $_ for not_ok my $res = await $scope->eval($name);
+      return $_ for not_ok my $res = await concat $scope->eval($name);
       $new{$name->data} = $res->val;
       next;
     }
     return Err([ Name('NOT_PAIR'), $pair ])
       unless $pair->is('List') and $pair->count == 2;
-    return $_ for not_ok my $kres = await $pair->data->[0]->string;
+    return $_ for not_ok my $kres = await concat $pair->data->[0]->string;
     $new{$kres->val->data} = $pair->data->[1];
   }
   return Val Dict \%new;
@@ -130,7 +130,7 @@ async sub destructure ($class, $scope, $lst) {
       die "WHAT" unless $key_p->is('Name');
       return Err [ Name('MISMATCH') ]
         unless my $from_value = delete $from{$key_p->data};
-      return $_ for not_ok +await dot_call_escape(
+      return $_ for not_ok +await concat dot_call_escape(
         $scope, $key_p, assign => $from_value
       );
       next;
@@ -140,18 +140,18 @@ async sub destructure ($class, $scope, $lst) {
       if ($key_p->is('Name')) {
         String($key_p->data);
       } else {
-        return $_ for not_ok my $res = await $scope->eval($key_p);
+        return $_ for not_ok my $res = await concat $scope->eval($key_p);
         die "WHAT" unless (my $val = $res->val)->is('String');
         $val;
       }
     };
-    return $_ for not_ok +await dot_call_escape(
+    return $_ for not_ok +await concat dot_call_escape(
       $scope, $to_value, assign => (delete($from{$key->data})//())
     );
   }
   return Err [ Name('MISMATCH') ] if CORE::keys(%from) and not $splat_to;
   if ($splat_to and ref($splat_to)) {
-    return $_ for not_ok +await dot_call_escape(
+    return $_ for not_ok +await concat dot_call_escape(
       $scope, $splat_to, assign => Dict(\%from)
     );
   }

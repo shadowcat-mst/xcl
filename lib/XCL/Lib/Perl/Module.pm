@@ -17,10 +17,10 @@ sub f_sub ($self, $lst) {
 }
 
 async sub fx_call_sub ($self, $scope, $lst_p) {
-  return $_ for not_ok my $lres = await $scope->eval($lst_p);
+  return $_ for not_ok my $lres = await concat $scope->eval($lst_p);
   my ($sub, $args) = $lres->val->ht;
-  return $_ for not_ok my $sres = await $self->f_sub(List[$sub]);
-  return await $sres->val->invoke($scope, $args);
+  return $_ for not_ok my $sres = await concat $self->f_sub(List[$sub]);
+  return await concat $sres->val->invoke($scope, $args);
 }
 
 sub fx_call_method ($self, $scope, $lst_p) {
@@ -30,12 +30,12 @@ sub fx_call_method ($self, $scope, $lst_p) {
 
 async sub fx_import ($self, $scope, $lst_p) {
   state $pkg_stub = 'A0001';
-  return $_ for not_ok my $lres = await $scope->eval($lst_p);
+  return $_ for not_ok my $lres = await concat $scope->eval($lst_p);
   my $scratch_pkg = __PACKAGE__.'::_Scratch_::'.($pkg_stub++);
   $self->data->import::into($scratch_pkg, @{$lres->val->to_perl});
   my $iscope = $scope->but(intro_as => \&Val);
   foreach my $name (_sub_names_of $scratch_pkg) {
-    await $iscope->set(
+    await concat $iscope->set(
       $name => Native->from_foreign($scratch_pkg->can($name))
     )
   }
