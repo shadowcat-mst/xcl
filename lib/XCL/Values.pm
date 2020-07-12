@@ -18,7 +18,7 @@ our @Types = qw(
   Bool Fexpr Dict List Name Call
   Result Var
   Native PerlObject
-  Scope Block
+  Scope Block Stream
   Compound Lambda
 );
 

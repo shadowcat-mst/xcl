@@ -331,10 +331,28 @@ sub metadata_for_alias_dict ($class) {
   };
 }
 
-async sub c_f_sleep ($class, $lst) {
-  my ($time) = $lst->values;
+async sub c_fx_sleep ($class, $scope, $lstp) {
+  return $_ for not_ok my $lres = await concat $scope->eval($lstp);
+  my ($time, $code) = $lres->val->values;
   await Mojo::Promise->timer($time->data);
+  if ($code) {
+    return await $code->invoke($scope, List[]);
+  }
   return Val True;
+}
+
+async sub c_fx_every ($class, $scope, $lstp) {
+  return $_ for not_ok my $lres = await concat $scope->eval($lstp);
+  my ($time, $code) = $lres->val->values;
+  my $tick = async sub {
+    await Mojo::Promise->timer($time->data);
+    return await $code->invoke($scope, List[]);
+  };
+  Val Stream({
+    generator => $tick,
+    base => Val(True),
+    concat => sub { Val True },
+  });
 }
 
 1;
