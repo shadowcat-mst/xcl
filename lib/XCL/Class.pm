@@ -3,6 +3,7 @@ package XCL::Class;
 use Import::Into;
 use curry;
 use Async::Methods;
+use Mojo::Promise;
 use Mojo::Base -strict, -signatures;
 
 sub import ($, $superclass = 'Mojo::Base') {

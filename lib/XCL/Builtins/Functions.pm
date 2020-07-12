@@ -331,4 +331,10 @@ sub metadata_for_alias_dict ($class) {
   };
 }
 
+async sub c_f_sleep ($class, $lst) {
+  my ($time) = $lst->values;
+  await Mojo::Promise->timer($time->data);
+  return Val True;
+}
+
 1;
