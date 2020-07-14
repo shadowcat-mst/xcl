@@ -71,7 +71,14 @@ sub not_ok_except ($or, @things) {
   grep +(!$_->is_ok and not $_->err->data->[0]->data eq $or), @things
 }
 
-sub concat ($x) { $x }
+async sub concat ($x) {
+  my $r = await $x;
+  if ($r->isa('XCL::V::Result') and $r->is_ok
+    and ((my $val = $r->val)->isa('XCL::V::Stream'))) {
+     return await $val->f_concat(undef);
+  }
+  return $r;
+}
 
 sub dot_lookup ($scope, $obj, $method, @args) {
   state $loaded = require XCL::Builtins::Functions;
