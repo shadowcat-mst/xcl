@@ -15,7 +15,7 @@ async sub _invoke ($self, $scope, $lst) {
   };
   my $res;
   foreach my $stmt (@{$self->data}) {
-    $res = await concat $iscope->eval($stmt);
+    $res = await $iscope->eval($stmt);
     return $res unless $res->is_ok;
   }
   return $res;

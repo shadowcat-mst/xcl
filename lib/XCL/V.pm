@@ -24,8 +24,8 @@ async sub invoke ($self, $scope, @lst) {
   my $lst = $lst[0]//List[];
   state $state_id = '000';
   my $op_id = ++$state_id;
-  # theoretically harmless but complicated life before, await concat more tests
-  #return await concat $self->_invoke($scope, $lst) unless DEBUG;
+  # theoretically harmless but complicated life before, await more tests
+  #return await $self->_invoke($scope, $lst) unless DEBUG;
   my $is_basic = do {
     state %is_basic;
     $is_basic{ref($self)} //= 0+!!(
@@ -57,7 +57,7 @@ async sub invoke ($self, $scope, @lst) {
                ."\n";
            });
     }
-    my $tmp = await concat $f;
+    my $tmp = await $f;
     print STDERR "${indent}\}" if DEBUG and $Did_Thing;
     $tmp;
   };
@@ -171,19 +171,19 @@ sub fx_or ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 0) }
 sub fx_and ($self, $scope, $lst) { $self->_fx_bool($scope, $lst, 1) }
 
 async sub _fx_bool ($self, $scope, $lst, $check) {
-  my $bres = await concat $self->bool;
+  my $bres = await $self->bool;
   return $bres unless $bres->is_ok;
   return Val $self if $bres->val->data != $check;
-  return await concat $scope->eval($lst->data->[0]);
+  return await $scope->eval($lst->data->[0]);
 }
 
 async sub fx_where ($self, $scope, $lst) {
-  return $_ for not_ok my $lres = await concat $scope->eval($lst);
+  return $_ for not_ok my $lres = await $scope->eval($lst);
   my ($where) = $lres->val->values;
-  my $res = await concat $where->invoke($scope, List[$self]);
+  my $res = await $where->invoke($scope, List[$self]);
   return $_ for not_ok_except NO_SUCH_VALUE => $res;
   return Val List[] unless $res->is_ok;
-  return $_ for not_ok my $bres = await concat $res->val->bool;
+  return $_ for not_ok my $bres = await $res->val->bool;
   return Val List[$bres->val->data ? ($self) : ()];
 }
 
@@ -203,7 +203,7 @@ sub fx_exists ($self, $scope, $lst) {
 
 async sub fx_assign ($self, $scope, $lst) {
   return Err[ Name('MISMATCH') ] unless my ($val) = $lst->values;
-  return $_ for not_ok my $res = await concat dot_call_escape(
+  return $_ for not_ok my $res = await dot_call_escape(
     $scope, $self, 'eq' => $val
   );
   return Err[ Name('MISMATCH') ] unless $res->val->data;

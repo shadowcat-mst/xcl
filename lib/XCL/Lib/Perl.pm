@@ -23,10 +23,10 @@ sub f_class ($self, $lst) {
 }
 
 async sub fx_import ($self, $scope, $lst_p) {
-  return $_ for not_ok my $lres = await concat $scope->eval($lst_p);
+  return $_ for not_ok my $lres = await $scope->eval($lst_p);
   my ($name, $args) = $lres->val->ht;
-  return $_ for not_ok my $mres = await concat $self->f_module(List[$name]);
-  return await concat $mres->val->fx_import($scope, $args);
+  return $_ for not_ok my $mres = await $self->f_module(List[$name]);
+  return await $mres->val->fx_import($scope, $args);
 }
 
 1;

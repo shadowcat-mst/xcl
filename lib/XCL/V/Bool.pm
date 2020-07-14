@@ -9,10 +9,10 @@ sub display_data ($self, $) {
 }
 
 async sub c_fx_not ($self, $scope, $lst) {
-  return $_ for not_ok my $vres = await concat $scope->f_expr($lst);
+  return $_ for not_ok my $vres = await $scope->f_expr($lst);
   my $val = $vres->val;
   return Val(Bool(0+!$val->data)) if ref($val) eq '__PACKAGE__';
-  my $res = await concat $val->bool;
+  my $res = await $val->bool;
   return $res unless $res->is_ok;
   Val(Bool(0+!$res->val->data));
 }

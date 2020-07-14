@@ -24,16 +24,16 @@ async sub evaluate_against ($self, $scope) {
     ) {
       my (undef, @tail) = @{$el->data};
       die "WHAT" unless @tail;
-      return $_ for not_ok my $res = await concat $scope->eval(Compound \@tail);
+      return $_ for not_ok my $res = await $scope->eval(Compound \@tail);
       unless ($res->val->is('List')) {
-        return $_ for not_ok $res = await concat dot_call_escape(
+        return $_ for not_ok $res = await dot_call_escape(
           $scope, $res->val, 'to_list'
         );
       }
       push @ret, $res->val->values;
       next;
     }
-    return $_ for not_ok my $res = await concat $scope->eval($el);
+    return $_ for not_ok my $res = await $scope->eval($el);
     push @ret, $res->val;
   }
   return Val List(\@ret);
@@ -62,17 +62,17 @@ async sub _map_cb ($self, $scope, $lst, $wrap) {
   my @val;
   my $yield = async sub ($el) {
     return $_ for not_ok my $res = await
-      $wrap->($el, await concat $call->invoke($scope, List[$el]));
+      $wrap->($el, await $call->invoke($scope, List[$el]));
     push @val, $res->val->values;
     Val True;
   };
-  return $_ for not_ok +await concat $self->_gen_cb($yield);
+  return $_ for not_ok +await $self->_gen_cb($yield);
   return Val List \@val;
 }
 
 async sub _gen_cb ($self, $yield) {
   foreach my $el ($self->values) {
-    return $_ for not_ok +await concat $yield->($el);
+    return $_ for not_ok +await $yield->($el);
   }
   return Val True;
 }
@@ -88,7 +88,7 @@ sub fx_where ($self, $scope, $lst) {
   $self->_map_cb($scope, $lst, async sub ($el, $res) {
     return $_ for not_ok_except NO_SUCH_VALUE => $res;
     my $val = $res->is_ok ? $res->val : return Val List[];
-    return $_ for not_ok my $bres = await concat $val->bool;
+    return $_ for not_ok my $bres = await $val->bool;
     return Val List[ $bres->val->data ? ($el) : () ];
   });
 }
@@ -104,7 +104,7 @@ sub fx_pipe ($self, $scope, $lst) {
 async sub fx_each ($self, $scope, $lst) {
   my $call = Call [ $lst->values ];
   foreach my $el ($self->values) {
-    return $_ for not_ok +await concat $call->invoke($scope, List[$el]);
+    return $_ for not_ok +await $call->invoke($scope, List[$el]);
   }
   return Val True;
 }
@@ -114,7 +114,7 @@ async sub f_join ($self, $lst) {
   return Err [ Name('NOT_A_STRING'), $join ] unless $join->is('String');
   my @to_join;
   foreach my $el ($self->values) {
-    return $_ for not_ok my $res = await concat $el->string;
+    return $_ for not_ok my $res = await $el->string;
     push @to_join, $res->val->data;
   }
   Val String join $join->data, @to_join;
@@ -151,8 +151,8 @@ async sub fx_assign ($self, $scope, $lst) {
       push @dict_from, shift @assign_from;
     }
     return $_ for not_ok
-      my $dres = await concat Dict->c_fx_make($scope, List \@dict_from);
-    return $_ for not_ok +await concat Dict->destructure(
+      my $dres = await Dict->c_fx_make($scope, List \@dict_from);
+    return $_ for not_ok +await Dict->destructure(
       $scope, List[List(\@dict_to), $dres->val]
     );
   }
@@ -166,12 +166,12 @@ async sub fx_assign ($self, $scope, $lst) {
         (my $splat_call = $to_slot->to_call)->data->[0]
     ) {
       die "WHAT" unless (my (undef, $splat_to) = @{$splat_call->data}) == 2;
-      return $_ for not_ok +await concat dot_call_escape(
+      return $_ for not_ok +await dot_call_escape(
         $scope, $splat_to, assign => List \@assign_from
       );
       return Val $from;
     }
-    return $_ for not_ok +await concat dot_call_escape(
+    return $_ for not_ok +await dot_call_escape(
       $scope, $to_slot, assign => (shift @assign_from // ())
     );
   }

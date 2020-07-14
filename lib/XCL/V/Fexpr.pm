@@ -4,14 +4,14 @@ use XCL::Class 'XCL::V';
 
 async sub _invoke ($self, $outer_scope, $vals) {
   my ($argspec, $scope, $body) = @{$self->data}{qw(argspec scope body)};
-  my $val_res = await concat $self->_invoke_values($outer_scope, $vals);
+  my $val_res = await $self->_invoke_values($outer_scope, $vals);
   return $_ for not_ok $val_res;
   my $iscope = $scope->snapshot;
-  return $_ for not_ok +await concat dot_call_escape(
+  return $_ for not_ok +await dot_call_escape(
     $iscope->but(intro_as => \&Val),
     $argspec, assign => $val_res->val
   );
-  await concat $body->invoke($iscope);
+  await $body->invoke($iscope);
 }
 
 sub _invoke_values ($self, $outer_scope, $vals) {
@@ -24,7 +24,7 @@ sub display_data ($self, $) {
 
 async sub c_fx_make ($class, $scope, $lst) {
   my ($argspec_p, $body_proto) = $lst->values;
-  my $res = await concat $body_proto->evaluate_against($scope);
+  my $res = await $body_proto->evaluate_against($scope);
   return $res unless $res->is_ok;
   my ($argspec) = map $_->is('List') ? $_ : List([$_]), $argspec_p;
   Val($class->new(data => {

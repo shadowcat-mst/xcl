@@ -9,20 +9,20 @@ async sub _invoke ($self, $scope, $valp) {
   my $valp_u = $unwrap ? $valp->tail : $valp;
   my $vals = (
     $apply
-      ? (not_ok($res = await concat $scope->eval($valp_u)) ? return $res : $res->val)
+      ? (not_ok($res = await $scope->eval($valp_u)) ? return $res : $res->val)
       : $valp_u
   );
   if (my $cb = $self->data->{code}) {
-    return await concat $cb->($scope, $vals);
+    return await $cb->($scope, $vals);
   }
   if ($is_method) {
     return Err[ Name('WRONG_ARG_COUNT') => Int(0) ]
       unless my ($first, $rest) = $vals->ht;
     my $fval = $apply ? $first
-      : not_ok($res = await concat $scope->eval($first)) ? return $res : $res->val;
-    return await concat $fval->$method_name(($apply ? () : $scope), $rest);
+      : not_ok($res = await $scope->eval($first)) ? return $res : $res->val;
+    return await $fval->$method_name(($apply ? () : $scope), $rest);
   }
-  return await concat $ns->$method_name(($apply ? () : $scope), $vals);
+  return await $ns->$method_name(($apply ? () : $scope), $vals);
 }
 
 sub display_data ($self, $depth) {
@@ -67,7 +67,7 @@ async sub _call_foreign ($class, $code, $scope, $vals) {
   };
   if ($ret->$_can('AWAIT_IS_READY')) {
     try {
-      $ret = await concat $ret;
+      $ret = await $ret;
     } catch {
       return Err [ Name('FOREIGN') => String('FUTURE') => String($@) ];
     }

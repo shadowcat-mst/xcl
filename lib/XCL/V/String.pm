@@ -13,7 +13,7 @@ sub string ($self) { ValF($self) }
 async sub c_f_make ($class, $lst) {
   my @res;
   foreach my $v ($lst->values) {
-    my $res = await concat $v->string;
+    my $res = await $v->string;
     return $res unless $res->is_ok;
     push @res, $res->val->data;
   }
