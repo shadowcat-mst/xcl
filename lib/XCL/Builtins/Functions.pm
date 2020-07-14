@@ -350,13 +350,16 @@ async sub c_fx_every ($class, $scope, $lstp) {
   };
   Val Stream({
     generator => $tick,
-    base => Val(True),
-    concat => sub { Val True },
   });
 }
 
 sub c_fx_no_such_value (@) {
   return ErrF [ Name('NO_SUCH_VALUE') ];
+}
+
+sub c_fx_start ($class, $scope, $lst) {
+  my $inv = Call[ $lst->values ];
+  return $inv->evaluate_against($scope);
 }
 
 1;
