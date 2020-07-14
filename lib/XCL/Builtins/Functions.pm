@@ -355,4 +355,8 @@ async sub c_fx_every ($class, $scope, $lstp) {
   });
 }
 
+sub c_fx_no_such_value (@) {
+  return ErrF [ Name('NO_SUCH_VALUE') ];
+}
+
 1;
