@@ -348,7 +348,7 @@ async sub c_fx_every ($class, $scope, $lstp) {
     await Mojo::Promise->timer($time->data);
     return await $code->invoke($scope, List[]);
   };
-  Val Stream({
+  Stream({
     generator => $tick,
   });
 }
@@ -359,7 +359,7 @@ sub c_fx_no_such_value (@) {
 
 sub c_fx_start ($class, $scope, $lst) {
   my $inv = Call[ $lst->values ];
-  return $inv->evaluate_against($scope);
+  return $scope->eval_start($inv);
 }
 
 1;

@@ -74,8 +74,20 @@ has 'intro_as';
 
 async sub eval ($self, $thing) {
   my $res = await $thing->evaluate_against($self);
-  return $res unless $res->isa('XCL::V::Stream');
-  die;
+  return $res if $res->isa('XCL::V::Result');
+  return await $res->f_concat(undef);
+}
+
+async sub eval_drop ($self, $thing) {
+  my $res = await $thing->evaluate_against($self);
+  return $res if $res->isa('XCL::V::Result');
+  return await $res->f_exhaust(undef);
+}
+
+async sub eval_start ($self, $thing) {
+  my $res = await $thing->evaluate_against($self);
+  return $res if $res->isa('XCL::V::Result');
+  return Val $res;
 }
 
 async sub get ($self, $index) {
