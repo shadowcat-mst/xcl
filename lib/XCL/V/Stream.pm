@@ -6,7 +6,7 @@ async sub f_next ($self, $) {
   my $d = $self->data;
   return $_ for grep defined, $d->{done};
   my $gen = $d->{generator};
-  $d->{done} = $_ for not_ok my $res = await concat $gen->();
+  $d->{done} = $_ for not_ok my $res = await $gen->();
   return $res;
 }
 
@@ -15,7 +15,7 @@ async sub _fold ($self, $base, $f) {
   my $r = Val $base;
   while (!$d->{done}) {
     return $_ for not_ok_except
-      NO_SUCH_VALUE => my $res = await concat $self->f_next(undef);
+      NO_SUCH_VALUE => my $res = await $self->f_next(undef);
     next unless $res->is_ok;
     $r = await $f->($r, $res->val);
   }

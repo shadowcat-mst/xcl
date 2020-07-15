@@ -332,7 +332,7 @@ sub metadata_for_alias_dict ($class) {
 }
 
 async sub c_fx_sleep ($class, $scope, $lstp) {
-  return $_ for not_ok my $lres = await concat $scope->eval($lstp);
+  return $_ for not_ok my $lres = await $scope->eval($lstp);
   my ($time, $code) = $lres->val->values;
   await Mojo::Promise->timer($time->data);
   if ($code) {
@@ -342,7 +342,7 @@ async sub c_fx_sleep ($class, $scope, $lstp) {
 }
 
 async sub c_fx_every ($class, $scope, $lstp) {
-  return $_ for not_ok my $lres = await concat $scope->eval($lstp);
+  return $_ for not_ok my $lres = await $scope->eval($lstp);
   my ($time, $code) = $lres->val->values;
   my $tick = async sub {
     await Mojo::Promise->timer($time->data);
