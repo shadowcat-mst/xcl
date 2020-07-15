@@ -20,49 +20,53 @@ sub of_data ($self, $data) { $self->new(data => $data, metadata => {}) }
 
 sub evaluate_against ($self, $) { ValF($self) }
 
-async sub invoke ($self, $scope, @lst) {
-  my $lst = $lst[0]//List[];
-  state $state_id = '000';
-  my $op_id = ++$state_id;
-  # theoretically harmless but complicated life before, await more tests
-  #return await $self->_invoke($scope, $lst) unless DEBUG;
-  my $is_basic = do {
-    state %is_basic;
-    $is_basic{ref($self)} //= 0+!!(
-      ref($self)->can('_invoke')
-        eq XCL::V->can('_invoke')
-    )
-  };
+#async sub invoke ($self, $scope, @lst) {
+#  my $lst = $lst[0]//List[];
+#  state $state_id = '000';
+#  my $op_id = ++$state_id;
+#  # theoretically harmless but complicated life before, await more tests
+#  #return await $self->_invoke($scope, $lst) unless DEBUG;
+#  my $is_basic = do {
+#    state %is_basic;
+#    $is_basic{ref($self)} //= 0+!!(
+#      ref($self)->can('_invoke')
+#        eq XCL::V->can('_invoke')
+#    )
+#  };
+#
+#  return Val $self if $is_basic && !$lst->values;
+#
+#  dynamically $Eval_Depth = $Eval_Depth + 1;
+#  dynamically $Am_Running = [ Name('invoke') => $self, $lst ];
+#
+#  my $indent = '  ' x $Eval_Depth;
+#  my $prefix = "${indent}call "; # $op_id ";
+#  if ($Eval_Depth and not $Did_Thing) {
+#    print STDERR " {\n" if DEBUG;
+#    $Did_Thing++;
+#  }
+#
+#  print STDERR $prefix.$self->display(DEBUG).' '.$lst->display(DEBUG) if DEBUG;
+#  my $res = do {
+#    dynamically $Did_Thing = 0;
+#    my $f = $self->_invoke($scope, $lst);
+#    if (DEBUG) {
+#      $f = $f->catch(sub ($err, @) {
+#             die "$err invoking "
+#               .(Call[ $self, $lst->values ])->display(DEBUG)
+#               ."\n";
+#           });
+#    }
+#    my $tmp = await $f;
+#    print STDERR "${indent}\}" if DEBUG and $Did_Thing;
+#    $tmp;
+#  };
+#  print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n" if DEBUG;
+#  return $res;
+#}
 
-  return Val $self if $is_basic && !$lst->values;
-
-  dynamically $Eval_Depth = $Eval_Depth + 1;
-  dynamically $Am_Running = [ Name('invoke') => $self, $lst ];
-
-  my $indent = '  ' x $Eval_Depth;
-  my $prefix = "${indent}call "; # $op_id ";
-  if ($Eval_Depth and not $Did_Thing) {
-    print STDERR " {\n" if DEBUG;
-    $Did_Thing++;
-  }
-
-  print STDERR $prefix.$self->display(DEBUG).' '.$lst->display(DEBUG) if DEBUG;
-  my $res = do {
-    dynamically $Did_Thing = 0;
-    my $f = $self->_invoke($scope, $lst);
-    if (DEBUG) {
-      $f = $f->catch(sub ($err, @) {
-             die "$err invoking "
-               .(Call[ $self, $lst->values ])->display(DEBUG)
-               ."\n";
-           });
-    }
-    my $tmp = await $f;
-    print STDERR "${indent}\}" if DEBUG and $Did_Thing;
-    $tmp;
-  };
-  print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n" if DEBUG;
-  return $res;
+async sub invoke ($self, $scope, $lst = List[]) {
+  await $self->_invoke($scope, $lst);
 }
 
 sub can_invoke ($self) {
@@ -74,7 +78,7 @@ sub can_invoke ($self) {
 
 sub _invoke ($self, $scope, $lst) {
   # Was seriously wondering if this should always just be an error.
-  return ErrF([ Name('CANT_INVOKE'), String($self->type) ]);
+  # return ErrF([ Name('CANT_INVOKE'), String($self->type) ]);
   # Try letting this code run again if we find a reason
   return ValF $self unless my @vals = $lst->values;
   ErrF([

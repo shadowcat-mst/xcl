@@ -12,55 +12,70 @@ has weaver => sub { XCL::Weaver->new };
 
 has 'intro_as';
 
+#async sub eval ($self, $thing) {
+#  state $state_id = '000';
+#  my $op_id = ++$state_id;
+#  # theoretically harmless but complicated life before, await more tests
+#  #return await $thing->evaluate_against($self) unless DEBUG;
+#  my $is_basic = do {
+#    state %is_basic;
+#    $is_basic{ref($thing)} //= 0+!!(
+#      ref($thing)->can('evaluate_against')
+#        eq XCL::V->can('evaluate_against')
+#    );
+#  };
+#  return Val $thing if $is_basic;
+#
+#  dynamically $Eval_Depth = $Eval_Depth + 1;
+#  dynamically $Am_Running = [ Name('eval') => $thing ];
+#
+#  my $indent = '  ' x $Eval_Depth;
+#  my $prefix = "${indent}eval "; # $op_id ";
+#  if ($Eval_Depth and not $Did_Thing) {
+#    print STDERR " {\n" if DEBUG;
+#    $Did_Thing++;
+#  }
+#  print STDERR $prefix.$thing->display(DEBUG) if DEBUG;
+#  my $res = do {
+#    dynamically $Did_Thing = 0;
+#    my $f = $thing->evaluate_against($self);
+#    if (DEBUG) {
+#      $f = $f->catch(sub ($err, @) {
+#        die "$err evaluating ".$thing->display(8)."\n"
+#      });
+#    }
+#    my $tmp = await $f;
+#    print STDERR "${indent}\}" if DEBUG and $Did_Thing;
+#    if ($tmp->isa('XCL::V::Stream')) {
+#      my $concat_f = $tmp->f_concat(undef);
+#      if (DEBUG) {
+#        $f = $f->catch(sub ($err, @) {
+#          die "$err running concat on stream of ".$thing->display(8)."\n"
+#        });
+#      }
+#      $tmp = await $concat_f;
+#    }
+#    $tmp;
+#  };
+#  unless ($res) {
+#    die "undef return evaluating ".$thing->display(8)."\n";
+#  }
+#  unless ($res->is_ok) {
+#    my ($prop) = map $_ ? $_->data : [], $res->metadata->{propagated_through};
+#    $res = $res->new(%$res, metadata => {
+#      %{$res->metadata},
+#      propagated_through =>
+#        List[ String($thing->display(4)), @$prop ],
+#    });
+#  }
+#  print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n" if DEBUG;
+#  return $res;
+#}
+
 async sub eval ($self, $thing) {
-  state $state_id = '000';
-  my $op_id = ++$state_id;
-  # theoretically harmless but complicated life before, await more tests
-  #return await $thing->evaluate_against($self) unless DEBUG;
-  my $is_basic = do {
-    state %is_basic;
-    $is_basic{ref($thing)} //= 0+!!(
-      ref($thing)->can('evaluate_against')
-        eq XCL::V->can('evaluate_against')
-    );
-  };
-  return Val $thing if $is_basic;
-
-  dynamically $Eval_Depth = $Eval_Depth + 1;
-  dynamically $Am_Running = [ Name('eval') => $thing ];
-
-  my $indent = '  ' x $Eval_Depth;
-  my $prefix = "${indent}eval "; # $op_id ";
-  if ($Eval_Depth and not $Did_Thing) {
-    print STDERR " {\n" if DEBUG;
-    $Did_Thing++;
-  }
-  print STDERR $prefix.$thing->display(DEBUG) if DEBUG;
-  my $res = do {
-    dynamically $Did_Thing = 0;
-    my $f = $thing->evaluate_against($self);
-    if (DEBUG) {
-      $f = $f->catch(sub ($err, @) {
-             die "$err evaluating ".$thing->display(8)."\n"
-           });
-    }
-    my $tmp = await $f;
-    print STDERR "${indent}\}" if DEBUG and $Did_Thing;
-    $tmp;
-  };
-  unless ($res) {
-    die "undef return evaluating ".$thing->display(8)."\n";
-  }
-  unless ($res->is_ok) {
-    my ($prop) = map $_ ? $_->data : [], $res->metadata->{propagated_through};
-    $res = $res->new(%$res, metadata => {
-      %{$res->metadata},
-      propagated_through =>
-        List[ String($thing->display(4)), @$prop ],
-    });
-  }
-  print STDERR " ->\n${indent}  ".$res->display(DEBUG).";\n" if DEBUG;
-  return $res;
+  my $res = await $thing->evaluate_against($self);
+  return $res unless $res->isa('XCL::V::Stream');
+  die;
 }
 
 async sub get ($self, $index) {
