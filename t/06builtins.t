@@ -3,7 +3,6 @@ use XCL::Class -test;
 
 my $builtins;
 
-bail_out unless try_ok { XCL::Builtins->ops };
 bail_out unless try_ok { $builtins = XCL::Builtins->builtins };
 
 use XCL::Builtins::Builder qw(

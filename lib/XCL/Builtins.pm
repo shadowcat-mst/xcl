@@ -71,10 +71,6 @@ sub _builtin_map () {
   map [ @map[$_*2,$_*2+1] ], 0 .. int $#map/2;
 }
 
-sub ops ($class) {
-  state $ops = XCL::Builtins::Builder::_load_ops _builtin_map;
-}
-
 sub builtins ($class) {
   state $builtins = XCL::Builtins::Builder::_load_builtins _builtin_map;
 }
