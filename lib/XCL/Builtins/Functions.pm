@@ -54,14 +54,18 @@ async sub c_fx_where ($class, $scope, $lst) {
 # wutcol / ?:
 async sub c_fx_wutcol ($class, $scope, $lst) {
   my ($cond, @ans) = $lst->values;
-  my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans));
+  return $_ for not_ok my $res = await $scope->eval($cond);
+  return $_ for not_ok my $wres = await $class->c_fx_op_wutcol($scope, List [
+    Escape($res->val), (@ans > 1 ? @ans : (Escape($res->val), @ans))
+  ]);
+  return await $scope->eval($wres->val);
+}
+
+async sub c_fx_op_wutcol ($class, $scope, $lst) {
+  my ($cond, $then, $else) = $lst->values;
   return $_ for not_ok my $res = await $scope->eval($cond);
   return $_ for not_ok my $bres = await $res->val->bool;
-  if ($bres->val->data) {
-    return $res unless $then;
-    return await $scope->eval($then);
-  }
-  return await $scope->eval($else);
+  return Val($bres->val->data ? $then : $else);
 }
 
 async sub c_fx_while ($class, $scope, $lst) {
