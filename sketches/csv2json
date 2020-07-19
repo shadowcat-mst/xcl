@@ -2,12 +2,44 @@ use Mojo::JSON qw(encode_json);
 
 use xcl::script;
 
-let csvparse = line => { line.split(',') } with_metadata :flatten(0);
+let csvparse = line => { line.split(',') }
+
+let columns = csvparse io::stdin.lines().next();
+
+io::stdin.lines().each line => {
+  let out = %();
+  out(columns) = csvparse line;
+  say encode_json out;
+}
+
+###############################
+
+let columns = csvparse io::stdin.lines().next();
+
+let line2dict = line => {
+  let out = %();
+  out(columns) = csvparse line;
+  $out;
+}
+
+# slurp
+
+let list_of_dicts = io::stdin.lines().map line2dict;
+
+# stream
+
+io::stdin.lines().map(line2dict).each \[ say encode_json ];
+
+# pipe
+
+io::stdin.lines() | line2dict | say encode_json;
+
+###############################
 
 let columns = csvparse io::stdin.readline();
 
 while [ exists let row = csvparse io::stdin.readline() ] {
-  let out = %;
+  let out = %();
   out(columns) = row;
   say encode_json out;
 }
