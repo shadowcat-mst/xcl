@@ -72,9 +72,9 @@ sub not_ok_except ($or, @things) {
 }
 
 sub dot_lookup ($scope, $obj, $method, @args) {
-  state $loaded = require XCL::Builtins::Functions;
+  state $loaded = require XCL::Builtins::Dot;
   $method = Name($method) unless ref($method);
-  return XCL::Builtins::Functions->c_fx_dot(
+  return XCL::Builtins::Dot->c_fx_dot(
     $scope, List([ $obj, $method, @args ])
   );
 }

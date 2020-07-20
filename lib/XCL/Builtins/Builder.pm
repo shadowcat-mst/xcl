@@ -2,6 +2,7 @@ package XCL::Builtins::Builder;
 
 use XCL::V::Scope;
 use XCL::Builtins::Functions;
+use XCL::Builtins::Dot;
 use XCL::Class -exporter;
 
 our @EXPORT_OK = qw(
@@ -87,7 +88,7 @@ sub _assemble_value ($builtins, $to) {
   my @bits = split /\./, $to;
   if (@bits > 1) {
     my $scope = Scope(Dict $builtins);
-    my $dotf = XCL::Builtins::Functions->c_fx_dot(
+    my $dotf = XCL::Builtins::Dot->c_fx_dot(
       $scope,
       List [ map Name($_), grep length, @bits ]
     )->get;
@@ -98,7 +99,10 @@ sub _assemble_value ($builtins, $to) {
 
 sub _load_builtins (@map) {
 
-  my $functions = _builtins_of 'XCL::Builtins::Functions';
+  my $functions = +{
+    %{_builtins_of 'XCL::Builtins::Functions'},
+    %{_builtins_of 'XCL::Builtins::Dot'},
+  };
 
   my $builtins = { map +($_ => Val($functions->{$_})), keys %$functions };
 

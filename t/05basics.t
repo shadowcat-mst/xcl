@@ -14,7 +14,7 @@ is $scope->eval(Call[ Name('+'), $three, $four ])->get, Val(Int 7);
 
 $scope = Scope Dict {
   '.' => Val(Native({
-    ns => 'XCL::Builtins::Functions',
+    ns => 'XCL::Builtins::Dot',
     native_name => 'c_fx_dot',
   })),
   Int => Val(Name('Int', {
