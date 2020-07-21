@@ -1,5 +1,10 @@
 use xcl::test;
 
+let ?: = fexpr (scope, cond, case, @else) {
+  let call = \[ wutcol ] ++ (scope.eval(cond), case, @else);
+  scope.eval call;
+}
+
 is [ ?: 1 2 3 ] 2;
 is [ ?: 0 2 3 ] 3;
 
