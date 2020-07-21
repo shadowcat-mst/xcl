@@ -37,18 +37,6 @@ sub c_f_metadata ($class, $lst) {
   ValF Dict($lst->data->[0]->metadata);
 }
 
-async sub c_fx_where ($class, $scope, $lst) {
-  my ($cond, $block, $dscope) = @{$lst->data};
-  $dscope ||= $scope->snapshot;
-  return $_ for
-    not_ok_except NO_SUCH_VALUE => my $bres = await $dscope->eval_bool($cond);
-  return Val False unless $bres->is_ok;
-  if ($bres->val->data) {
-    return $_ for not_ok +await $block->invoke($dscope, List []);
-  }
-  return $bres;
-}
-
 # wutcol / ?:
 async sub c_fx_wutcol ($class, $scope, $lst) {
   my ($cond, @ans) = $lst->values;

@@ -86,6 +86,11 @@ sub builtins ($class) {
         let res = catch_only NO_SUCH_VALUE scope.expr @lst;
         ?: res.is_ok() (res.val()) ();
       }
+      let where = fexpr (scope, cond, block) {
+        let dscope = do scope.derive;
+        let res = catch_only NO_SUCH_VALUE dscope.eval cond;
+        ?: [res.is_ok() and res.val()] [do { dscope.call block; true }] false;
+      }
     END
     $scope;
   };
