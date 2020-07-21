@@ -25,8 +25,6 @@ xcl_is 'assign [let x] 3; $x', '3';
 
 xcl_is 'let x = \[ + 3 ]; x 4', '7';
 
-xcl_is 'let x = ?: 0 3 4; $x', '4';
-
 xcl_is 'let x = \[ + 3 ]; x(4)', '7';
 
 xcl_is 'let x = lambda (x) { + x 3 }; x 4', '7';
@@ -50,14 +48,6 @@ xcl_is '2 * 3', '6';
 xcl_is 'let double = * ++ (2); double(3)', '6';
 
 xcl_is 'var x = 3; x = 5; $x', '5';
-
-xcl_is '?: 1 0', '1';
-
-xcl_is '?: 0 3', '3';
-
-xcl_is '?: 1 2 3', '2';
-
-xcl_is '?: 0 2 3', '3';
 
 xcl_is '(1, 2, 3).map x => { x + 1 }', '(2, 3, 4)';
 
