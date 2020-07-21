@@ -72,20 +72,25 @@ has 'intro_as';
 #  return $res;
 #}
 
+async sub _eval ($self, $thing) {
+  dynamically $Am_Running = [ Name('eval') => $thing ];
+  await $thing->evaluate_against($self);
+}
+
 async sub eval ($self, $thing) {
-  my $res = await $thing->evaluate_against($self);
+  my $res = await $self->_eval($thing);
   return $res if $res->isa('XCL::V::Result');
   return await $res->f_concat(undef);
 }
 
 async sub eval_drop ($self, $thing) {
-  my $res = await $thing->evaluate_against($self);
+  my $res = await $self->_eval($thing);
   return $res if $res->isa('XCL::V::Result');
   return await $res->f_exhaust(undef);
 }
 
 async sub eval_start ($self, $thing) {
-  my $res = await $thing->evaluate_against($self);
+  my $res = await $self->_eval($thing);
   return $res if $res->isa('XCL::V::Result');
   return Val $res;
 }

@@ -66,6 +66,7 @@ sub evaluate_against ($self, $) { ValF($self) }
 #}
 
 async sub invoke ($self, $scope, $lst = List[]) {
+  dynamically $Am_Running = [ Name('invoke') => $self, $lst ];
   await $self->_invoke($scope, $lst);
 }
 

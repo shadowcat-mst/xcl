@@ -44,6 +44,7 @@ foreach my $type (@Types) {
     return $class unless @_;
     my ($data, $metadata) = @_;
     load_class $class;
+    die "UNDEF" unless defined($data);
     $class->new(data => $data, metadata => $metadata||{});
   }
 }
