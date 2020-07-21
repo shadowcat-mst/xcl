@@ -20,6 +20,18 @@ sub get ($self) {
   die $self->err->display(8)."\n";
 }
 
-sub f_get ($self) { ResultF $self }
+sub f_get ($self, $) { ResultF $self }
+
+sub f_is_ok ($self, $) { ValF Bool $self->is_ok }
+
+sub f_val ($self, $) {
+  return ErrF([ Name 'NO_SUCH_VALUE' ]) unless $self->is_ok;
+  return ValF $self->val;
+}
+
+sub f_err ($self, $) {
+  return ErrF([ Name 'NO_SUCH_VALUE' ]) if $self->is_ok;
+  return ValF $self->err;
+}
 
 1;

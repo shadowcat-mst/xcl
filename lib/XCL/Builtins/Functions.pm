@@ -15,7 +15,7 @@ sub c_fx_escape ($class, $scope, $lst) { ValF $lst->data->[0] }
 
 # direct result return (no implicit return-on-err)
 async sub c_fx_result_of ($class, $scope, $lst) {
-  Val await $scope->f_call($lst);
+  Val +await $scope->f_call($lst);
 }
 
 async sub c_fx_catch_only ($class, $scope, $lst) {
