@@ -26,6 +26,14 @@ let(unless) = fexpr (scope, cond, block) {
   let y = 2;
   var r = 0;
   unless [ [ let x = y ] > 4 ] { r = x + 1 }
-  is r 3 'let if';
+  is r 3 'let unless';
   is x 2 'x set via unless cond';
+}
+
+{
+  let y = 2;
+  var r = 0;
+  r = x + 1 unless [ let x = y ] > 4;
+  is r 3 'let unless binop';
+  is x 2 'x set via unless binop cond';
 }
