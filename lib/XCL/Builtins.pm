@@ -94,6 +94,9 @@ sub builtins ($class) {
       }
       {
         let m := ^List.'provides_methods';
+        m.'pipe' := (self, cb) => {
+          [ start self.stream ].pipe cb;
+        }
         m.'map' := (self, cb) => {
           self.pipe x => { (cb x) }
         }

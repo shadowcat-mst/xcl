@@ -57,15 +57,14 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-sub fx_pipe ($self, $scope, $lst) {
+async sub f_stream ($self, $) {
   my @source = $self->values;
-  my $stream = Stream({
+  Stream({
     generator => sub {
       return ValF $_ for grep defined, shift @source;
       return ErrF [ Name('NO_SUCH_VALUE') ];
     },
   });
-  $stream->fx_pipe($scope, $lst);
 }
 
 async sub f_join ($self, $lst) {
