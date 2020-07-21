@@ -82,6 +82,10 @@ sub builtins ($class) {
       let(unless) = fexpr (scope, cond, block) {
         ?: scope.eval(cond) false [do { scope.call block; true }];
       }
+      let maybe = fexpr (scope, @lst) {
+        let res = catch_only NO_SUCH_VALUE scope.expr @lst;
+        ?: res.is_ok() (res.val()) ();
+      }
     END
     $scope;
   };

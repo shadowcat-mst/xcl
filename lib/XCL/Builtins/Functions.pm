@@ -21,8 +21,8 @@ async sub c_fx_result_of ($class, $scope, $lst) {
 async sub c_fx_catch_only ($class, $scope, $lst) {
   my ($head, $tail) = $lst->ht;
   return $_ for
-    not_ok_except $head->data, my $res = await $scope->f_call($lst);
-  return $res;
+    not_ok_except $head->data, my $res = await $scope->f_expr($tail);
+  return Val $res;
 }
 
 # operative ternary
@@ -35,13 +35,6 @@ async sub c_fx_opwut($class, $scope, $lst) {
 # metadata / ^
 sub c_f_metadata ($class, $lst) {
   ValF Dict($lst->data->[0]->metadata);
-}
-
-# maybe
-async sub c_fx_maybe ($class, $scope, $lst) {
-  my $res = await $scope->f_expr($lst);
-  return $_ for not_ok_except NO_SUCH_VALUE => $res;
-  return Val List[ $res->is_ok ? ($res->val) : () ];
 }
 
 async sub c_fx_where ($class, $scope, $lst) {
