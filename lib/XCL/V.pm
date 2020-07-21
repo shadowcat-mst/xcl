@@ -110,7 +110,9 @@ sub display ($self, $depth) {
 
 sub display_data ($self, $) { $self->type.'()' }
 
-sub bool ($self) { ErrF([ Name('CANT_BOOLEAN') => String($self->type) ]) }
+sub bool ($self) {
+  ErrF([ Name('CANT_BOOLEAN') => $self ])
+}
 
 sub string ($self) { ErrF([ Name('CANT_STRINGIFY') => String($self->type) ]) }
 
