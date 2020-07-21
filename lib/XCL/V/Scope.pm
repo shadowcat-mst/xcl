@@ -140,7 +140,10 @@ sub snapshot ($self) {
   Scope(Dict({ %{$self->data->data} }));
 }
 
-sub f_snapshot ($self, $) {
+sub f_derive ($self, $lst) {
+  if (my ($merge) = $lst->values) {
+    return ValF $self->derive($merge->data);
+  }
   ValF $self->snapshot;
 }
 
