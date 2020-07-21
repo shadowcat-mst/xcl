@@ -94,17 +94,15 @@ sub builtins ($class) {
       }
       {
         let m := ^List.'provides_methods';
-        m.'map' := fexpr (scope, self, cbp) {
-          let cb := do [scope.eval ++ (scope.eval(cbp))];
-          scope.eval(self).pipe { (cb this) }
+        m.'map' := (self, cb) => {
+          self.pipe x => { (cb x) }
         }
-        m.'where' := fexpr (scope, self, cbp) {
-          let cb := do [scope.eval ++ (scope.eval(cbp))];
+        m.'where' := (self, cb) => {
           let wcb := x => {
             let res := maybe cb x;
             ?: [ res and res.0 ] res ();
           }
-          scope.eval(self).pipe wcb;
+          self.pipe wcb;
         }
       }
     END

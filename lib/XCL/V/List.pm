@@ -57,9 +57,8 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-async sub _map_cb ($self, $scope, $lstp, $wrap) {
-  return $_ for not_ok my $lres = await $scope->eval($lstp);
-  my $call = Call[$lres->val->values];
+async sub _map_cb ($self, $scope, $lst, $wrap) {
+  my $call = Call[$lst->values];
   my @val;
   my $yield = async sub ($el) {
     return $_ for not_ok my $res = await
