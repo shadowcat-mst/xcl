@@ -75,7 +75,13 @@ sub builtins ($class) {
   state $builtins = do {
     my $scope = XCL::Builtins::Builder::_load_builtins _builtin_map;
     $scope->eval_string_inscope(<<~'END');
-      1 + 2;
+      let(if) = fexpr (scope, cond, block) {
+        let dscope = do scope.derive;
+        ?: dscope.eval(cond) [do { dscope.call block; true }] false;
+      }
+      let(unless) = fexpr (scope, cond, block) {
+        ?: scope.eval(cond) false [do { scope.call block; true }];
+      }
     END
     $scope;
   };

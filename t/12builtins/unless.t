@@ -1,9 +1,5 @@
 use xcl::test;
 
-let(unless) = fexpr (scope, cond, block) {
-  ?: scope.eval(cond) false [do { scope.call block; true }];
-}
-
 {
   var x = 0;
   unless 0 { x = 3 }

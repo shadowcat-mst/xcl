@@ -1,10 +1,5 @@
 use xcl::test;
 
-let(if) = fexpr (scope, cond, block) {
-  let dscope = do scope.derive;
-  ?: dscope.eval(cond) [do { dscope.call block; true }] false;
-}
-
 {
   var x = 0;
   if 0 { x = 3 }
