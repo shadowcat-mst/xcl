@@ -76,21 +76,36 @@ sub builtins ($class) {
   state $builtins = do {
     my $scope = XCL::Builtins::Builder::_load_builtins _builtin_map;
     $scope->eval_string_inscope(<<~'END');
-      let(if) = fexpr (scope, cond, block) {
-        let dscope = do scope.derive;
+      let(if) := fexpr (scope, cond, block) {
+        let dscope := do scope.derive;
         ?: dscope.eval(cond) [do { dscope.call block; true }] false;
       }
-      let(unless) = fexpr (scope, cond, block) {
+      let(unless) := fexpr (scope, cond, block) {
         ?: scope.eval(cond) false [do { scope.call block; true }];
       }
-      let maybe = fexpr (scope, @lst) {
-        let res = catch_only NO_SUCH_VALUE scope.expr @lst;
+      let maybe := fexpr (scope, @lst) {
+        let res := catch_only NO_SUCH_VALUE scope.expr @lst;
         ?: res.is_ok() (res.val()) ();
       }
-      let where = fexpr (scope, cond, block) {
-        let dscope = do scope.derive;
-        let res = catch_only NO_SUCH_VALUE dscope.eval cond;
+      let where := fexpr (scope, cond, block) {
+        let dscope := do scope.derive;
+        let res := catch_only NO_SUCH_VALUE dscope.eval cond;
         ?: [res.is_ok() and res.val()] [do { dscope.call block; true }] false;
+      }
+      {
+        let m := ^List.'provides_methods';
+        m.'map' := fexpr (scope, self, cbp) {
+          let cb := do [scope.eval ++ (scope.eval(cbp))];
+          scope.eval(self).pipe { (cb this) }
+        }
+        m.'where' := fexpr (scope, self, cbp) {
+          let cb := do [scope.eval ++ (scope.eval(cbp))];
+          let wcb := x => {
+            let res := maybe cb x;
+            ?: [ res and res.0 ] res ();
+          }
+          scope.eval(self).pipe wcb;
+        }
       }
     END
     $scope;

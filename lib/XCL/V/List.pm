@@ -57,8 +57,9 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-async sub _map_cb ($self, $scope, $lst, $wrap) {
-  my $call = Call [$lst->values];
+async sub _map_cb ($self, $scope, $lstp, $wrap) {
+  return $_ for not_ok my $lres = await $scope->eval($lstp);
+  my $call = Call[$lres->val->values];
   my @val;
   my $yield = async sub ($el) {
     return $_ for not_ok my $res = await
@@ -75,22 +76,6 @@ async sub _gen_cb ($self, $yield) {
     return $_ for not_ok +await $yield->($el);
   }
   return Val True;
-}
-
-sub fx_map ($self, $scope, $lst) {
-  $self->_map_cb($scope, $lst, async sub ($, $res) {
-    return $res unless $res->is_ok;
-    return Val List[$res->val];
-  });
-}
-
-sub fx_where ($self, $scope, $lst) {
-  $self->_map_cb($scope, $lst, async sub ($el, $res) {
-    return $_ for not_ok_except NO_SUCH_VALUE => $res;
-    my $val = $res->is_ok ? $res->val : return Val List[];
-    return $_ for not_ok my $bres = await $val->bool;
-    return Val List[ $bres->val->data ? ($el) : () ];
-  });
 }
 
 sub fx_pipe ($self, $scope, $lst) {
