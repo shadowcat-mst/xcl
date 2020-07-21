@@ -36,12 +36,22 @@ sub f_concat ($self, $) {
 async sub fx_pipe ($self, $scope, $lstp) {
   return $_ for not_ok my $lres = await $scope->eval($lstp);
   my $cb = $lres->val->head;
-  await $self->_fold(List([]), async sub ($acc, $new) {
-    return $_ for not_ok my $res = await $cb->invoke($scope, List[$new]);
-    my $val = $res->val;
-    my @val = $val->is('List') ? $val->values : $val;
-    Val List [ @{$acc->val->data}, @val ];
-  });
+  my @queue;
+  my $pipegen = async sub {
+    return Val $_ for grep defined, shift @queue;
+    while (1) {
+      return $_ for not_ok my $nres = await $self->f_next(undef);
+      return $_ for
+        not_ok my $res = await $cb->invoke($scope, List[$nres->val]);
+      my $val = $res->val;
+      my @val = $val->is('List') ? $val->values : $val;
+      if (my $next = shift @val) {
+        push @queue, @val;
+        return Val $next;
+      }
+    }
+  };
+  Stream({ generator => $pipegen });
 }
 
 1;
