@@ -57,40 +57,15 @@ sub f_count ($self, $) {
   ValF Int scalar @{$self->data};
 }
 
-async sub _map_cb ($self, $scope, $lst, $wrap) {
-  my $call = Call[$lst->values];
-  my @val;
-  my $yield = async sub ($el) {
-    return $_ for not_ok my $res = await
-      $wrap->($el, await $call->invoke($scope, List[$el]));
-    push @val, $res->val->values;
-    Val True;
-  };
-  return $_ for not_ok +await $self->_gen_cb($yield);
-  return Val List \@val;
-}
-
-async sub _gen_cb ($self, $yield) {
-  foreach my $el ($self->values) {
-    return $_ for not_ok +await $yield->($el);
-  }
-  return Val True;
-}
-
 sub fx_pipe ($self, $scope, $lst) {
-  $self->_map_cb($scope, $lst, async sub ($, $res) {
-    return $_ for not_ok $res;
-    my $val = $res->is_ok ? $res->val : return Val List[];
-    Val($val->is('List') ? $val : List[$val]);
+  my @source = $self->values;
+  my $stream = Stream({
+    generator => sub {
+      return ValF $_ for grep defined, shift @source;
+      return ErrF [ Name('NO_SUCH_VALUE') ];
+    },
   });
-}
-
-async sub fx_each ($self, $scope, $lst) {
-  my $call = Call [ $lst->values ];
-  foreach my $el ($self->values) {
-    return $_ for not_ok +await $call->invoke($scope, List[$el]);
-  }
-  return Val True;
+  $stream->fx_pipe($scope, $lst);
 }
 
 async sub f_join ($self, $lst) {

@@ -24,13 +24,23 @@ async sub _fold ($self, $base, $f) {
 
 sub f_exhaust ($self, $) {
   my $vtrue = True;
-  $self->_fold($vtrue, async sub { Val $vtrue });
+  $self->_fold(True, async sub { Val $vtrue });
 }
 
 sub f_concat ($self, $) {
-  my $base = List [];
-  $self->_fold($base, async sub ($acc, $new) {
+  $self->_fold(List([]), async sub ($acc, $new) {
     Val List [ @{$acc->val->data}, $new ];
+  });
+}
+
+async sub fx_pipe ($self, $scope, $lstp) {
+  return $_ for not_ok my $lres = await $scope->eval($lstp);
+  my $cb = $lres->val->head;
+  await $self->_fold(List([]), async sub ($acc, $new) {
+    return $_ for not_ok my $res = await $cb->invoke($scope, List[$new]);
+    my $val = $res->val;
+    my @val = $val->is('List') ? $val->values : $val;
+    Val List [ @{$acc->val->data}, @val ];
   });
 }
 
