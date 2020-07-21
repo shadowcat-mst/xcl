@@ -72,7 +72,13 @@ sub _builtin_map () {
 }
 
 sub builtins ($class) {
-  state $builtins = XCL::Builtins::Builder::_load_builtins _builtin_map;
+  state $builtins = do {
+    my $scope = XCL::Builtins::Builder::_load_builtins _builtin_map;
+    $scope->eval_string_inscope(<<~'END');
+      1 + 2;
+    END
+    $scope;
+  };
 }
 
 1;
