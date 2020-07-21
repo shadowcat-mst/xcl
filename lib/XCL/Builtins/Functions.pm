@@ -44,25 +44,6 @@ async sub c_fx_maybe ($class, $scope, $lst) {
   return Val List[ $res->is_ok ? ($res->val) : () ];
 }
 
-async sub c_fx_if ($class, $scope, $lst) {
-  my ($cond, $block, $dscope) = @{$lst->data};
-  $dscope ||= $scope->snapshot;
-  return $_ for not_ok my $bres = await $dscope->eval_bool($cond);
-  if ($bres->val->data) {
-    return $_ for not_ok +await $block->invoke($dscope, List []);
-  }
-  return $bres;
-}
-
-async sub c_fx_unless ($class, $scope, $lst) {
-  my ($cond, $block) = @{$lst->data};
-  return $_ for not_ok my $bres = await $scope->eval_bool($cond);
-  unless ($bres->val->data) {
-    return $_ for not_ok +await $block->invoke($scope);
-  }
-  return $bres;
-}
-
 async sub c_fx_where ($class, $scope, $lst) {
   my ($cond, $block, $dscope) = @{$lst->data};
   $dscope ||= $scope->snapshot;
