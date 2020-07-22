@@ -77,10 +77,10 @@ sub builtins ($class) {
     $scope->eval_string_inscope(<<~'END');
       let(if) = fexpr (scope, cond, block) {
         let dscope = do scope.derive;
-        ?: dscope.eval(cond) [do { dscope.call block; true }] false;
+        ?: dscope.eval(cond) do{ dscope.call block; true } false;
       }
       let(unless) = fexpr (scope, cond, block) {
-        ?: scope.eval(cond) false [do { scope.call block; true }];
+        ?: scope.eval(cond) false do{ scope.call block; true };
       }
       let maybe = fexpr (scope, @lst) {
         let res = catch_only NO_SUCH_VALUE scope.expr @lst;
