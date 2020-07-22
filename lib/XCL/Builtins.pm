@@ -51,7 +51,6 @@ sub _builtin_map () {
     '|' => [ '.pipe', -65, -1 ],
 
     '=' => [ assign => -70 ],
-    ':=' => [ assign => -70 ],
 
     if => [ undef, -90, 0, 1 ],
     unless => [ undef, -90, 0, 1 ],
@@ -76,42 +75,42 @@ sub builtins ($class) {
   state $builtins = do {
     my $scope = XCL::Builtins::Builder::_load_builtins _builtin_map;
     $scope->eval_string_inscope(<<~'END');
-      let(if) := fexpr (scope, cond, block) {
-        let dscope := do scope.derive;
+      let(if) = fexpr (scope, cond, block) {
+        let dscope = do scope.derive;
         ?: dscope.eval(cond) [do { dscope.call block; true }] false;
       }
-      let(unless) := fexpr (scope, cond, block) {
+      let(unless) = fexpr (scope, cond, block) {
         ?: scope.eval(cond) false [do { scope.call block; true }];
       }
-      let maybe := fexpr (scope, @lst) {
-        let res := catch_only NO_SUCH_VALUE scope.expr @lst;
+      let maybe = fexpr (scope, @lst) {
+        let res = catch_only NO_SUCH_VALUE scope.expr @lst;
         ?: res.is_ok() (res.val()) ();
       }
-      let where := fexpr (scope, cond, block) {
-        let dscope := do scope.derive;
-        let res := catch_only NO_SUCH_VALUE dscope.eval cond;
+      let where = fexpr (scope, cond, block) {
+        let dscope = do scope.derive;
+        let res = catch_only NO_SUCH_VALUE dscope.eval cond;
         ?: [res.is_ok() and res.val()] [do { dscope.call block; true }] false;
       }
       {
-        let m := ^List.'provides_methods';
-        m.'pipe' := (self, cb) => {
+        let m = ^List.'provides_methods';
+        m.'pipe' = (self, cb) => {
           start(self.stream).pipe cb;
         }
-        m.'map' := (self, cb) => {
+        m.'map' = (self, cb) => {
           start(self.stream).map cb;
         }
-        m.'where' := (self, cb) => {
+        m.'where' = (self, cb) => {
           start(self.stream).where cb;
         }
       }
       {
-        let m := ^Stream.'provides_methods';
-        m.'map' := (self, cb) => {
+        let m = ^Stream.'provides_methods';
+        m.'map' = (self, cb) => {
           self.pipe x => { (cb x) }
         }
-        m.'where' := (self, cb) => {
-          let wcb := x => {
-            let res := maybe cb x;
+        m.'where' = (self, cb) => {
+          let wcb = x => {
+            let res = maybe cb x;
             ?: [ res and res.0 ] res ();
           }
           self.pipe wcb;
