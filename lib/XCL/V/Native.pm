@@ -27,8 +27,15 @@ async sub _invoke ($self, $scope, $valp) {
 
 sub display_data ($self, $depth) {
   return $self->SUPER::display_data(0) unless $depth;
+
   my $in_depth = $depth - 1;
   my $dproto = { %{$self->data} };
+
+  if ($dproto->{native_name} and $dproto->{ns}) {
+    my $name = String(join('::', @{$dproto}{qw(ns native_name)}));
+    return 'Native('.$name->display(1).')';
+  }
+
   my ($is_class, $is_fexpr) =
     $dproto->{native_name}||'' =~ /^((?:c_)?)f(x?)_(.*)/;
   my %data;
