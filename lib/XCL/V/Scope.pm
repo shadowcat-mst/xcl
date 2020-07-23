@@ -74,7 +74,28 @@ has 'intro_as';
 
 async sub _eval ($self, $thing) {
   dynamically $Am_Running = [ Name('eval') => $thing ];
-  await $thing->evaluate_against($self);
+  state $state_id = '000';
+  my $op_id = ++$state_id;
+  if (DEBUG) {
+    my @vm_loc = (caller(3))[1..2];
+    $vm_loc[0] = do {
+      no warnings 'uninitialized';
+      +{ reverse %INC }->{$vm_loc[0]//''} // $vm_loc[0];
+    };
+    print STDERR Call([
+      Name('ENTER'), String($op_id), $thing
+    ])->display(8)."\n";
+    print STDERR Call([
+      Name('VMLOC'), String($op_id), map XCL::V->from_perl($_), @vm_loc
+    ])->display(8)."\n";
+  }
+  my $ret = await $thing->evaluate_against($self);
+  if (DEBUG) {
+    print STDERR Call([
+      Name('LEAVE'), String($op_id), $ret
+    ])->display(8)."\n";
+  }
+  return $ret;
 }
 
 async sub eval ($self, $thing) {
