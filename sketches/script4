@@ -1,0 +1,30 @@
+use xcl;
+use fs (cat);
+use re (m);
+use process (env, stdin, stdout, stderr, argv);
+
+let log = stderr.say;
+
+let say = stdout.say;
+
+let each_input_line = block => {
+  [ ?: argv [ argv | cat ] stdin ] | block
+}
+
+#let each_input_line = (block) => {
+#  if argv {
+#    argv.each file => { cat file | block }
+#  } else {
+#    stdin.each block;
+#  }
+#}
+
+let regexp = env.'MATCH_RE' // '^FATAL';
+
+each_input_line {
+  if [ m(regexp) this ] {
+    say this;
+  } else {
+    log 'DISCARDED: '++this;
+  }
+}

@@ -1,0 +1,13 @@
+
+
+let parse = stream => {
+  let headers = gather {
+    let h = stream.split("\r\n");
+    while [ let line = h.next() ] {
+      take line;
+    }
+  }
+  let message = make_message(headers);
+  message.slurp stream.read(16384);
+  message;
+}

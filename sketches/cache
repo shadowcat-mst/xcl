@@ -1,0 +1,80 @@
+if [ let c = cache.get target; c.expires() < now() ] {
+  c.value
+} else {
+  cache.set target generate(target)
+}
+
+if [ let c = cache.get target; c->expires < now() ] {
+if [ let c = cache.get target; c::expires < now() ] {
+if [ let c = cache.get target; c.'expires' < now() ] {
+
+# I WANT THE TRIPLE
+
+let val = x.attr;
+x.attr = val;
+x = x.attr(val);
+
+# we shall see
+
+let val = x.attr;
+x.attr = val;
+x = x.=attr(val);
+
+# maybe? meh
+
+x = x.set_attr val;
+
+# probably ok?
+
+let val = x.attr();
+x.attr() = val;
+x = x.attr val;
+
+# ^^ easiest
+
+let vthunk = x.attr;
+
+...
+
+let attr = vthunk();
+
+vthunk set_to_this;
+
+# etc.
+
+# and finally:
+
+if [ let c = cache.get target; do c.expires < now() ] {
+  c.value
+} else {
+  cache.set target generate(target)
+}
+
+# the triple:
+
+let curval = do obj.attr;
+let curval = [obj.attr];
+let curval = obj.attr();
+
+let obj = obj.attr newval;
+let obj = obj.attr(newval);
+
+let newval = obj.attr() = newval;
+let newval = [obj.attr] = newval;
+let newval = do(obj.attr) = newval;
+
+let inc_attr = self => {
+  self.attr() = self.attr() + 1;
+}
+
+############ inc/dec
+
+let x = 3;
+
+++ x; # x = 4, returns 4
+
+-- x; # x = 3, returns 3
+
+<++ x; # x = 4, returns 3
+
+<-- x; # x = 3, returns 4

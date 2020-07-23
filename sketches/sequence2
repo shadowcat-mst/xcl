@@ -1,0 +1,105 @@
+
+
+let (nextval, setval, curval) = do {
+  let values = %;
+  let nextval = name => {
+    values(name) = 0 unless exists values(name);
+    values(name) = values(name) + 1;
+  }
+  let setval = (name, val) => { values(name) = val }
+  let curval = name => { values(name) }
+  (nextval, setval, curval);
+}
+
+let seq = do {
+  let seq = %();
+  let values = %();
+  seq.'create_sequence' = (name, @val) => {
+    unless exists(values name) {
+      values(name) = val.0 // 0;
+    }
+  }
+  seq.'nextval' = name => { ++ values(name) }
+  seq.'curval' = name => { values(name) }
+  seq.'setval' = (name, val) => { values(name) = val }
+  seq.'SAVE' = () => { values }
+  seq.'LOAD' = v => { values = v }
+  seq;
+}
+
+let seqset = () => {
+  let seq = %();
+  let values = %();
+  seq.'create_sequence' = (name, @val) => {
+    unless exists(values name) {
+      values(name) = val.0 // 0;
+    }
+  }
+  seq.'nextval' = name => { ++ values(name) }
+  seq.'curval' = name => { values(name) }
+  seq.'setval' = (name, val) => { values(name) = val }
+  seq.'SAVE' = () => { values }
+  seq.'LOAD' = v => { values = v }
+  seq;
+}
+
+let seq = seqset();
+
+let seqset = () => {
+  let seqset = %();
+  let values = %();
+  let m = ^seqset.'has_methods';
+  m.'create_sequence' = ($, name, @val) => {
+    unless exists(values name) {
+      values(name) = val.0 // 0;
+    }
+  }
+  m.'incval' = ($, name, by) => {
+    values(name) = values(name) + by
+  }
+  m.'nextval' = (self, name) => { self.incval name 1 }
+  m.'curval' = ($, name) => { values(name) }
+  m.'setval' = ($, name, val) => { values(name) = val }
+  m.'SAVE' = ($) => { values }
+  m.'LOAD' = ($, v) => { values = v }
+  seqset;
+}
+
+let seq = seqset();
+
+seq.LOAD(<data>);
+
+let next = seq.nextval('name');
+
+let seqset = () => {
+  let seqset = %();
+  let values = %();
+  let m = ^seqset.'has_methods';
+  m.'create_sequence' = ($, String name, @val) => {
+    unless exists(values name) {
+      values(name) = val.0 // 0;
+    }
+  }
+  m.'incval' = ($, String name, Int by) => {
+    values(name) = values(name) + by
+  }
+  m.'nextval' = (self, String name) => { self.incval name 1 }
+  m.'curval' = ($, String name) => { values(name) }
+  m.'setval' = ($, String name, Int val) => { values(name) = val }
+  m.'SAVE' = ($) => { values }
+  m.'LOAD' = ($, v) => { values = v }
+  seqset;
+}
+
+let seqset = () => object {
+  let values = %();
+  method create_sequence (String name, Int? val) => {
+    unless exists(values name) { values(name) = val.0 // 0 }
+  }
+  method incval (String name, Int by) => { values(name) += by }
+  method nextval (String name) => { $.incval name 1 }
+  method curval (String name) => { values(name) }
+  method setval (String name, Int val) => { values(name) = val }
+  method SAVE () { values }
+  method LOAD (v) { values = v }
+}
