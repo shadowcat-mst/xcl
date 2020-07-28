@@ -12,12 +12,6 @@ sub index_is { 'Int' }
 async sub evaluate_against ($self, $scope) {
   my @ret;
   foreach my $el (@{$self->data}) {
-    state %class_is_basic;
-    my $is_basic = $class_is_basic{ref($el)} //= 0+!!(
-      ref($el)->can('evaluate_against')
-        eq XCL::V->can('evaluate_against')
-    );
-    if ($is_basic) { push @ret, $el; next; }
     if ($el->is('Compound')
       and $el->data->[0]->is('Name')
       and $el->data->[0]->data eq '@'
