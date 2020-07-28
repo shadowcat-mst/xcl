@@ -1,5 +1,5 @@
 if [ let c = cache.get target; c.expires() < now() ] {
-  c.value
+  c.value()
 } else {
   cache.set target generate(target)
 }

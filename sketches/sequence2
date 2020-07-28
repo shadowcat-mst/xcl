@@ -93,7 +93,7 @@ let seqset = () => {
 
 let seqset = () => object {
   let values = %();
-  method create_sequence (String name, Int? val) => {
+  method create_sequence (String name, maybe Int val) => {
     unless exists(values name) { values(name) = val.0 // 0 }
   }
   method incval (String name, Int by) => { values(name) += by }
