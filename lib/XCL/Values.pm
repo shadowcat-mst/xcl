@@ -15,7 +15,7 @@ no warnings 'redefine';
 
 our @Types = qw(
   String Bytes Float Int Escape
-  Bool Fexpr Dict List Name Call
+  Bool Fexpr Dict List Name Call Curry
   Result Var
   Native PerlObject
   Scope Block Stream

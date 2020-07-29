@@ -24,7 +24,7 @@ sub display_data ($self, $) {
 
 async sub c_fx_make ($class, $scope, $lst) {
   my ($argspec_p, $body_proto) = $lst->values;
-  my $res = await $body_proto->evaluate_against($scope);
+  my $res = await $scope->eval($body_proto);
   return $res unless $res->is_ok;
   my ($argspec) = map $_->is('List') ? $_ : List([$_]), $argspec_p;
   Val($class->new(data => {
@@ -36,7 +36,7 @@ async sub c_fx_make ($class, $scope, $lst) {
 
 sub f_concat ($self, $lst) {
   return $_ for $self->_same_types($lst, 'List');
-  ValF Call([ $self, map $_->values, $lst->values ]);
+  ValF Curry([ $self, map $_->values, $lst->values ]);
 }
 
 1;

@@ -7,7 +7,7 @@ async sub dot_flip ($class, $scope, $lst) {
   return Err [ Name('WRONG_ARG_COUNT') => Int(0) ] unless $lst->values;
   my ($arg, $inv) = $lst->values;
   if (my $invoke = $arg->can_invoke or $arg->is('Name')) {
-   return Val Call [
+   return Val Curry [
       Native({ ns => $class, native_name => 'dot_curried' }),
       $invoke ? List[ Escape($arg), $inv ] : $lst
    ];
@@ -43,7 +43,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
   my $rhs = $rres->val;
 
   unless (@p > 1) {
-    return Val Call [
+    return Val Curry[
       Native({ ns => $class, native_name => 'dot_flip' }),
       $rhs
     ];
@@ -55,7 +55,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
   push @rest, @p[2..$#p];
 
   if ($rhs->can_invoke) {
-    return Val Call [ Escape($rhs), $lhs, @rest ];
+    return Val Curry[ $rhs, $lhs, @rest ];
   }
 
   unless ($rhs->is('Name')) {
@@ -69,7 +69,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
   if ($has_methods) {
     return $_ for not_ok_except NO_SUCH_VALUE =>
       my $res = await $scope->combine($has_methods, List[$name]);
-    return Val Call [ Escape($res->val), Escape($lhs), @rest ] if $res->is_ok;
+    return Val Curry[ $res->val, Escape($lhs), @rest ] if $res->is_ok;
   }
 
   my $nope = Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ];
@@ -89,7 +89,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
 
   return $nope unless $res->is_ok;
 
-  return Val Call [ Escape($res->val), Escape($lhs), @rest ];
+  return Val Curry[ $res->val, Escape($lhs), @rest ];
 }
 
 async sub dot_assign_via_call ($class, $scope, $lst) {

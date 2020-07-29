@@ -12,7 +12,7 @@ use xcl::test;
 
 #let ?: = fexpr (scope, cond, case, @elsep) {
 #  let condv = scope.eval(cond);
-#  let cases = wutcol elsep (case, @elsep) (\[\] ++ (condv), case);
+#  let cases = wutcol elsep (case, @elsep) (\ ++ (condv), case);
 #  let call = wutcol condv cases.0 cases.1;
 #  scope.eval call;
 #}
