@@ -2,7 +2,7 @@ package XCL::V::Block;
 
 use XCL::Class 'XCL::V';
 
-async sub _invoke ($self, $scope, $lst) {
+async sub invoke_against ($self, $scope, $lst) {
   my $iscope = do {
     if (my ($this) = $lst->values) {
       $scope->derive({

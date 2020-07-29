@@ -24,7 +24,7 @@ sub to_perl { shift->data }
 
 sub can_invoke ($self) { 0+!!$self->can(CODULATE) }
 
-sub _invoke ($self, $scope, $vals) {
+sub invoke_against ($self, $scope, $vals) {
   $self->SUPER::_invoke($scope, $vals) unless $self->can_invoke;
   _make_perl_call($self->data->${\+CODULATE})->invoke($scope, $vals);
 }

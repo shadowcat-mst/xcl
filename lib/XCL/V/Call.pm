@@ -9,7 +9,7 @@ sub evaluate_against ($self, $scope) {
   $self->_call($scope, @{$self->data});
 }
 
-sub _invoke ($self, $scope, $lst) {
+sub invoke_against ($self, $scope, $lst) {
   $self->_call($scope, @{$self->data}, $lst->values);
 }
 

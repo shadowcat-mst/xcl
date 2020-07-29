@@ -3,7 +3,7 @@ package XCL::V::Lambda;
 use Role::Tiny::With;
 use XCL::Class 'XCL::V::Fexpr';
 
-sub _invoke_values ($self, $scope, $vals) {
+sub _argument_values ($self, $scope, $vals) {
   return $scope->eval($vals);
 }
 

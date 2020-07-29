@@ -5,7 +5,7 @@ use XCL::Class 'XCL::V';
 
 sub set_data ($self, $new) { $self->data($new); ValF($new) }
 
-sub _invoke ($self, $, $) {
+sub invoke_against ($self, $, $) {
   ValF($self->data);
 }
 

@@ -67,17 +67,17 @@ sub evaluate_against ($self, $) { ValF($self) }
 
 async sub invoke ($self, $scope, $lst = List[]) {
   dynamically $Am_Running = [ Name('invoke') => $self, $lst ];
-  await $self->_invoke($scope, $lst);
+  await $self->invoke_against($scope, $lst);
 }
 
 sub can_invoke ($self) {
   my $class = ref($self) || $self;
   state %can_invoke;
-  state $me = __PACKAGE__->can('_invoke');
-  $can_invoke{$class} //= 0+!!($me ne $class->can("_invoke"));
+  state $me = __PACKAGE__->can('invoke_against');
+  $can_invoke{$class} //= 0+!!($me ne $class->can('invoke_against'));
 }
 
-sub _invoke ($self, $scope, $lst) {
+sub invoke_against ($self, $scope, $lst) {
   # Was seriously wondering if this should always just be an error.
   # return ErrF([ Name('CANT_INVOKE'), String($self->type) ]);
   # Try letting this code run again if we find a reason
