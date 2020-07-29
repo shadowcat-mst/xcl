@@ -8,8 +8,8 @@ async sub evaluate_against ($self, $scope) {
   my $res = await $scope->eval($val);
   return $res unless $res->is_ok;
   foreach my $step (@rest) {
-    $res = await $scope->eval(
-             Call[ Escape($res->val), $step->is('List') ? $step->values : $step ]
+    $res = await $scope->combine(
+             $res->val, $step->is('List') ? $step : List[$step]
            );
     return $res unless $res->is_ok;
   }

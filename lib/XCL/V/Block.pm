@@ -7,6 +7,7 @@ async sub invoke_against ($self, $scope, $lst) {
     if (my ($this) = $lst->values) {
       $scope->derive({
         this => Val($this),
+        # should probably convert this to direct c_fx_dot + Curry
         '$.' => Val(Call [ Name('.'), $this ]),
       });
     } else {

@@ -89,7 +89,7 @@ async sub _call_foreign ($class, $code, $scope, $vals) {
 
 sub f_concat ($self, $lst) {
   return $_ for $self->_same_types($lst, 'List');
-  ValF Call([ $self, map $_->values, $lst->values ]);
+  ValF Curry([ $self, map $_->values, $lst->values ]);
 }
 
 1;
