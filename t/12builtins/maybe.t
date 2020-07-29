@@ -4,7 +4,9 @@ let d = %(:x 1);
 
 is d('x') 1 'dict sanity';
 
-is maybe(d.'x') (1) 'dict lookup';
+is maybe(d('x')) (1) 'dict lookup via compound';
+
+is maybe(d.'x') (1) 'dict lookup via method';
 
 is maybe(d 'x') (1) 'dict lookup via call';
 
