@@ -1,6 +1,5 @@
 package XCL::V::Float;
 
-use Role::Tiny::With;
 use XCL::Class 'XCL::V';
 
 with 'XCL::V::Role::Numeric';

@@ -1,6 +1,5 @@
 package XCL::V::Lambda;
 
-use Role::Tiny::With;
 use XCL::Class 'XCL::V::Fexpr';
 
 sub _argument_values ($self, $scope, $vals) {

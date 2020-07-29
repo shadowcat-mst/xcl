@@ -1,6 +1,5 @@
 package XCL::V::Int;
 
-use Role::Tiny::With;
 use XCL::Class 'XCL::V';
 
 with 'XCL::V::Role::Numeric';
