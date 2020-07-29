@@ -25,7 +25,7 @@ $scope = Scope Dict {
 my $curried = $scope->eval(Call([ Name('.'), $three, Name('plus') ]))
                     ->get->val;
 
-is $curried->invoke($scope, List[ $four ])->get, Val(Int 7);
+is $scope->await::combine($curried, List[ $four ]), Val(Int 7);
 
 is(
   $scope->eval(Call[ Call([ Call([ Name('.'), Name('plus') ]) ]), $three, $four ])->get,

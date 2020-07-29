@@ -86,7 +86,7 @@ sub dot_lookup_escape ($scope, $obj, $method, @args) {
 
 async sub dot_call ($scope, $obj, $method, @args) {
   return $_ for not_ok my $res = await dot_lookup($scope, $obj, $method);
-  return await $res->val->invoke($scope, List(\@args));
+  return await $scope->combine($res->val, List(\@args));
 }
 
 sub dot_call_escape ($scope, $obj, $method, @args) {

@@ -11,14 +11,14 @@ use XCL::Builtins::Builder qw(
 );
 use XCL::V;
 
-my $plus = $builtins->get('+')->get->val;
+my $plus = $builtins->await::get('+')->val;
 
-is $plus->invoke($builtins, List [ Int(3), Int(4) ])->get, Val(Int 7);
+is $builtins->await::combine($plus, List [ Int(3), Int(4) ]), Val(Int 7);
 
-is $plus->invoke($builtins, List [ Float(3), Float(4) ])->get, Val(Float 7);
+is $builtins->await::combine($plus, List [ Float(3), Float(4) ]), Val(Float 7);
 
 my $not = Call [ Name('.'), Name('Bool'), Name('not') ];
 
-is $builtins->eval($not)->get->val, $builtins->get('not')->get->val;
+is $builtins->await::eval($not)->val, $builtins->await::get('not')->val;
 
 done_testing;

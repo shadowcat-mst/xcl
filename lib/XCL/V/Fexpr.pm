@@ -11,7 +11,7 @@ async sub invoke_against ($self, $outer_scope, $vals) {
     $iscope->but(intro_as => \&Val),
     $argspec, assign => $val_res->val
   );
-  await $body->invoke($iscope);
+  await $iscope->combine($body, List[]);
 }
 
 sub _argument_values ($self, $outer_scope, $vals) {

@@ -20,7 +20,7 @@ async sub fx_call_sub ($self, $scope, $lst_p) {
   return $_ for not_ok my $lres = await $scope->eval($lst_p);
   my ($sub, $args) = $lres->val->ht;
   return $_ for not_ok my $sres = await $self->f_sub(List[$sub]);
-  return await $sres->val->invoke($scope, $args);
+  return await $scope->combine($sres->val, $args);
 }
 
 sub fx_call_method ($self, $scope, $lst_p) {

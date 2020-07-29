@@ -37,12 +37,12 @@ async sub fx_assign ($self, $scope, $lst) {
           $scope, $res->val, 'assign_via_call'
         );
       if ($lres->is_ok) {
-        return await $lres->val->invoke(
-          $scope, List[$step_list, $lst->values]
+        return await $scope->combine(
+          $lres->val, List[$step_list, $lst->values]
         );
       }
     }
-    return $_ for not_ok $res = await $res->val->invoke($scope, $step_list);
+    return $_ for not_ok $res = await $scope->combine($res->val, $step_list);
   }
   return await dot_call_escape($scope, $res->val, assign => $lst->values);
 }

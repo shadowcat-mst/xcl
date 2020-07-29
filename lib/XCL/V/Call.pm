@@ -16,7 +16,7 @@ sub invoke_against ($self, $scope, $lst) {
 async sub _call ($self, $scope, $command_p, @args) {
   return $_ for not_ok my $res = await $scope->eval(List[$command_p]);
   my ($command, @rest) = $res->val->values;
-  return await $command->invoke($scope, List[ @rest, @args ]);
+  return await $scope->combine($command, List[ @rest, @args ]);
 }
 
 sub display_data ($self, $depth) {
@@ -42,13 +42,13 @@ async sub fx_assign ($self, $scope, $lst) {
   if ($lres->is_ok) {
     # fall through only if assign_via_call explicitly declines to try
     return $_ for not_ok_except DECLINE_MATCH =>
-      my $res = await $lres->val->invoke(
-        $scope, List[List([@rest, $tail->values]), $lst->values]
+      my $res = await $scope->combine(
+        $lres->val, List[List([@rest, $tail->values]), $lst->values]
       );
     return $res if $res->is_ok;
   }
   return $_ for not_ok
-    my $cres = await $command->invoke($scope, List \@rest);
+    my $cres = await $scope->combine($command, List \@rest);
   return await dot_call_escape($scope, $cres->val, assign => $lst->values);
 }
 

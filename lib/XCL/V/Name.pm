@@ -3,7 +3,7 @@ package XCL::V::Name;
 use XCL::Class 'XCL::V';
 
 sub evaluate_against ($self, $scope) {
-  $scope->invoke($scope, List[String $self->data]);
+  $scope->combine($scope, List[String $self->data]);
 }
 
 sub display_data ($self, $) { $self->data }

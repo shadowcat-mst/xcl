@@ -12,9 +12,10 @@ has weaver => sub { XCL::Weaver->new };
 
 has 'intro_as';
 
+our $state_id = '000';
+
 async sub _eval ($self, $thing) {
   dynamically $Am_Running = [ Name('eval') => $thing ];
-  state $state_id = '000';
   my $op_id = ++$state_id;
   if (DEBUG) {
     my @vm_loc = (caller(3))[1..2];
@@ -23,7 +24,7 @@ async sub _eval ($self, $thing) {
       +{ reverse %INC }->{$vm_loc[0]//''} // $vm_loc[0];
     };
     print STDERR Call([
-      Name('ENTER'), String($op_id), $thing
+      Name('ENTER'), String($op_id), @$Am_Running
     ])->display(8)."\n";
     print STDERR Call([
       Name('VMLOC'), String($op_id), map XCL::V->from_perl($_), @vm_loc
@@ -61,13 +62,38 @@ async sub eval_start ($self, $thing) {
   return Val $res;
 }
 
+async sub combine ($self, $thing, $lst) {
+  dynamically $Am_Running = [ Name('combine') => $thing ];
+  my $op_id = ++$state_id;
+  if (DEBUG) {
+    my @vm_loc = (caller(2))[1..2];
+    $vm_loc[0] = do {
+      no warnings 'uninitialized';
+      +{ reverse %INC }->{$vm_loc[0]//''} // $vm_loc[0];
+    };
+    print STDERR Call([
+      Name('ENTER'), String($op_id), @$Am_Running
+    ])->display(8)."\n";
+    print STDERR Call([
+      Name('VMLOC'), String($op_id), map XCL::V->from_perl($_), @vm_loc
+    ])->display(8)."\n";
+  }
+  my $ret = await $thing->invoke_against($self, $lst);
+  if (DEBUG) {
+    print STDERR Call([
+      Name('LEAVE'), String($op_id), $ret
+    ])->display(8)."\n";
+  }
+  return $ret;
+}
+
 async sub get ($self, $index) {
   $index = String($index) unless ref($index);
   return $_ for not_ok
-    my $res = await $self->data->invoke($self, List[$index]);
+    my $res = await $self->combine($self->data, List[$index]);
   return Err[ Name('MISMATCH') ] unless my $val = $res->val;
   return $val if $val->is('Result');
-  return await $val->invoke($self, List[]);
+  return await $self->combine($val, List[]);
 }
 
 async sub set ($self, $index, $val) {
@@ -78,7 +104,7 @@ async sub set ($self, $index, $val) {
     );
   } else {
     return $_ for not_ok
-      my $res = await $self->data->invoke($self, List[$index]);
+      my $res = await $self->combine($self->data, List[$index]);
     my $cur = $res->val;
     if ($cur->is('Result')) {
       return $_ for not_ok +await
@@ -90,7 +116,7 @@ async sub set ($self, $index, $val) {
       );
     }
   }
-  return await $self->data->invoke($self, List[$index]);
+  return await $self->combine($self->data, List[$index]);
 }
 
 sub derive ($self, $merge) {
@@ -145,7 +171,7 @@ async sub eval_string ($self, $string) {
     stmt_list => $string, 
     await($self->get('_OPS'))->val->to_perl
   );
-  await $ans->invoke($self, List[]);
+  await $self->combine($ans, List[]);
 }
 
 sub f_eval_string ($self, $lst) {

@@ -92,7 +92,7 @@ sub _assemble_value ($builtins, $to) {
       $scope,
       List [ map Name($_), grep length, @bits ]
     )->get;
-    return $to =~ /^\./ ? $dotf->val->await::invoke($scope, List[]) : $dotf;
+    return $to =~ /^\./ ? $scope->await::combine($dotf->val, List[]) : $dotf;
   }
   return $builtins->{$bits[0]};
 }

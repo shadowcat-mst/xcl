@@ -50,7 +50,7 @@ async sub c_fx_todo ($class, $scope, $lst) {
   my ($strp, $func) = $lres->val->values;
   return $_ for not_ok my $sres = await $strp->string;
   dynamically my $todo = todo $sres->val->data;
-  return await $func->invoke($scope, List[]);
+  return await $scope->combine($func, List[]);
 }
 
 sub c_f_diag ($class, $lst) {

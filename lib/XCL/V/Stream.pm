@@ -42,7 +42,7 @@ async sub fx_pipe ($self, $scope, $lstp) {
     while (1) {
       return $_ for not_ok my $nres = await $self->f_next(undef);
       return $_ for
-        not_ok my $res = await $cb->invoke($scope, List[$nres->val]);
+        not_ok my $res = await $scope->combine($cb, List[$nres->val]);
       my $val = $res->val;
       my @val = $val->is('List') ? $val->values : $val;
       if (my $next = shift @val) {

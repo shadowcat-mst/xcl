@@ -58,21 +58,12 @@ async sub c_fx_while ($class, $scope, $lst) {
     if ($bres->val->data) {
       $did = 1;
       my $bscope = $dscope->derive;
-      return $_ for not_ok +await $body->invoke($bscope);
+      return $_ for not_ok +await $bscope->combine($body, List[]);
     } else {
       last WHILE;
     }
   }
   return Val Bool $did;
-}
-
-async sub c_fx_else ($class, $scope, $lst) {
-  my ($lp, $rp) = $lst->values;
-  my $dscope = $scope->snapshot;
-  return $_ for not_ok my $bres = await $lp->invoke($scope, List $dscope);
-  return $bres if $bres->val->data;
-  return $_ for not_ok my $else_res = await $rp->invoke($dscope);
-  return await $else_res->val->bool;
 }
 
 async sub c_fx_exists ($class, $scope, $lst) {
@@ -184,11 +175,8 @@ sub metadata_for_alias_dict ($class) {
 
 async sub c_fx_sleep ($class, $scope, $lstp) {
   return $_ for not_ok my $lres = await $scope->eval($lstp);
-  my ($time, $code) = $lres->val->values;
+  my ($time) = $lres->val->values;
   await Mojo::Promise->timer($time->data);
-  if ($code) {
-    return await $code->invoke($scope, List[]);
-  }
   return Val True;
 }
 
@@ -197,7 +185,7 @@ async sub c_fx_every ($class, $scope, $lstp) {
   my ($time, $code) = $lres->val->values;
   my $tick = async sub {
     await Mojo::Promise->timer($time->data);
-    return await $code->invoke($scope, List[]);
+    return await $scope->combine($code, List[]);
   };
   Stream({
     generator => $tick,
