@@ -5,8 +5,7 @@ use XCL::Class -strict;
 
 async sub c_fx_ok ($class, $scope, $lst) {
   my ($check, $strp) = $lst->values;
-  return $_ for not_ok my $cres = await $scope->eval($check);
-  return $_ for not_ok my $bres = await $cres->val->bool;
+  return $_ for not_ok my $bres = await $scope->eval($check)->then::bool;
   my ($str) = do {
     if ($strp) {
       return $_ for not_ok my $sres = await $scope->eval($strp);
