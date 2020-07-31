@@ -148,6 +148,35 @@ sub f_expr ($self, $lst) {
   $self->eval($lst->count > 1 ? Call [ $lst->values ] : $lst->head);
 }
 
+async sub lookup_method_of ($self, $of, $method) {
+  my $fallthrough = !(my $has_methods = $of->metadata->{has_methods});
+
+  if ($has_methods) {
+    return $_ for not_ok_except NO_SUCH_VALUE =>
+      my $res = await $self->combine($has_methods, List[$method]);
+    return $res if $res->is_ok;
+  }
+
+  my $nope = Err [ Name('NO_SUCH_METHOD_OF'), $method, $of ];
+
+  return $nope
+    unless my $try =
+      $of->metadata->{dot_via}
+        || ($fallthrough && Name($of->type));
+
+  return $_ for not_ok my $tres = await $self->eval($try);
+
+  return $nope
+    unless my $via_methods = $tres->val->metadata->{provides_methods};
+
+  return $_ for not_ok_except NO_SUCH_VALUE =>
+    my $res = await $self->combine($via_methods, List[$method]);
+
+  return $nope unless $res->is_ok;
+
+  return $res;
+}
+
 async sub eval_string_inscope ($self, $string) {
   my $ans = $self->weaver->parse(
     stmt_list => $string, 

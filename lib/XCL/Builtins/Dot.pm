@@ -64,30 +64,7 @@ async sub c_fx_dot ($class, $scope, $lst) {
 
   my $name = String($rhs->data);
 
-  my $fallthrough = !(my $has_methods = $lhs->metadata->{has_methods});
-
-  if ($has_methods) {
-    return $_ for not_ok_except NO_SUCH_VALUE =>
-      my $res = await $scope->combine($has_methods, List[$name]);
-    return Val Curry[ $res->val, Escape($lhs), @rest ] if $res->is_ok;
-  }
-
-  my $nope = Err [ Name('NO_SUCH_METHOD_OF'), $name, $p[0] ];
-
-  return $nope
-    unless my $try =
-      $lhs->metadata->{dot_via}
-        || ($fallthrough && Name($lhs->type));
-
-  return $_ for not_ok my $tres = await $scope->eval($try);
-
-  return $nope
-    unless my $via_methods = $tres->val->metadata->{provides_methods};
-
-  return $_ for not_ok_except NO_SUCH_VALUE =>
-    my $res = await $scope->combine($via_methods, List[$name]);
-
-  return $nope unless $res->is_ok;
+  return $_ for not_ok my $res = await $scope->lookup_method_of($lhs, $name);
 
   return Val Curry[ $res->val, Escape($lhs), @rest ];
 }
