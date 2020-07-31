@@ -51,11 +51,6 @@ async sub eval_drop ($self, $thing) {
   return await $res->f_exhaust(undef);
 }
 
-async sub eval_bool ($self, $thing) {
-  return $_ for not_ok my $res = await $self->eval_drop($thing);
-  return await $res->val->bool;
-}
-
 async sub eval_start ($self, $thing) {
   my $res = await $self->_eval($thing);
   return $res if $res->isa('XCL::V::Result');

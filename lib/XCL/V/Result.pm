@@ -20,6 +20,11 @@ sub get ($self) {
   die $self->err->display(8)."\n";
 }
 
+async sub bool ($self) {
+  return $self unless $self->is_ok;
+  return await $self->val->bool;
+}
+
 sub f_get ($self, $) { ResultF $self }
 
 sub f_is_ok ($self, $) { ValF Bool $self->is_ok }

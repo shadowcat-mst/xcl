@@ -34,10 +34,13 @@ sub c_f_metadata ($class, $lst) {
 async sub c_fx_wutcol ($class, $scope, $lst) {
   my ($cond, @ans) = $lst->values;
   my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans));
-  return $_ for not_ok my $res = await $scope->eval($cond);
-  return $_ for not_ok my $bres = await $res->val->bool;
-  if ($bres->val->data) {
-    return $then ? await $scope->eval($then) : $res;
+  my $wres;
+  return $_ for not_ok
+    my $res = await $scope->eval($cond)->then::_(sub ($r) {
+      ($wres = $r)->bool;
+  });
+  if ($res->val->data) {
+    return $then ? await $scope->eval($then) : $wres;
   }
   return await $scope->eval($else);
 }
@@ -47,7 +50,7 @@ async sub c_fx_while ($class, $scope, $lst) {
   $dscope ||= $scope->snapshot;
   my $did = 0;
   WHILE: while (1) {
-    return $_ for not_ok my $bres = await $dscope->eval_bool($cond);
+    return $_ for not_ok my $bres = await $dscope->eval_drop($cond)->then::bool;
     if ($bres->val->data) {
       $did = 1;
       my $bscope = $dscope->derive;
