@@ -25,13 +25,6 @@ async sub c_fx_catch_only ($class, $scope, $lst) {
   return Val $res;
 }
 
-# operative ternary
-async sub c_fx_opwut($class, $scope, $lst) {
-  my ($cond, $then, $else) = $lst->values;
-  return $_ for not_ok my $bres = await $scope->eval_bool($cond);
-  return Val($bres->val->data ? $then : $else);
-}
-
 # metadata / ^
 sub c_f_metadata ($class, $lst) {
   ValF Dict($lst->data->[0]->metadata);
