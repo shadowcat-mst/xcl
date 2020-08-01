@@ -162,8 +162,8 @@ sub fx_exists ($self, $scope, $lst) {
 
 async sub fx_assign ($self, $scope, $lst) {
   return Err[ Name('MISMATCH') ] unless my ($val) = $lst->values;
-  return $_ for not_ok my $res = await dot_call_escape(
-    $scope, $self, 'eq' => $val
+  return $_ for not_ok my $res = await $scope->invoke_method_of(
+    $self, 'eq' => List[$val]
   );
   return Err[ Name('MISMATCH') ] unless $res->val->data;
   return Val List($val);

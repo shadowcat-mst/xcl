@@ -7,10 +7,11 @@ async sub invoke_against ($self, $outer_scope, $vals) {
   my $val_res = await $self->_argument_values($outer_scope, $vals);
   return $_ for not_ok $val_res;
   my $iscope = $scope->snapshot;
-  return $_ for not_ok +await dot_call_escape(
-    $iscope->but(intro_as => \&Val),
-    $argspec, assign => $val_res->val
-  );
+  # Escape shouldn't be necessary here - is something eval-ing pointlessly?
+  return $_ for not_ok +await
+    $iscope->but(intro_as => \&Val)->invoke_method_of(
+      Escape($argspec), assign => List[$val_res->val]
+    );
   await $iscope->combine($body, List[]);
 }
 
