@@ -19,8 +19,8 @@ async sub evaluate_against ($self, $scope) {
       die "WHAT" unless @tail;
       return $_ for not_ok my $res = await $scope->eval(Compound \@tail);
       unless ($res->val->is('List')) {
-        return $_ for not_ok $res = await dot_call_escape(
-          $scope, $res->val, 'to_list'
+        return $_ for not_ok $res = await $scope->invoke_method_of(
+          $res->val, 'to_list', List[]
         );
       }
       push @ret, $res->val->values;
@@ -117,13 +117,13 @@ async sub fx_assign ($self, $scope, $lst) {
         (my $splat_call = $to_slot->to_call)->data->[0]
     ) {
       die "WHAT" unless (my (undef, $splat_to) = @{$splat_call->data}) == 2;
-      return $_ for not_ok +await dot_call_escape(
-        $scope, $splat_to, assign => List \@assign_from
+      return $_ for not_ok +await $scope->invoke_method_of(
+        Escape($splat_to), assign => List[ List \@assign_from ]
       );
       return Val $from;
     }
-    return $_ for not_ok +await dot_call_escape(
-      $scope, $to_slot, assign => (shift @assign_from // ())
+    return $_ for not_ok +await $scope->invoke_method_of(
+      Escape($to_slot), assign => List[ (shift @assign_from // ()) ]
     );
   }
   return Err [ Name('MISMATCH') ] if @assign_from;
