@@ -26,7 +26,6 @@ async sub fx_assign_via_call ($self, $scope, $lst) {
   # this should use more clever typing but will do to begin with
   return Err [ Name('MISMATCH') ]
      unless $val and $val->is($self->data);
-  # Escape shouldn't be necessary here - is something eval-ing pointlessly?
   return await $scope->invoke_method_of(Escape($call_args->head), assign => List[$val]);
 }
 
