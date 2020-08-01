@@ -40,7 +40,7 @@ async sub fx_assign ($self, $scope, $lst) {
     my $lres = await $scope->lookup_method_of($command, 'assign_via_call');
   if ($lres->is_ok) {
     # fall through only if assign_via_call explicitly declines to try
-    return $_ for not_ok_except DECLINE_MATCH =>
+    return $_ for not_ok_except MISMATCH =>
       my $res = await $scope->combine(
         $lres->val, List[$command, List([@rest, $tail->values]), $lst->values]
       );

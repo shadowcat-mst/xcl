@@ -35,7 +35,7 @@ async sub fx_assign ($self, $scope, $lst) {
       return $_ for not_ok_except NO_SUCH_METHOD_OF =>
         my $lres = await $scope->lookup_method_of($res->val, 'assign_via_call');
       if ($lres->is_ok) {
-        return $_ for not_ok_except DECLINE_MATCH =>
+        return $_ for not_ok_except MISMATCH =>
           my $ares = await $scope->combine(
             $lres->val, List[$res->val, $step_list, $lst->values]
           );
