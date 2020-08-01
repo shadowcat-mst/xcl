@@ -106,7 +106,7 @@ async sub c_fx_assign ($class, $scope, $lst) {
   my ($assign_to, $to_assign) = $lst->values;
   return Err [ Name('MISMATCH') ] unless $to_assign;
   return $_ for not_ok my $res = await $scope->eval($to_assign);
-  await dot_call_escape($scope, $assign_to, assign => $res->val);
+  await $scope->invoke_method_of(Escape($assign_to), assign => List[$res->val]);
 }
 
 sub metadata_for_c_fx_assign ($class) {
@@ -125,7 +125,7 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
   my ($args, $to_assign) = $lst->values;
   my ($assign_to, $default_to) = $args->values;
   return $_ for not_ok my $res = await $scope->eval($to_assign||$default_to);
-  await dot_call_escape($scope, $assign_to, assign => $res->val);
+  await $scope->invoke_method_of(Escape($assign_to), assign => List[$res->val]);
 }
 
 {
@@ -141,7 +141,9 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
         return ErrF [ Name('DECLINE_MATCH') ] unless $to_assign;
         my ($assign_to) = $args->values;
         my $assign_scope = $scope->but(intro_as => $intro_as);
-        dot_call_escape($assign_scope, $assign_to, assign => $to_assign);
+        $assign_scope->invoke_method_of(
+          Escape($assign_to), assign => List[$to_assign]
+        );
       },
       "metadata_for_c_fx_${type}" => sub ($class) {
         return +{
