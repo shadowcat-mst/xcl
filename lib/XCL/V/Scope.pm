@@ -94,8 +94,8 @@ async sub get ($self, $index) {
 async sub set ($self, $index, $val) {
   $index = String($index) unless ref($index);
   if (my $intro = $self->intro_as) {
-    return $_ for not_ok +await dot_call_escape(
-      $self, $self->data, assign_via_call => List([$index]), $intro->($val)
+    return $_ for not_ok +await $self->invoke_method_of(
+      $self->data, assign_via_call => List[List([$index]), $intro->($val)]
     );
   } else {
     return $_ for not_ok
@@ -103,11 +103,11 @@ async sub set ($self, $index, $val) {
     my $cur = $res->val;
     if ($cur->is('Result')) {
       return $_ for not_ok +await
-        my $bres = dot_call_escape($self, $cur, 'eq' => $val);
+        my $bres = $self->invoke_method_of($cur, 'eq' => List[$val]);
       return Err[ Name('MISMATCH') ] unless $bres->data;
     } else {
-      return $_ for not_ok +await dot_call_escape(
-        $self, $cur, assign_via_call => List([]), $val
+      return $_ for not_ok +await $self->invoke_method_of(
+        $cur, assign_via_call => List[List([]), $val]
       );
     }
   }
