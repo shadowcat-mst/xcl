@@ -138,7 +138,7 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
       },
       "${type}_assign_via_call" => sub ($class, $scope, $lst) {
         my ($args, $to_assign) = $lst->values;
-        return Err [ Name('MISMATCH') ] unless $to_assign;
+        return ErrF [ Name('DECLINE_MATCH') ] unless $to_assign;
         my ($assign_to) = $args->values;
         my $assign_scope = $scope->but(intro_as => $intro_as);
         dot_call_escape($assign_scope, $assign_to, assign => $to_assign);

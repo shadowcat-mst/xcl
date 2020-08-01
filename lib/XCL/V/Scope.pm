@@ -149,6 +149,7 @@ sub f_expr ($self, $lst) {
 }
 
 async sub lookup_method_of ($self, $of, $method) {
+  $method = String($method) unless ref $method;
   my $fallthrough = !(my $has_methods = $of->metadata->{has_methods});
 
   if ($has_methods) {

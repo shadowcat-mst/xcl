@@ -32,14 +32,14 @@ async sub fx_assign ($self, $scope, $lst) {
   while (my $step = shift @rest) {
     my $step_list = $step->is('List') ? $step : List [$step];
     unless (@rest) {
-      return $_ for not_ok_except NO_SUCH_VALUE =>
-        my $lres = await dot_lookup_escape(
-          $scope, $res->val, 'assign_via_call'
-        );
+      return $_ for not_ok_except NO_SUCH_METHOD_OF =>
+        my $lres = await $scope->lookup_method_of($res->val, 'assign_via_call');
       if ($lres->is_ok) {
-        return await $scope->combine(
-          $lres->val, List[$step_list, $lst->values]
-        );
+        return $_ for not_ok_except DECLINE_MATCH =>
+          my $ares = await $scope->combine(
+            $lres->val, List[$res->val, $step_list, $lst->values]
+          );
+        return $ares if $res->is_ok;
       }
     }
     return $_ for not_ok $res = await $scope->combine($res->val, $step_list);
