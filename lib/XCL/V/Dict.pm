@@ -130,8 +130,8 @@ async sub destructure ($class, $scope, $lst) {
       die "WHAT" unless $key_p->is('Name');
       return Err [ Name('MISMATCH') ]
         unless my $from_value = delete $from{$key_p->data};
-      return $_ for not_ok +await dot_call_escape(
-        $scope, $key_p, assign => $from_value
+      return $_ for not_ok +await $scope->invoke_method_of(
+        Escape($key_p), assign => List[$from_value]
       );
       next;
     }
@@ -145,14 +145,14 @@ async sub destructure ($class, $scope, $lst) {
         $val;
       }
     };
-    return $_ for not_ok +await dot_call_escape(
-      $scope, $to_value, assign => (delete($from{$key->data})//())
+    return $_ for not_ok +await $scope->invoke_method_of(
+      Escape($to_value), assign => List[ (delete($from{$key->data})//()) ]
     );
   }
   return Err [ Name('MISMATCH') ] if CORE::keys(%from) and not $splat_to;
   if ($splat_to and ref($splat_to)) {
-    return $_ for not_ok +await dot_call_escape(
-      $scope, $splat_to, assign => Dict(\%from)
+    return $_ for not_ok +await $scope->invoke_method_of(
+      Escape($splat_to), assign => List[ Dict(\%from) ]
     );
   }
   return Val $from;
