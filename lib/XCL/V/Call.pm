@@ -46,9 +46,10 @@ async sub fx_assign ($self, $scope, $lst) {
       );
     return $res if $res->is_ok;
   }
-  return $_ for not_ok
-    my $cres = await $scope->combine($command, List \@rest);
-  return await dot_call_escape($scope, $cres->val, assign => $lst->values);
+  die "WHAT" if @rest;
+  #return $_ for not_ok
+  #  my $cres = await $scope->combine($command, List \@rest);
+  return await $scope->invoke_method_of($res->val, assign => $lst);
 }
 
 sub to_call ($self) { $self }

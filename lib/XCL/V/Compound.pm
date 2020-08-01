@@ -44,7 +44,7 @@ async sub fx_assign ($self, $scope, $lst) {
     }
     return $_ for not_ok $res = await $scope->combine($res->val, $step_list);
   }
-  return await dot_call_escape($scope, $res->val, assign => $lst->values);
+  return await $scope->invoke_method_of($res->val, assign => $lst);
 }
 
 sub to_call ($self) {

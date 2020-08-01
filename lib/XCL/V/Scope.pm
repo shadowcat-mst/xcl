@@ -178,6 +178,11 @@ async sub lookup_method_of ($self, $of, $method) {
   return $res;
 }
 
+async sub invoke_method_of ($self, $of, $method, $lst) {
+  return $_ for not_ok my $mres = await $self->lookup_method_of($of, $method);
+  return $self->combine($mres->val, List[ $of, $lst->values ]);
+}
+
 async sub eval_string_inscope ($self, $string) {
   my $ans = $self->weaver->parse(
     stmt_list => $string, 
