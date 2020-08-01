@@ -83,8 +83,8 @@ async sub dot_assign_via_call ($class, $scope, $lst) {
   return $_ for not_ok my $lres = await $scope->eval(List[ $lhs_p ]);
   my ($lhs, @rest) = $lres->val->values;
 
-  return await dot_call_escape(
-    $scope, Call([ $lhs, $rhs ]), assign => $lst->tail->values
+  return await $scope->invoke_method_of(
+    Escape(Call([ $lhs, $rhs ])), assign => $lst->tail
   );
 }
 
