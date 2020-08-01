@@ -25,7 +25,7 @@ async sub bool ($self) {
   return await $self->val->bool;
 }
 
-sub f_get ($self, $) { ResultF $self }
+async sub f_get ($self, $) { $self }
 
 sub f_is_ok ($self, $) { ValF Bool $self->is_ok }
 

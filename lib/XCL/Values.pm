@@ -24,7 +24,7 @@ our @Types = qw(
 
 our @EXPORT = (
   @Types,
-  qw(ResultF Val ValF Err ErrF),
+  qw(Val ValF Err ErrF),
   qw(not_ok not_ok_except),
   qw(DEBUG $Eval_Depth $Did_Thing $Am_Running),
   qw(True False),
@@ -75,16 +75,8 @@ sub xwarn {
   warn join ' ', map ref() ? $_->display(3) : $_, @_;
 }
 
-async sub ResultF {
-  if ($_[0]->$_isa('XCL::V::Result')) {
-    return $_[0];
-  } else {
-    die "ResultF called on non-result: $_[0]";
-  }
-}
-
-sub ValF { ResultF(Val(@_)) }
-sub ErrF ($err, $meta = {}) { ResultF(Err($err, $meta, 1)) }
+async sub ValF { Val(@_) }
+async sub ErrF ($err, $meta = {}) { Err($err, $meta, 1) }
 
 sub True { Bool(1) }
 sub False { Bool(0) }
