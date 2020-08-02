@@ -8,7 +8,7 @@ with 'XCL::V::Role::Listish';
 
 sub index_is { 'Int' }
 
-async sub evaluate_against ($self, $scope) {
+async sub _expand ($self, $scope, $scalar) {
   my @ret;
   foreach my $el (@{$self->data}) {
     if ($el->is('Compound')
@@ -26,10 +26,22 @@ async sub evaluate_against ($self, $scope) {
       push @ret, $res->val->values;
       next;
     }
-    return $_ for not_ok my $res = await $scope->eval($el);
+    return $_ for not_ok my $res = await $scalar->($scope, $el);
     push @ret, $res->val;
   }
   return Val List(\@ret);
+}
+
+async sub evaluate_against ($self, $scope) {
+  return await $self->_expand($scope, async sub ($scope, $el) {
+    await $scope->eval($el);
+  });
+}
+
+async sub f_expand ($self, $scope, $) {
+  return await $self->_expand($scope, async sub ($scope, $el) {
+    Val $el;
+  });
 }
 
 sub display_data ($self, $depth) {
