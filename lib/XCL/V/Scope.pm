@@ -57,6 +57,10 @@ async sub eval_start ($self, $thing) {
   return Val $res;
 }
 
+async sub eval_raw ($self, $thing) {
+  return await $self->_eval($thing);
+}
+
 async sub combine ($self, $thing, $lst) {
   dynamically $Am_Running = [ Name('combine') => $thing ];
   my $op_id = ++$state_id;
@@ -201,7 +205,7 @@ async sub eval_string ($self, $string) {
     stmt_list => $string, 
     await($self->get('_OPS'))->val->to_perl
   );
-  await $self->combine($ans, List[]);
+  await $self->eval(Call[$ans]);
 }
 
 sub f_eval_string ($self, $lst) {

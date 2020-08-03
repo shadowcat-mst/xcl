@@ -5,6 +5,9 @@ use XCL::Builtins;
 my $scope = XCL::Builtins->builtins;
 
 sub xcl_is ($xcl, $expect, $name = "xcl: $xcl -> $expect") {
+  dynamically $Am_Running = [
+    Name('EXTERNAL'), String(__FILE__), Int(__LINE__)
+  ];
   my $res = $scope->await::eval_string($xcl);
   if ($res->is_ok) {
     is($res->val->display(-1), $expect, $name);

@@ -15,11 +15,12 @@ async sub invoke_against ($self, $scope, $lst) {
     }
   };
   my $res;
-  foreach my $stmt (@{$self->data}) {
-    $res = await $iscope->eval($stmt);
-    return $res unless $res->is_ok;
+  my @stmt = @{$self->data};
+  my $last = pop @stmt;
+  foreach my $stmt (@stmt) {
+    return $_ for not_ok +await $iscope->eval_drop($stmt);
   }
-  return $res;
+  return await $iscope->eval_raw($last);
 }
 
 sub display_data ($self, $depth) {

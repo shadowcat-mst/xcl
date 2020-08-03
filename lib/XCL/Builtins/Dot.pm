@@ -49,10 +49,15 @@ async sub c_fx_dot ($class, $scope, $lst) {
     ];
   }
 
-  return $_ for not_ok my $lres = await $scope->eval(List[ $p[0] ]);
-  my ($lhs, @rest) = $lres->val->values;
+  return $_ for not_ok
+    my $lpres = await List([ $p[0] ])->f_expand($scope, List[]);
+  my ($lhs_p, @rest) = $lpres->val->values;
 
   push @rest, @p[2..$#p];
+
+  return $_ for not_ok my $lres = await $scope->eval_start($lhs_p);
+
+  my $lhs = $lres->val;
 
   if ($rhs->can_invoke) {
     return Val Curry[ $rhs, $lhs, @rest ];
@@ -62,9 +67,8 @@ async sub c_fx_dot ($class, $scope, $lst) {
     return await $scope->combine($lhs, List[$rhs, @rest]);
   }
 
-  my $name = String($rhs->data);
-
-  return $_ for not_ok my $res = await $scope->lookup_method_of($lhs, $name);
+  return $_ for not_ok
+    my $res = await $scope->lookup_method_of($lhs, $rhs->data);
 
   return Val Curry[ $res->val, Escape($lhs), @rest ];
 }

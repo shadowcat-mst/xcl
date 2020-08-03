@@ -5,15 +5,12 @@ use XCL::Class 'XCL::V';
 
 async sub evaluate_against ($self, $scope) {
   my ($val, @rest) = @{$self->data};
-  my $res = await $scope->eval($val);
-  return $res unless $res->is_ok;
-  foreach my $step (@rest) {
-    $res = await $scope->combine(
-             $res->val, $step->is('List') ? $step : List[$step]
-           );
-    return $res unless $res->is_ok;
+  while (@rest) {
+    return $_ for not_ok my $res = await $scope->eval($val);
+    my $step = shift @rest;
+    $val = Call[ Escape($res->val), $step->is('List') ? $step->values : $step ];
   }
-  return $res;
+  return await $scope->eval_raw($val);
 }
 
 sub display_data ($self, $depth) {

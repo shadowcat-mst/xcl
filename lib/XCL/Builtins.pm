@@ -94,13 +94,13 @@ sub builtins ($class) {
       {
         let m = ^List.'provides_methods';
         m.'pipe' = (self, cb) => {
-          start(self.stream).pipe cb;
+          self.stream().pipe cb;
         }
         m.'map' = (self, cb) => {
-          start(self.stream).map cb;
+          self.stream().map cb;
         }
         m.'where' = (self, cb) => {
-          start(self.stream).where cb;
+          self.stream().where cb;
         }
       }
       {
