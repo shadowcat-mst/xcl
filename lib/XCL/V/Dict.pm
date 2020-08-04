@@ -119,11 +119,11 @@ async sub destructure ($class, $scope, $lst) {
     # Valid are: :x, : x, :x(y), :x y, : x y
     die "WHAT" unless $to_spec_p->is('Call') or $to_spec_p->is('Compound');
     # convert to: [ : x ] [ [ : x ] y ] [ : x y ]
-    my ($h, $t) = $to_spec_p->to_call->ht;
+    my ($h, @t) = $to_spec_p->to_call->values;
     # then: (:, x) or (:, x, y)
     my ($first, $key_p, $to_value) = (
       ($h->is('Call') ? $h->values : $h),
-      $t->values
+      @t,
     );
     die "WHAT" unless $first->is('Name') and $first->data eq ':';
     unless ($to_value) {

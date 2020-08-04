@@ -2,7 +2,7 @@ package XCL::V::Call;
 
 use XCL::Class 'XCL::V';
 
-with 'XCL::V::Role::Listish';
+sub values ($self) { @{$self->data} }
 
 sub evaluate_against ($self, $scope) {
   $self->_call($scope, @{$self->data});
@@ -33,7 +33,7 @@ sub f_to_list ($self, $) {
 }
 
 async sub fx_assign ($self, $scope, $lst) {
-  my ($head, $tail) = $self->ht;
+  my ($head, @tail) = $self->values;
   return $_ for not_ok my $res = await $scope->eval_concat(List[$head]);
   my ($command, @rest) = $res->val->values;
   return $_ for not_ok_except NO_SUCH_METHOD_OF =>
@@ -42,7 +42,7 @@ async sub fx_assign ($self, $scope, $lst) {
     # fall through only if assign_via_call explicitly declines to try
     return $_ for not_ok_except MISMATCH =>
       my $res = await $scope->combine(
-        $lres->val, List[$command, List([@rest, $tail->values]), $lst->values]
+        $lres->val, List[$command, List([@rest, @tail]), $lst->values]
       );
     return $res if $res->is_ok;
   }
@@ -55,5 +55,10 @@ async sub fx_assign ($self, $scope, $lst) {
 sub to_call ($self) { $self }
 
 sub f_to_call ($self, $) { ValF $self }
+
+sub f_concat ($self, $lst) {
+  return $_ for $self->_same_types($lst, 'List');
+  ValF($self->of_data([ map $_->values, $self, $lst->values ]));
+}
 
 1;
