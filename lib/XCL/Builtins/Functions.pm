@@ -36,13 +36,13 @@ async sub c_fx_wutcol ($class, $scope, $lst) {
   my ($then, $else) = (@ans > 1 ? @ans : (undef, @ans));
   my $wres;
   return $_ for not_ok
-    my $res = await $scope->eval($cond)->then::_(sub ($r) {
+    my $res = await $scope->eval_concat($cond)->then::_(sub ($r) {
       ($wres = $r)->bool;
   });
   if ($res->val->data) {
-    return $then ? await $scope->eval($then) : $wres;
+    return $then ? await $scope->eval_concat($then) : $wres;
   }
-  return await $scope->eval($else);
+  return await $scope->eval_concat($else);
 }
 
 async sub c_fx_while ($class, $scope, $lst) {
@@ -72,7 +72,7 @@ async sub c_fx_exists_or ($class, $scope, $lst) {
   return $_ for not_ok
     my $res = await $class->c_fx_maybe($scope, List[$exists]);
   return Val($_) for $res->val->values;
-  return await $scope->eval($or);
+  return await $scope->eval_concat($or);
 }
 
 async sub c_fx_matches ($class, $scope, $lst) {
@@ -93,19 +93,19 @@ async sub c_fx_pair ($class, $scope, $lst) {
     if ($key_p->is('Name')) {
       String($key_p->data);
     } else {
-      return $_ for not_ok my $res = await $scope->eval($key_p);
+      return $_ for not_ok my $res = await $scope->eval_concat($key_p);
       die "WHAT" unless (my $val = $res->val)->is('String');
       $val;
     }
   };
-  return $_ for not_ok my $res = await $scope->eval($val_p);
+  return $_ for not_ok my $res = await $scope->eval_concat($val_p);
   return Val List[ $key, $res->val ], { is_pair => True };
 }
 
 async sub c_fx_assign ($class, $scope, $lst) {
   my ($assign_to, $to_assign) = $lst->values;
   return Err [ Name('MISMATCH') ] unless $to_assign;
-  return $_ for not_ok my $res = await $scope->eval($to_assign);
+  return $_ for not_ok my $res = await $scope->eval_concat($to_assign);
   await $scope->invoke_method_of(Escape($assign_to), assign => List[$res->val]);
 }
 
@@ -124,7 +124,7 @@ sub metadata_for_c_fx_assign ($class) {
 async sub assign_assign_via_call ($class, $scope, $lst) {
   my ($args, $to_assign) = $lst->values;
   my ($assign_to, $default_to) = $args->values;
-  return $_ for not_ok my $res = await $scope->eval($to_assign||$default_to);
+  return $_ for not_ok my $res = await $scope->eval_concat($to_assign||$default_to);
   await $scope->invoke_method_of(Escape($assign_to), assign => List[$res->val]);
 }
 
@@ -172,14 +172,14 @@ sub metadata_for_alias_dict ($class) {
 }
 
 async sub c_fx_sleep ($class, $scope, $lstp) {
-  return $_ for not_ok my $lres = await $scope->eval($lstp);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lstp);
   my ($time) = $lres->val->values;
   await Mojo::Promise->timer($time->data);
   return Val True;
 }
 
 async sub c_fx_every ($class, $scope, $lstp) {
-  return $_ for not_ok my $lres = await $scope->eval($lstp);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lstp);
   my ($time, $code) = $lres->val->values;
   my $tick = async sub {
     await Mojo::Promise->timer($time->data);

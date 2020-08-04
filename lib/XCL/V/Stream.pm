@@ -34,7 +34,7 @@ sub f_concat ($self, $) {
 }
 
 async sub fx_pipe ($self, $scope, $lstp) {
-  return $_ for not_ok my $lres = await $scope->eval($lstp);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lstp);
   my $cb = $lres->val->head;
   my @queue;
   my $pipegen = async sub {

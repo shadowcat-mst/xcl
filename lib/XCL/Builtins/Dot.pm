@@ -27,7 +27,7 @@ async sub dot_curried ($class, $scope, $lst) {
 
 async sub _expand_dot_rhs ($class, $scope, $rp) {
   return Val $rp if $rp->is('Name');
-  return $_ for not_ok my $res = await $scope->eval($rp);
+  return $_ for not_ok my $res = await $scope->eval_concat($rp);
   return $res;
 }
 
@@ -84,7 +84,7 @@ async sub dot_assign_via_call ($class, $scope, $lst) {
 
   return Err [ Name('MISMATCH') ] if $rhs->is('Name') or $rhs->can_invoke;
 
-  return $_ for not_ok my $lres = await $scope->eval(List[ $lhs_p ]);
+  return $_ for not_ok my $lres = await $scope->eval_concat(List[ $lhs_p ]);
   my ($lhs, @rest) = $lres->val->values;
 
   return await $scope->invoke_method_of(

@@ -58,13 +58,13 @@ sub display_data ($self, $depth) {
 sub bool ($self) { ValF(Bool(CORE::keys(%{$self->data}) ? 1 : 0)) }
 
 async sub c_fx_make ($class, $scope, $lst) {
-  return $_ for not_ok my $lres = await $scope->eval($lst);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lst);
   my %new;
   foreach my $pair ($lres->val->values) {
     if ($pair->is('Call') and $pair->metadata->{is_pair_proto}) {
       my $name = $pair->data->[1];
       return Err[ Name('NOT_NAME'), $name ] unless $name->is('Name');
-      return $_ for not_ok my $res = await $scope->eval($name);
+      return $_ for not_ok my $res = await $scope->eval_concat($name);
       $new{$name->data} = $res->val;
       next;
     }
@@ -140,7 +140,7 @@ async sub destructure ($class, $scope, $lst) {
       if ($key_p->is('Name')) {
         String($key_p->data);
       } else {
-        return $_ for not_ok my $res = await $scope->eval($key_p);
+        return $_ for not_ok my $res = await $scope->eval_concat($key_p);
         die "WHAT" unless (my $val = $res->val)->is('String');
         $val;
       }

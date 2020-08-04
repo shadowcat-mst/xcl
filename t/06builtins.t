@@ -19,6 +19,6 @@ is $builtins->await::combine($plus, List [ Float(3), Float(4) ]), Val(Float 7);
 
 my $not = Call [ Name('.'), Name('Bool'), Name('not') ];
 
-is $builtins->await::eval($not)->val, $builtins->await::get('not')->val;
+is $builtins->await::eval_concat($not)->val, $builtins->await::get('not')->val;
 
 done_testing;

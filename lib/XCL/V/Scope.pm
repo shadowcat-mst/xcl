@@ -39,7 +39,7 @@ async sub _eval ($self, $thing) {
   return $ret;
 }
 
-async sub eval ($self, $thing) {
+async sub eval_concat ($self, $thing) {
   my $res = await $self->_eval($thing);
   return $res if $res->isa('XCL::V::Result');
   return await $res->f_concat(undef);
@@ -141,15 +141,15 @@ sub display_data ($self, $depth) {
 sub c_fx_current ($class, $scope, $lst) { ValF($scope) }
 
 sub f_eval ($self, $lst) {
-  $self->eval($lst->head);
+  $self->eval_concat($lst->head);
 }
 
 sub f_call ($self, $lst) {
-  $self->eval(Call [ $lst->values ]);
+  $self->eval_concat(Call [ $lst->values ]);
 }
 
 sub f_expr ($self, $lst) {
-  $self->eval($lst->count > 1 ? Call [ $lst->values ] : $lst->head);
+  $self->eval_concat($lst->count > 1 ? Call [ $lst->values ] : $lst->head);
 }
 
 async sub lookup_method_of ($self, $of, $method) {
@@ -169,7 +169,7 @@ async sub lookup_method_of ($self, $of, $method) {
       $of->metadata->{dot_via}
         || ($fallthrough && Name($of->type));
 
-  return $_ for not_ok my $tres = await $self->eval($try);
+  return $_ for not_ok my $tres = await $self->eval_concat($try);
 
   return $nope
     unless my $via_methods = $tres->val->metadata->{provides_methods};
@@ -194,7 +194,7 @@ async sub eval_string_inscope ($self, $string) {
   );
   my $res;
   foreach my $stmt (@{$ans->data}) {
-    $res = await $self->eval($stmt);
+    $res = await $self->eval_concat($stmt);
     return $res unless $res->is_ok;
   }
   return $res;
@@ -205,7 +205,7 @@ async sub eval_string ($self, $string) {
     stmt_list => $string, 
     await($self->get('_OPS'))->val->to_perl
   );
-  await $self->eval(Call[$ans]);
+  await $self->eval_concat(Call[$ans]);
 }
 
 sub f_eval_string ($self, $lst) {

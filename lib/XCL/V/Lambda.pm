@@ -3,7 +3,7 @@ package XCL::V::Lambda;
 use XCL::Class 'XCL::V::Fexpr';
 
 sub _argument_values ($self, $scope, $vals) {
-  return $scope->eval($vals);
+  return $scope->eval_concat($vals);
 }
 
 sub display_data ($self, $) {

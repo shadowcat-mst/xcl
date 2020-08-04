@@ -10,7 +10,7 @@ my $int_plus = Native {
 
 my $scope = Scope Dict { '+' => Val $int_plus };
 
-is $scope->eval(Call[ Name('+'), $three, $four ])->get, Val(Int 7);
+is $scope->eval_concat(Call[ Name('+'), $three, $four ])->get, Val(Int 7);
 
 $scope = Scope Dict {
   '.' => Val(Native({
@@ -22,13 +22,13 @@ $scope = Scope Dict {
   })),
 };
 
-my $curried = $scope->eval(Call([ Name('.'), $three, Name('plus') ]))
+my $curried = $scope->eval_concat(Call([ Name('.'), $three, Name('plus') ]))
                     ->get->val;
 
 is $scope->await::combine($curried, List[ $four ]), Val(Int 7);
 
 is(
-  $scope->eval(Call[ Call([ Call([ Name('.'), Name('plus') ]) ]), $three, $four ])->get,
+  $scope->eval_concat(Call[ Call([ Call([ Name('.'), Name('plus') ]) ]), $three, $four ])->get,
   Val(Int 7)
 );
 

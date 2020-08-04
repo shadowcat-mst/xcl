@@ -5,10 +5,10 @@ use XCL::Class -strict;
 
 async sub c_fx_ok ($class, $scope, $lst) {
   my ($check, $strp) = $lst->values;
-  return $_ for not_ok my $bres = await $scope->eval($check)->then::bool;
+  return $_ for not_ok my $bres = await $scope->eval_concat($check)->then::bool;
   my ($str) = do {
     if ($strp) {
-      return $_ for not_ok my $sres = await $scope->eval($strp);
+      return $_ for not_ok my $sres = await $scope->eval_concat($strp);
       return $_ for not_ok my $res = await $sres->val->string;
       $res->val->data;
     } else {
@@ -21,7 +21,7 @@ async sub c_fx_ok ($class, $scope, $lst) {
 
 async sub c_fx_is ($class, $scope, $lst) {
   my ($lp, $rp) = $lst->values;
-  return $_ for not_ok my $lres = await $scope->eval($lst);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lst);
   my ($lv, $rv, $strp) = $lres->val->values;
   my ($str) = do {
     if ($strp) {
@@ -45,7 +45,7 @@ async sub c_fx_is ($class, $scope, $lst) {
 }
 
 async sub c_fx_todo ($class, $scope, $lst) {
-  return $_ for not_ok my $lres = await $scope->eval($lst);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lst);
   my ($strp, $func) = $lres->val->values;
   return $_ for not_ok my $sres = await $strp->string;
   dynamically my $todo = todo $sres->val->data;

@@ -9,7 +9,7 @@ async sub invoke_against ($self, $scope, $valp) {
   my $valp_u = $unwrap ? $valp->tail : $valp;
   my $vals = (
     $apply
-      ? (not_ok($res = await $scope->eval($valp_u)) ? return $res : $res->val)
+      ? (not_ok($res = await $scope->eval_concat($valp_u)) ? return $res : $res->val)
       : $valp_u
   );
   if (my $cb = $self->data->{code}) {
@@ -19,7 +19,7 @@ async sub invoke_against ($self, $scope, $valp) {
     return Err[ Name('WRONG_ARG_COUNT') => Int(0) ]
       unless my ($first, $rest) = $vals->ht;
     my $fval = $apply ? $first
-      : not_ok($res = await $scope->eval($first)) ? return $res : $res->val;
+      : not_ok($res = await $scope->eval_concat($first)) ? return $res : $res->val;
     return await $fval->$method_name(($apply ? () : $scope), $rest);
   }
   return await $ns->$method_name(($apply ? () : $scope), $vals);

@@ -133,11 +133,11 @@ async sub _fx_bool ($self, $scope, $lst, $check) {
   my $bres = await $self->bool;
   return $bres unless $bres->is_ok;
   return Val $self if $bres->val->data != $check;
-  return await $scope->eval($lst->data->[0]);
+  return await $scope->eval_concat($lst->data->[0]);
 }
 
 async sub fx_where ($self, $scope, $lst) {
-  return $_ for not_ok my $lres = await $scope->eval($lst);
+  return $_ for not_ok my $lres = await $scope->eval_concat($lst);
   my ($where) = $lres->val->values;
   my $res = await $scope->combine($where, List[$self]);
   return $_ for not_ok_except NO_SUCH_VALUE => $res;

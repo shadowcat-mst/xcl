@@ -6,7 +6,7 @@ use XCL::Class 'XCL::V';
 async sub evaluate_against ($self, $scope) {
   my ($val, @rest) = @{$self->data};
   while (@rest) {
-    return $_ for not_ok my $res = await $scope->eval($val);
+    return $_ for not_ok my $res = await $scope->eval_concat($val);
     my $step = shift @rest;
     $val = Call[ Escape($res->val), $step->is('List') ? $step->values : $step ];
   }
@@ -23,7 +23,7 @@ sub f_list ($self, $) {
 
 async sub fx_assign ($self, $scope, $lst) {
   my ($val, @rest) = @{$self->data};
-  my $res = await $scope->eval($val);
+  my $res = await $scope->eval_concat($val);
   return $res unless $res->is_ok;
   # unsure: do we need an assign_via_compound as well?
   while (my $step = shift @rest) {

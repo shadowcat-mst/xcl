@@ -24,7 +24,7 @@ sub display_data ($self, $) {
 
 async sub c_fx_make ($class, $scope, $lst) {
   my ($argspec_p, $body_proto) = $lst->values;
-  my $res = await $scope->eval($body_proto);
+  my $res = await $scope->eval_concat($body_proto);
   return $res unless $res->is_ok;
   my ($argspec) = map $_->is('List') ? $_ : List([$_]), $argspec_p;
   Val($class->new(data => {

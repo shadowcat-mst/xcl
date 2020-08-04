@@ -13,7 +13,7 @@ sub invoke_against ($self, $scope, $lst) {
 }
 
 async sub _call ($self, $scope, $command_p, @args) {
-  return $_ for not_ok my $res = await $scope->eval(List[$command_p]);
+  return $_ for not_ok my $res = await $scope->eval_concat(List[$command_p]);
   my ($command, @rest) = $res->val->values;
   return await $scope->combine($command, List[ @rest, @args ]);
 }
@@ -34,7 +34,7 @@ sub f_to_list ($self, $) {
 
 async sub fx_assign ($self, $scope, $lst) {
   my ($head, $tail) = $self->ht;
-  return $_ for not_ok my $res = await $scope->eval(List[$head]);
+  return $_ for not_ok my $res = await $scope->eval_concat(List[$head]);
   my ($command, @rest) = $res->val->values;
   return $_ for not_ok_except NO_SUCH_METHOD_OF =>
     my $lres = await $scope->lookup_method_of($command, 'assign_via_call');

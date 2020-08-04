@@ -17,7 +17,7 @@ async sub _expand ($self, $scope, $scalar) {
     ) {
       my (undef, @tail) = @{$el->data};
       die "WHAT" unless @tail;
-      return $_ for not_ok my $res = await $scope->eval(Compound \@tail);
+      return $_ for not_ok my $res = await $scope->eval_concat(Compound \@tail);
       unless ($res->val->is('List')) {
         return $_ for not_ok $res = await $scope->invoke_method_of(
           $res->val, 'to_list', List[]
@@ -34,7 +34,7 @@ async sub _expand ($self, $scope, $scalar) {
 
 async sub evaluate_against ($self, $scope) {
   return await $self->_expand($scope, async sub ($scope, $el) {
-    await $scope->eval($el);
+    await $scope->eval_concat($el);
   });
 }
 
