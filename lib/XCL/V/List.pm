@@ -64,7 +64,7 @@ sub f_count ($self, $) {
 
 async sub f_stream ($self, $) {
   my @source = $self->values;
-  Stream({
+  Val Stream({
     generator => sub {
       return ValF $_ for grep defined, shift @source;
       return ErrF [ Name('NO_SUCH_VALUE') ];
