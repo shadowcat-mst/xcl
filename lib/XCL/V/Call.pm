@@ -56,9 +56,4 @@ sub to_call ($self) { $self }
 
 sub f_to_call ($self, $) { ValF $self }
 
-sub f_concat ($self, $lst) {
-  return $_ for $self->_same_types($lst, 'List');
-  ValF($self->of_data([ map $_->values, $self, $lst->values ]));
-}
-
 1;
