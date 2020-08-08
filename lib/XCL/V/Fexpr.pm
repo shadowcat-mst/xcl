@@ -6,15 +6,12 @@ async sub invoke_against ($self, $outer_scope, $vals) {
   my ($argspec, $scope, $body) = @{$self->data}{qw(argspec scope body)};
   my $val_res = await $self->_argument_values($outer_scope, $vals);
   return $_ for not_ok $val_res;
-  my $iscope = $scope->snapshot;
-  { my $dscope = $iscope->but(intro_as => \&Val);
-    return $_ for not_ok +await
-      $dscope->invoke_method_of(
-        Escape($argspec), assign => List[$val_res->val]
-      );
-    $iscope->data($dscope->data);
-  }
-  await $iscope->combine($body, List[]);
+  my $iscope = $scope->but(intro_as => \&Val);
+  return $_ for not_ok +await
+    $iscope->invoke_method_of(
+      Escape($argspec), assign => List[$val_res->val]
+    );
+  await $iscope->but(intro_as => undef)->combine($body, List[]);
 }
 
 sub _argument_values ($self, $outer_scope, $vals) {

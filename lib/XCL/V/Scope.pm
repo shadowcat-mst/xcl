@@ -123,7 +123,7 @@ sub derive ($self, $merge) {
 }
 
 sub snapshot ($self) {
-  Scope(Dict({ %{$self->data->data} }));
+  Scope($self->data);
 }
 
 sub f_derive ($self, $lst) {
