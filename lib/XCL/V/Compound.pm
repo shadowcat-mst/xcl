@@ -34,7 +34,7 @@ async sub fx_assign ($self, $scope, $lst) {
       if ($lres->is_ok) {
         return $_ for not_ok_except MISMATCH =>
           my $ares = await $scope->combine(
-            $lres->val, List[$res->val, $step_list, $lst->values]
+            $lres->val, List[Escape($res->val), $step_list, $lst->values]
           );
         return $ares if $res->is_ok;
       }
