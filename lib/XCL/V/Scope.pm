@@ -98,8 +98,8 @@ async sub get ($self, $index) {
 async sub set ($self, $index, $val) {
   $index = String($index) unless ref($index);
   if (my $intro = $self->intro_as) {
-    return $_ for not_ok +await $self->invoke_method_of(
-      $self->data, assign_via_call => List[List([$index]), $intro->($val)]
+    $self->data(
+      Dict({ %{$self->data->data}, $index->data => $intro->($val) })
     );
   } else {
     return $_ for not_ok

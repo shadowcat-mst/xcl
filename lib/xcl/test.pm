@@ -12,6 +12,7 @@ sub setup_scope ($self) {
   ];
   $scope->await::set($_ => $test_builtins->{$_})
     for sort keys %$test_builtins;
+  $self->scope->data($scope->data);
   return $self;
 };
 

@@ -136,14 +136,16 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
       "c_fx_${type}" => sub (@) {
         ErrF [ Name('VALID_ONLY_IN_ASSIGN') => Name($type) ];
       },
-      "${type}_assign_via_call" => sub ($class, $scope, $lst) {
+      "${type}_assign_via_call" => async sub ($class, $scope, $lst) {
         my ($args, $to_assign) = $lst->values;
         return ErrF [ Name('MISMATCH') ] unless $to_assign;
         my ($assign_to) = $args->values;
         my $assign_scope = $scope->but(intro_as => $intro_as);
-        $assign_scope->invoke_method_of(
+        return $_ for not_ok my $res = await $assign_scope->invoke_method_of(
           Escape($assign_to), assign => List[$to_assign]
         );
+        $scope->data($assign_scope->data);
+        return $res;
       },
       "metadata_for_c_fx_${type}" => sub ($class) {
         return +{
