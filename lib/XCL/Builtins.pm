@@ -25,6 +25,8 @@ sub _builtin_map () {
 
     current_scope => [ 'Scope.current' ],
 
+    mut => [ '.mutable' ],
+
     #'**' => [ '.exp' => -5 ],
 
     '+' => [ '.plus', -10 ],

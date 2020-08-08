@@ -14,14 +14,6 @@ async sub get ($self, $index) {
   });
 }
 
-async sub set ($self, $index, $value) {
-  my $idx = $index->data;
-  die "NOT YET" if $idx < 0;
-  my $ary = $self->data;
-  return Err([ Name('NO_SUCH_INDEX') => Int($idx) ]) if $idx > @$ary;
-  return Val($ary->[$idx] = $value);
-}
-
 sub pairs ($self) {
   my $ary = $self->data;
   return map List([Int($_), $ary->[$_]]), 0 .. $#$ary;

@@ -21,7 +21,7 @@ is lst.where(x => { acc = acc ++ (x); x }).map(x => { acc = acc ++ (x+1); x+1 })
 
 is acc (1, 2, 0, 1, 2, 0, 1, 2) 'streaming chain';
 
-let lst = (1, 2, 3);
+let lst = mut (1, 2, 3);
 
 lst(0) = 4;
 

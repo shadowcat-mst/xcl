@@ -3,7 +3,7 @@ package XCL::V::List;
 use curry;
 use XCL::Class 'XCL::V';
 
-with 'XCL::V::Role::MutableIndexable';
+with 'XCL::V::Role::Indexable';
 with 'XCL::V::Role::Listish';
 
 sub index_is { 'Int' }
@@ -89,6 +89,10 @@ sub fx_to_dict ($self, $scope, $) {
 
 sub to_perl ($self) {
   [ map $_->to_perl, @{$self->data} ]
+}
+
+async sub f_mutable ($self, $) {
+  Val MutableList [ @{$self->data} ], { %{$self->metadata} };
 }
 
 async sub fx_assign ($self, $scope, $lst) {

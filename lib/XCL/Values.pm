@@ -16,7 +16,7 @@ no warnings 'redefine';
 our @Types = qw(
   String Bytes Float Int Escape
   Bool Fexpr Dict List Name Call Curry
-  Result Var
+  Result Var MutableList
   Native PerlObject
   Scope Block Stream
   Compound Lambda
