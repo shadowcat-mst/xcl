@@ -3,7 +3,7 @@ package XCL::V::List;
 use curry;
 use XCL::Class 'XCL::V';
 
-with 'XCL::V::Role::Indexable';
+with 'XCL::V::Role::MutableIndexable';
 with 'XCL::V::Role::Listish';
 
 sub index_is { 'Int' }

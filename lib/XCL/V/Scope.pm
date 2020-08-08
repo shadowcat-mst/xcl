@@ -4,7 +4,7 @@ use Mojo::File qw(path);
 use XCL::Weaver;
 use XCL::Class 'XCL::V';
 
-with 'XCL::V::Role::Indexable';
+with 'XCL::V::Role::MutableIndexable';
 
 sub index_is { 'String' }
 
