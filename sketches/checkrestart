@@ -1,0 +1,15 @@
+# Just to check
+
+hosts | .where { on this { apt-get upgrade | .where 'openssl' } } | say
+
+# now record the list
+
+hosts | .where { on this { apt-get upgrade | .where 'openssl' } } >sslupgrade;
+
+# upgrade openssl
+
+file('sslupgrade') | { on this { apt-get install -y openssl } }
+
+# checkrestart
+
+file('sslupgrade') | { on this { checkrestart | m'^service' | sh } }

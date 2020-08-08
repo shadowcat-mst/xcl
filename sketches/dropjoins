@@ -1,0 +1,24 @@
+
+let dropjoins = q => {
+  let tables = [ q.select() ++ q.where() ].map(.table()).uniq();
+  let joins = q.joins().where {
+    not [ $.type() == 'left' and not tables.contains($.name()) ]
+  }
+  q.but :joins;
+}
+
+let dropjoins = q => {
+  let tables = [ q.select() ++ q.where() ] | .tables() |> .uniq();
+  q.but :joins[
+    q.joins().except $.type() == 'left' and not tables.contains($.name())
+  ];
+}
+
+let dropjoins = q => {
+  let tables = [ q.select() ++ q.where() ] | .tables() |> .uniq();
+  let joins = q.joins().except {
+    $.type() == 'left' and not tables.contains($.name())
+  }
+  q.but :joins;
+}
+

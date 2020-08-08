@@ -1,0 +1,61 @@
+# Initial file:
+
+struct Server {
+  has hostname;
+}
+
+# console session:
+
+$ let Server.on = (self, @expr) {
+.   let conn = SSHRemote.new self.hostname();
+.   conn.eval_expr @expr;
+. }
+$ save Server
+
+# result:
+
+struct Server {
+  has hostname;
+  let on = (self, @expr) {
+    let conn = SSHRemote.new self.hostname();
+    conn.eval_expr @expr;
+  }
+}
+
+###### extension methods
+
+# definitions in src/ServerInfo.xcl
+
+struct Server {
+  has hostname;
+  method on (@call) {
+    let conn = SSHRemote.new $!hostname;
+    conn.eval_call @call;
+  }
+}
+
+config {
+  export servers = mut ();
+  let server = hostname => { servers.push Server.new :hostname }
+}
+
+# config file
+
+server 'hermit1.scsys.co.uk';
+...
+
+# use with extensions
+
+use ServerInfo (Server);
+
+let servers = <load config here, no idea yet>
+
+let Server.check_upgrade = self => {
+  let h = self.hostname();
+  self.on {
+    run apt-get update;
+    run apt-get upgrade -n;
+  } | { $"$(h): $(this)" }
+}
+
+servers.each .check_upgrade();

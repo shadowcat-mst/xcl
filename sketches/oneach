@@ -1,0 +1,21 @@
+let upgrade_onone = flag => {
+  run 'apt-get' update;
+  run 'apt-get' upgrade $flag;
+}
+
+let check_upgrade = () => { upgrade_one '--dry-run' }
+
+let run_upgrade => () => { upgrade_one '-y' }
+
+let on_host = (h, @cmd) { on h @cmd }
+
+let hosts = (...);
+
+let checkall = () => { hosts.each {
+  check_upgrade this | l => { "${this}: $l" } | say;
+} }
+
+let upgradeall = () => { hosts.each {
+  run_upgrade this | l => { "${this}: $l" } | say;
+} }
+
