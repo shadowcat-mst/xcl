@@ -24,7 +24,7 @@ is -3 [ 0 - 3 ] 'Basic arithmetic (minus)';
   }
 
   {
-    let foo = %();
+    let foo = mut %();
 
     foo('x') = 1;
 
@@ -90,7 +90,7 @@ is -3 [ 0 - 3 ] 'Basic arithmetic (minus)';
 }
 
 {
-  let bloop = %();
+  let bloop = mut %();
   bloop('x') = 6;
   is bloop %(:x 6) 'dict assign';
 }
@@ -258,7 +258,7 @@ is [false == true] false 'bool eq';
 }
 
 {
-  let d = %();
+  let d = mut %();
 
   d.'foo' = 1;
 

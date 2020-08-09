@@ -3,17 +3,13 @@ package XCL::V::Dict;
 use curry;
 use XCL::Class 'XCL::V';
 
-with 'XCL::V::Role::MutableIndexable';
+with 'XCL::V::Role::Indexable';
 
 sub index_is { 'String' }
 
 async sub get ($self, $index) {
   my $dict = $self->data;
   Val($dict->{$index->data}||return Err [ Name('NO_SUCH_VALUE') => $index ]);
-}
-
-sub set ($self, $index, $value) {
-  return ValF($self->data->{$index->data} = $value);
 }
 
 sub has_key ($self, $key) {
@@ -156,6 +152,10 @@ async sub destructure ($class, $scope, $lst) {
     );
   }
   return Val $from;
+}
+
+async sub f_mutable ($self, $) {
+  Val MutableDict { %{$self->data} }, { %{$self->metadata} };
 }
 
 1;

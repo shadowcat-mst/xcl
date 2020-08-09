@@ -79,7 +79,7 @@ sub _builtins_for_class ($name, $class) {
   return Val Name(
     $name, {
       has_methods => Dict(\%has),
-      provides_methods => Dict(\%provides)
+      provides_methods => MutableDict(\%provides)
     }
   );
 }
