@@ -14,7 +14,9 @@ my ($cfg_dir) = grep { -d $_ }
                     $ENV{HOME}||();
 
 if ($cfg_dir) {
-  $script->scope->but(intro_as => \&Val)->set(CFG_DIR => String($cfg_dir));
+  $script->scope->but_intro_as(\&Val,
+    $script->scope->curry::set(CFG_DIR => String($cfg_dir))
+  );
 }
 
 if ($cfg_dir and -f (my $rcfile = "${cfg_dir}rc")) {
@@ -25,13 +27,13 @@ unless (@ARGV) {
   require Caroline;
   my $c = Caroline->new;
   my $scope = $script->scope;
-  $scope->but(intro_as => \&Var)->await::set(PROMPT => '$ ');
+  $scope->but_intro_as(\&Var, sub { $scope->await::set(PROMPT => '$ ') });
   if ($cfg_dir and -f (my $rcfile = "${cfg_dir}profile")) {
     $scope->await::eval_file_inscope($rcfile)->get;
   }
   while (defined(
     my $line = $c->readline(
-      $scope->await::eval(
+      $scope->await::eval_concat(
         $scope->await::get('PROMPT')->get
       )->get->await::string->get->data
     )
