@@ -140,12 +140,11 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
         my ($args, $to_assign) = $lst->values;
         return ErrF [ Name('MISMATCH') ] unless $to_assign;
         my ($assign_to) = $args->values;
-        my $assign_scope = $scope->but(intro_as => $intro_as);
-        return $_ for not_ok my $res = await $assign_scope->invoke_method_of(
-          Escape($assign_to), assign => List[$to_assign]
+        return await $scope->but_intro_as($intro_as,
+          $scope->curry::invoke_method_of(
+              Escape($assign_to), assign => List[$to_assign]
+          )
         );
-        $scope->data($assign_scope->data);
-        return $res;
       },
       "metadata_for_c_fx_${type}" => sub ($class) {
         return +{

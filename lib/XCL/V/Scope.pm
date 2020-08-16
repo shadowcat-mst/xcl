@@ -208,6 +208,11 @@ async sub eval_string ($self, $string) {
   await $self->eval_concat(Call[$ans]);
 }
 
+async sub but_intro_as ($self, $intro_as, $thunk) {
+  dynamically $self->{intro_as} = $intro_as;
+  return await $thunk->();
+}
+
 sub f_eval_string ($self, $lst) {
   $self->eval_string($lst->head->data);
 }
