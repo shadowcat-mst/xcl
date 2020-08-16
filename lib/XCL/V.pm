@@ -14,8 +14,6 @@ sub new_with_methods ($class, @rest) {
   $new;
 }
 
-sub but ($self, @args) { ref($self)->new(%$self, @args) }
-
 sub of_data ($self, $data) { $self->new(data => $data, metadata => {}) }
 
 sub evaluate_against ($self, $) { ValF($self) }
