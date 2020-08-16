@@ -142,7 +142,7 @@ async sub assign_assign_via_call ($class, $scope, $lst) {
         my ($assign_to) = $args->values;
         return await $scope->but_intro_as($intro_as,
           $scope->curry::invoke_method_of(
-              Escape($assign_to), assign => List[$to_assign]
+            Escape($assign_to), assign => List[$to_assign]
           )
         );
       },
