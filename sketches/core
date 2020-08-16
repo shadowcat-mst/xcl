@@ -1,0 +1,91 @@
+
+# sketches of core functionality for scripty variations
+
+use process;
+
+let env = process.env();
+
+...
+  process.pid()
+  process.title()
+
+process.title() = title;
+
+let PERL5LIB = libpath;
+...
+
+let env.'http_proxy' = proxy_url;
+
+let x = 1;
+
+let x = 1();
+
+let env['http_proxy'] = proxy_url;
+
+use fs;
+
+let config_file = fs.file(config_file_path);
+
+fs.file(...);
+fs.dir(...);
+fs.path(...);
+
+file.openr() ....
+
+use system;
+
+system.exec ...;
+
+system.run ...;
+
+# shell: 'cat foo | grep bar'
+
+system.run 'cat' 'foo' | .where 'bar' | say;
+
+let cat = system.command 'cat';
+
+cat 'foo' | .where 'bar' | say;
+
+let cat = system.shell_command 'cat';
+
+cat foo | .where 'bar' | say;
+
+#
+
+use shellish 'cat';
+
+##############
+
+use io;
+
+let handle = io.fd(3);
+
+let log = msg => { io.stderr().say msg }
+
+let default_level = \info;
+
+let log = fexpr (scope, @to_log) {
+  let (level, message) = match to_log (
+    (levelp, messagep) => { (levelp, scope.eval messagep) },
+    (messagep) => { (default_level, scope.eval messagep) }
+  );
+  io.stderr().say ++ '[' level.to_string() '] ' message;
+}
+
+log 'foo'; # [info] foo
+
+log warn 'bar'; # [warn] bar
+
+##################
+
+system.run :redirect(stderr, stdout) 'git' 'status'
+
+let git = system.shellish_command 'git';
+
+git status 2>&1 | ...;
+
+if [3 = 3] {
+}
+
+if [x = 3] {
+}
