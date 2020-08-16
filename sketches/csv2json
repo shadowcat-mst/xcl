@@ -36,6 +36,16 @@ io::stdin.lines() | line2dict | say encode_json;
 
 ###############################
 
+# newstream
+
+let csvstream = start io::stdin.lines().map csvparse;
+
+let columns = csvstream.next();
+
+csvtream | line2dict | encode_json | say;
+
+###############################
+
 let columns = csvparse io::stdin.readline();
 
 while [ exists let row = csvparse io::stdin.readline() ] {
