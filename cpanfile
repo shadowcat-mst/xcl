@@ -13,3 +13,5 @@ requires "Object::Tap";
 requires "Safe::Isa";
 requires "Async::Methods";
 requires "Caroline";
+requires "IO::Async";
+requires "IO::Async::Loop::Mojo";
