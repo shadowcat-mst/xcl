@@ -27,7 +27,9 @@ unless (@ARGV) {
   require Caroline;
   my $c = Caroline->new;
   my $scope = $script->scope;
-  $scope->but_intro_as(\&Var, sub { $scope->await::set(PROMPT => '$ ') });
+  $scope->but_intro_as(\&Var, sub {
+    $scope->await::set(PROMPT => String('$ '))
+  });
   if ($cfg_dir and -f (my $rcfile = "${cfg_dir}profile")) {
     $scope->await::eval_file_inscope($rcfile)->get;
   }
